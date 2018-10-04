@@ -5,6 +5,7 @@ const path = require('path');
 
 // Routes.
 const index = require('./routes/index');
+const login = require('./routes/login');
 
 const port = process.env.PORT || 5000;
 
@@ -18,7 +19,9 @@ app.engine('.hbs', expressHbs({
     partialsDir: 'views/partials'
 }));
 
+// Routes
 app.use(index);
+app.use('/login', login);
 
 app.listen(port, () =>
     console.log(`Server started on port ${port}`)

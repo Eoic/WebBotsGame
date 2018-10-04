@@ -23,7 +23,7 @@ body {
     box-sizing: border-box;
 }
 
-.form > .button {
+.form > .btn {
     margin-top: 6px;
 }
 
@@ -65,7 +65,7 @@ body {
 }
 
 /* Mutual rules across different classes */
-.button {
+.btn {
     border-radius: 2px;
     border-style: none;
     transition: all 0.2s;
@@ -75,41 +75,23 @@ body {
 
 /* Color styles */
 /* PRIMARY */
-.button-primary {
+.btn-primary {
     background-color: #3f51b5; 
     color: #ebebee;
 }
 
-.button-primary:hover{
+.btn-primary:hover{
     background-color: #303f9f;
 }
 
-.button-primary:active{
+.btn-primary:active{
     background-color: #00186f;
 }
 
-.button-primary:focus{
+.btn-primary:focus{
     outline-color:#3f51b5; 
 }
 
-/* DARK */
-.button-dark {
-    background-color: #546e7a; 
-    color: #ebebee;
-}
-
-.button-dark:hover{
-    background-color: #455a64;
-}
-
-.button-dark:active{
-    background-color: #29434e;
-}
-
-.button-dark:focus{
-    outline-color: #546e7a; 
-}
-
-.button-fluid {
+.btn-fluid {
     width: 100%;
 }

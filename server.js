@@ -2,15 +2,25 @@ const express = require('express');
 const app = express();
 const expressHbs = require('express-handlebars');
 const path = require('path');
+const opn = require('opn');
+
+// Config
+const config = require('./config');
 
 // Routes.
 const index = require('./routes/index');
 const login = require('./routes/login');
+const register = require('./routes/register');
+
+// Mongo DB connection
+const connect = require('./models/Index');
+connect(config.mongoURI);
 
 const port = process.env.PORT || 5000;
 
-app.use('/public', express.static(path.join(__dirname,'public')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
+// Use handlebars view engine
 app.set('view engine', '.hbs');
 
 app.engine('.hbs', expressHbs({
@@ -22,7 +32,9 @@ app.engine('.hbs', expressHbs({
 // Routes
 app.use(index);
 app.use('/login', login);
+app.use('/register', register);
 
-app.listen(port, () =>
-    console.log(`Server started on port ${port}`)
-);
+app.listen(port, () => {
+    console.log(`Server started on port ${port}`);
+    // opn('localhost:5000', { app: 'firefox' });
+});

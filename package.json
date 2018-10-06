@@ -17,5 +17,8 @@
     "express": "^4.16.3",
     "express-handlebars": "^3.0.0",
     "handlebars": "^4.0.12"
+  },
+  "devDependencies": {
+    "opn": "^5.4.0"
   }
 }

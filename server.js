@@ -7,6 +7,7 @@ const opn = require('opn');
 // Routes.
 const index = require('./routes/index');
 const login = require('./routes/login');
+const register = require('./routes/register');
 
 const port = process.env.PORT || 5000;
 
@@ -23,6 +24,7 @@ app.engine('.hbs', expressHbs({
 // Routes
 app.use(index);
 app.use('/login', login);
+app.use('/register', register);
 
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);

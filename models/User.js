@@ -4,10 +4,11 @@ const bcrypt = require('bcrypt');
 const SALT_ROUNDS = 10;
 
 const UserSchema = new Schema({
+    _id: Schema.Types.ObjectId,
     username: {
         type: String,
         required: true
-    },
+    }, 
     password: {
         type: String,
         required: true
@@ -15,7 +16,11 @@ const UserSchema = new Schema({
     email: {
         type: String,
         required: true
-    }
+    },
+    scripts: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Script'
+    }]
 }, {
     timestamps: true
 });

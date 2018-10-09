@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
     height: 100%;
     margin: 0px;
     font-family: 'Open Sans', sans-serif;
@@ -11,7 +12,7 @@ body {
 .form {
     padding: 40px 40px 40px 40px;
     background-color: aliceblue;
-    border-radius: 2px; 
+    border-radius: 2px;
     flex-basis: 300px;
     min-width: 200px;
     max-height: 300px;
@@ -19,12 +20,12 @@ body {
     box-shadow: 0px 0px 9px #464646;
 }
 
-.form > .input {
+.form>.input {
     margin: 6px 12px 6px auto;
     box-sizing: border-box;
 }
 
-.form > .btn {
+.form>.btn {
     margin-top: 6px;
 }
 
@@ -60,7 +61,7 @@ body {
     padding: 0.7em 0.8em;
 }
 
-.input:focus{
+.input:focus {
     background-color: rgb(252, 252, 252);
     box-shadow: 0px 0px 2px 0px rgb(66, 100, 255);
 }
@@ -77,20 +78,20 @@ body {
 /* Color styles */
 /* PRIMARY */
 .btn-primary {
-    background-color: #3f51b5; 
+    background-color: #3f51b5;
     color: #ebebee;
 }
 
-.btn-primary:hover{
+.btn-primary:hover {
     background-color: #303f9f;
 }
 
-.btn-primary:active{
+.btn-primary:active {
     background-color: #00186f;
 }
 
-.btn-primary:focus{
-    outline-color:#3f51b5; 
+.btn-primary:focus {
+    outline-color: #3f51b5;
 }
 
 .btn-fluid {
@@ -111,18 +112,18 @@ body {
     list-style-type: none;
 }
 
-.navbar-list > li {
+.navbar-list>li {
     display: inline;
     padding: 0px 20px;
 }
 
-.navbar-list > li > a {
+.navbar-list>li>a {
     color: #464646;
     text-decoration: none;
     transition: all 0.1s;
 }
 
-.navbar-list > li > a:hover {
+.navbar-list>li>a:hover {
     border-bottom: 4px solid #4b4b4b;
 }
 
@@ -131,14 +132,32 @@ body {
     margin: 8px 12px 8px 8px;
 }
 
-@media only screen and (max-width: 805px){
+@media only screen and (max-width: 805px) {
     .navbar-list {
         display: none;
     }
 }
 
-@media only screen and (min-width: 806px){
+@media only screen and (min-width: 806px) {
     .menu-dropdown {
         display: none;
     }
+}
+
+#editor {
+    position: absolute;
+    right: 0;
+    width: 100%;
+    bottom: 0;
+    height: 300px;
+    font-family: monospace;
+}
+
+#splitter {
+    bottom: 300px;
+    height: 40px;
+    width: 100%;
+    background-color: cornflowerblue;
+    position: absolute;
+    cursor: ns-resize;
 }

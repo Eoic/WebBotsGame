@@ -1,0 +1,24 @@
+<script src="./public/js/editor/src-min/ace.js" type="text/javascript" charset="utf-8"></script>
+
+<div id='splitter' draggable="true" style="            bottom: 300px;
+            height: 40px;
+            width: 100%;
+            background-color: #5e5e5e;
+            position: absolute;
+            cursor: ns-resize;">
+</div>
+<div style="            bottom: 0;
+            height: 300px;
+            background-color: brown;
+            position: absolute;
+            width: 300px;">
+
+</div>
+<div id='editor' style="position: absolute; right: 0; bottom: 0; left: 300px; height: 300px; font-family: monospace">
+</div>
+
+<script>
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/tomorrow_night");
+    editor.session.setMode("ace/mode/javascript");
+</script>

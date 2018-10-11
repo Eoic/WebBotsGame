@@ -11,6 +11,7 @@ const config = require('./config');
 const index = require('./routes/index');
 const login = require('./routes/login');
 const register = require('./routes/register');
+const practice = require('./routes/practice');
 
 // Mongo DB connection
 const connect = require('./models/Index');
@@ -33,6 +34,7 @@ app.engine('.hbs', expressHbs({
 app.use(index);
 app.use('/login', login);
 app.use('/register', register);
+app.use('/practice', practice);
 
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);

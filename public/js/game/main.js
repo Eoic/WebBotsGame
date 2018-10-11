@@ -31,8 +31,8 @@ loader.load((loader, resources) => {
 loader.onComplete.add(() => {
     map.addChild(sprites.map);
     app.stage.addChild(map);
+    loadMapCoordinates();
 });
-
 
 /**
  * Called on map drag start
@@ -61,6 +61,7 @@ function onDragMove(){
 function onDragEnd(){
     this.dragging = false;
     this.data = null;
+    saveMapCoordinates();
 }
 
 map.interactive = true;
@@ -73,3 +74,27 @@ map.on('pointerdown', onDragStart)
 window.addEventListener('resize', () => {
     app.renderer.resize(window.innerWidth, window.innerHeight - 20);
 });
+
+/**
+ * Saves map position in game scene to local storage
+ */
+function saveMapCoordinates(){
+    const position = {
+        x: map.position.x,
+        y: map.position.y
+    }
+
+    localStorage.setItem('mapPosition', JSON.stringify(position))
+}
+
+/**
+ * Tries to load game map coordinates from local storage.
+ */
+function loadMapCoordinates(){
+    let position = JSON.parse(localStorage.getItem('mapPosition'));
+
+    if(position !== null)
+        map.position.set(position.x, position.y);
+    else 
+        map.position.set(0, 60);
+}

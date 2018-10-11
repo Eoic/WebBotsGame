@@ -71,9 +71,19 @@ map.on('pointerdown', onDragStart)
          .on('pointermove', onDragMove);
 
 // Event Listeners
-window.addEventListener('resize', () => {
+window.onresize = () =>
     app.renderer.resize(window.innerWidth, window.innerHeight - 20);
-});
+
+window.onwheel = (event) => {
+
+    if(event.deltaY < 0){
+        map.scale.x = map.scale.x * 0.95;
+        map.scale.y = map.scale.y * 0.95;
+    } else {
+        map.scale.x = map.scale.x / 0.95;
+        map.scale.y = map.scale.y / 0.95;
+    }
+}
 
 /**
  * Saves map position in game scene to local storage

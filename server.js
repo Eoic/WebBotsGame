@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 const expressHbs = require('express-handlebars');
 const path = require('path');
-const opn = require('opn');
 
 // Config
 const config = require('./config');

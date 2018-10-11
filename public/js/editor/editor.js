@@ -1,3 +1,12 @@
+var editor = ace.edit("editor");
+
+editor.setOptions({
+    fontSize: '12pt',
+    printMargin: false,
+    theme: 'ace/theme/tomorrow_night',
+    mode: 'ace/mode/javascript'
+});
+
 let isResizing = false;
 let splitter = document.getElementById('splitter');
 

@@ -14,7 +14,7 @@
   "license": "ISC",
   "homepage": "https://bitbucket.org/eoic/web-bots-it#readme",
   "dependencies": {
-    "bcrypt": "^3.0.1",
+    "bcryptjs": "^2.4.3",
     "express": "^4.16.3",
     "express-handlebars": "^3.0.0",
     "handlebars": "^4.0.12",

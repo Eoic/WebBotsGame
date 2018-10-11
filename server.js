@@ -38,5 +38,4 @@ app.use('/practice', practice);
 
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
-    // opn('localhost:5000', { app: 'firefox' });
 });

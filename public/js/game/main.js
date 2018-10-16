@@ -1,3 +1,5 @@
+const ZOOM_SCALE = 0.95;
+
 // Setup PixiJS renderer
 let gameMap = document.getElementById('game-map');
 
@@ -18,17 +20,19 @@ gameMap.appendChild(app.view);
 const loader = PIXI.loader;
 const map = new PIXI.Container();
 const sprites = {};
+let anchor = {};   
 
 loader.add('map', './public/img/sprites/map-prop.png');
 
 loader.load((loader, resources) => {
-    sprites.map = new PIXI.Sprite(resources.map.texture); 
+    sprites.map = new PIXI.Sprite(resources.map.texture);
 });
 
 /**
  * Called once game resources are loaded
  */
 loader.onComplete.add(() => {
+    map.pivot.set(sprites.map.width / 2, sprites.map.height / 2)
     map.addChild(sprites.map);
     app.stage.addChild(map);
     loadMapCoordinates();
@@ -38,7 +42,6 @@ loader.onComplete.add(() => {
  * Called on map drag start
  */
 function onDragStart(event){
-    console.log(event.data.getLocalPosition(this));
     this.data = event.data;
     this.dragging = true;
     this.startPosition = this.data.getLocalPosition(this);
@@ -47,11 +50,11 @@ function onDragStart(event){
 /**
  * Called while map is being dragged.
  */
-function onDragMove(){
+function onDragMove(event){
     if(this.dragging){
         let newPosition = this.data.getLocalPosition(this.parent);
-        this.x = newPosition.x - (this.startPosition.x * map.scale.x);
-        this.y = newPosition.y - (this.startPosition.y * map.scale.y);
+        this.x = (newPosition.x + map.pivot.x * map.scale.x) - (this.startPosition.x * map.scale.x);
+        this.y = (newPosition.y + map.pivot.y * map.scale.y) - (this.startPosition.y * map.scale.y);
     }
 }
 
@@ -66,22 +69,21 @@ function onDragEnd(){
 
 map.interactive = true;
 map.on('pointerdown', onDragStart)
-         .on('pointerup', onDragEnd)
-         .on('pointerupoutside', onDragEnd)
-         .on('pointermove', onDragMove);
+   .on('pointerup', onDragEnd)
+   .on('pointerupoutside', onDragEnd)
+   .on('pointermove', onDragMove);
 
 // Event Listeners
 window.onresize = () =>
     app.renderer.resize(window.innerWidth, window.innerHeight - 20);
 
 window.onwheel = (event) => {
-
     if(event.deltaY < 0){
-        map.scale.x = map.scale.x * 0.95;
-        map.scale.y = map.scale.y * 0.95;
+        map.scale.x = map.scale.x * ZOOM_SCALE;
+        map.scale.y = map.scale.y * ZOOM_SCALE;
     } else {
-        map.scale.x = map.scale.x / 0.95;
-        map.scale.y = map.scale.y / 0.95;
+        map.scale.x = map.scale.x / ZOOM_SCALE;
+        map.scale.y = map.scale.y / ZOOM_SCALE;
     }
 }
 

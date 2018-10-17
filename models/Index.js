@@ -20,4 +20,7 @@ const connect = (uri) => {
     });
 };
 
-module.exports = connect;
+module.exports = {
+    connect,
+    dbConnection: mongoose.connection
+}

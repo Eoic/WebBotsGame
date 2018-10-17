@@ -1,19 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const { validationResult } = require('express-validator/check');
-const { validateLogin } = require('../utils/validator'); 
+const passport = require('passport');
 
+// NOTE: Empty session is created because of flash middle ware
 router.get('/', (req, res) => {
-    res.render('login', { title: 'Login' });
+    res.render('login', {
+        title: 'Login',
+        errors: req.flash('error')
+    });
 });
 
-router.post('/', validateLogin, (req, res) => {
-    const errors = validationResult(req);
-
-    if(!errors.isEmpty())
-        return res.render('register', { title: 'Login', errors });
-
-    // Save session
-});
+router.post('/', passport.authenticate('local', {
+    successRedirect: '/profile',
+    failureFlash: 'Please check your username or password',
+    failureRedirect: '/login'
+}));
 
 module.exports = router;

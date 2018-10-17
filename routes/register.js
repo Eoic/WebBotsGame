@@ -1,12 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const {
-    validateRegistration
-} = require('../utils/validator');
-const {
-    validationResult
-} = require('express-validator/check');
+const { validateRegistration } = require('../utils/validator');
+const { validationResult } = require('express-validator/check');
 
 router.get('/', (req, res) => {
     res.render('register', {
@@ -17,9 +13,7 @@ router.get('/', (req, res) => {
 router.post('/', validateRegistration, (req, res) => {
     const errors = validationResult(req);
 
-    console.log(errors.array());
-
-    if (!errors.isEmpty())
+    if (!errors.isEmpty()){
         return res.render('register', {
             title: 'Register',
             errors: errors.array(),
@@ -28,6 +22,7 @@ router.post('/', validateRegistration, (req, res) => {
                 email: req.body.email
             }
         });
+    }
 
     const user = {
         username: req.body.username.trim(),
@@ -35,15 +30,18 @@ router.post('/', validateRegistration, (req, res) => {
         email: req.body.email
     }
 
-    User.create(user).then(response => {
-        // Sign JWT token
-        res.status(200).json({
-            response
+    User.create(user).then(user => {
+
+        req.login(user._id, (err) => {
+            if(err) res.redirect('/');
+        });
+
+        res.render('profile', {
+            title: 'Profile',
+            success: true
         });
     }).catch(err => {
-        res.status(422).json({
-            err
-        });
+        res.status(422).json({ err });
     });
 });
 

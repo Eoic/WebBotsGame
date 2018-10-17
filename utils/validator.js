@@ -1,17 +1,6 @@
 const { check, body } = require('express-validator/check');
 const User = require('../models/User');
 
-const validateLogin = [
-    body('username').custom(value => {
-        return User.findOne({
-            username: value
-        }).then(user => {
-            if(!user)
-                throw new Error('Please check your username or password')
-        });
-    })
-];
-
 const validateRegistration = [
     check('username').trim().not().isEmpty()
     .isLength({
@@ -42,15 +31,33 @@ const validateRegistration = [
 
     check('password').isLength({
         min: 6
-    }).withMessage('Password mus be at least 6 characters long'),
+    }).withMessage('Password must be at least 6 characters long'),
 
     check('passwordRepeat', 'Passwords doesn\'t match')
     .custom((value, {
         req
     }) => value === req.body.password)
-]
+];
+
+const authStrategyCallback = function (username, password, done) {
+    User.findOne({
+        username
+    }).then(user => {
+
+        if (!user)
+            return done(null, false);
+
+        user.comparePasswords(password, (err, match) => {
+            if (!match)
+                return done(null, false);
+
+            return done(null, user);
+        });
+
+    }).catch(err => done(err));
+}
 
 module.exports = {
-    validateLogin,
-    validateRegistration
+    validateRegistration,
+    authStrategyCallback
 }

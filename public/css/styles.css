@@ -30,7 +30,7 @@ body {
 }
 
 .error-list {
-    background-color: #Faaaaa;
+    background-color: rgb(245, 164, 164);
     border-radius: 2px;
     padding: 10px 10px 10px 30px;
     box-sizing: border-box;

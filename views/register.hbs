@@ -1,12 +1,21 @@
 <section class='container container-center'>
-    <form class='form'>
-        <legend class='form-legend'> Register </legend>
-        <input class='input' placeholder='Username' type='text' required />
-        <input class='input' placeholder='Email' type='email' required />
-        <input class='input' placeholder='Password' type='password' required />
-        <input class='input' placeholder='Repeat password' type='password' required />
+    <form class='form' method="POST" action="/register">
+        <legend class='form-legend'> Create new account </legend>
+
+        {{#if errors}}
+        <ul class='error-list'>
+            {{#each errors}}
+            <li> {{ msg }} </li>
+            {{/each}}
+        </ul>
+        {{/if}}
+
+        <input class='input' name='username' placeholder='Username' type='text' required value="{{ getValueOrEmpty form.username }}" />
+        <input class='input' name='email' placeholder='Email' type='email' required value="{{ getValueOrEmpty form.email }}" />
+        <input class='input' name='password' placeholder='Password' type='password' required />
+        <input class='input' name='passwordRepeat' placeholder='Repeat password' type='password' required />
         <button type='submit' class='btn btn-primary btn-fluid'>
-            Register
+            Sign Up
         </button>
     </form>
 </section>

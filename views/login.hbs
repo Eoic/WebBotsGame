@@ -1,8 +1,17 @@
 <section class="container container-center">
-    <form class='form'>
+    <form class='form' method="POST" action="/login">
         <legend class='form-legend'> LOGIN </legend>
-        <input class='input' placeholder='Username' type='text' required />
-        <input class='input' placeholder='Password' type='password' required />
+
+        {{#if errors}}
+        <ul class='error-list'>
+            {{#each errors as |error|}}
+            <li> {{ error }} </li>
+            {{/each}}
+        </ul>
+        {{/if}}
+
+        <input class='input' placeholder='Username' name='username' type='text' required />
+        <input class='input' placeholder='Password' name='password' type='password' required />
         <button type='submit' class="btn btn-primary btn-fluid">
             Login
         </button>

@@ -27,6 +27,10 @@ body {
     margin-top: 6px;
 }
 
+.rounded {
+    border-radius: 2px;
+}
+
 .error-list {
     background-color: rgb(245, 164, 164);
     border-radius: 2px;
@@ -74,11 +78,11 @@ body {
 
 /* Mutual rules across different classes */
 .btn {
-    border-radius: 2px;
     border-style: none;
     transition: all 0.2s;
     padding: 0.7em 1.7em;
     font-size: 16px;
+    max-height: 40px;
 }
 
 /* Color styles */
@@ -107,7 +111,6 @@ body {
 /* Navigation */
 .navbar {
     position: fixed;
-    height: 60px;
     width: 100%;
     background-color: #f2f7f2;
     box-shadow: 0px 1px 6px #443850;

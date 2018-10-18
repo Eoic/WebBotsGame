@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 
-// NOTE: Empty session is created because of flash middle ware
 router.get('/', (req, res) => {
     res.render('login', {
-        title: 'Login',
-        errors: req.flash('error')
+        title: 'Login'
+        // Pollutes session store on every login page visit
+        // errors: req.flash('error') 
     });
 });
 

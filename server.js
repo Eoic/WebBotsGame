@@ -12,16 +12,12 @@ const useRoutes = require('./routes/routes');
 const flash = require('connect-flash');
 const { authStrategyCallback } = require('./utils/validator');
 const morgan = require('morgan');
-
-// Config
 const config = require('./config');
-
-// Mongo DB connection
 const MongoStore = require('connect-mongo')(session);
 const { connect, dbConnection } = require('./models/Index');
-connect(config.mongoURI);
+connect(process.env.MONGO_URI || config.mongoURI);
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || config.devPort;
 
 // Create handlebars engine instance
 const hbs = expressHbs.create({
@@ -44,13 +40,13 @@ app.use(session({
     resave: false,
     genid: () => uuidv4(),
     saveUninitialized: false,
-    secret: process.env.SESSION_KEY || 'a_Z6deADFf8F+6e8f-cs',
+    secret: process.env.SESSION_KEY || config.sessionKey,
     store: new MongoStore({
         mongooseConnection: dbConnection,
         collection: 'sessions'
     }),
     cookie: {
-        maxAge: 86400000 // 24 hours
+        maxAge: config.cookieAge || process.env.COOKIE_AGE
     }
 }));
 

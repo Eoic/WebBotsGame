@@ -13,6 +13,8 @@ let splitter = document.getElementById('splitter');
 let editorContainer = document.getElementById('editor');
 let splitterHeight = Number.parseInt(document.defaultView.getComputedStyle(splitter).height);
 
+
+window.onload = setInitialEditorHeight;
 splitter.addEventListener('mousedown', onMouseDown);
 window.addEventListener('mouseup', onMouseUp);
 window.addEventListener('mousemove', onMouseMove);
@@ -20,13 +22,11 @@ window.addEventListener('mousemove', onMouseMove);
 // Listener callbacks
 function onMouseDown() {
     isResizing = true;
-    console.log('Resizing enabled');
 }
 
 function onMouseUp() {
     isResizing = false;
-    console.log('Resizing disabled');
-    // Save to local storage
+    localStorage.setItem('editorHeight', editorContainer.style.height);
 }
 
 function onMouseMove(event) {
@@ -41,5 +41,19 @@ function onMouseMove(event) {
 
         splitter.style.bottom = position + 'px'
         editorContainer.style.height = position + 'px';
+    }
+}
+
+/**
+ * Sets primary editor and splitter heights form
+ * local storage.
+ */
+function setInitialEditorHeight() {
+    let height = localStorage.getItem('editorHeight');
+
+    if (height !== null){
+        splitter.style.bottom = height;
+        editorContainer.style.height = height;
+        return;
     }
 }

@@ -1,3 +1,5 @@
+// TODO: Replace connect-monogo to connect-mongodb-session
+
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const bcrypt = require('bcryptjs');
@@ -17,8 +19,9 @@ const UserSchema = new Schema({
         required: true
     },
     scripts: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Script'
+        _id: false,
+        name: String,
+        code: String
     }]
 }, {
     timestamps: true

@@ -16,8 +16,8 @@ const config = require('./config');
 const MongoStore = require('connect-mongo')(session);
 const { connect, dbConnection } = require('./models/Index');
 connect(process.env.MONGO_URI || config.mongoURI);
-
 const port = process.env.PORT || config.devPort;
+const WebSocket = require('ws');
 
 // Create handlebars engine instance
 const hbs = expressHbs.create({
@@ -67,6 +67,23 @@ passport.deserializeUser((userId, done) => {
     });
 });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
     console.log(`Server started on port ${port}`);
 });
+
+const webSocketServer = new WebSocket.Server({ server });
+
+webSocketServer.on('connection', (ws) => {
+
+    ws.on('message', (message) => {
+        console.log(message);
+    });
+
+    ws.on('close', () => {
+        console.log('Client disconnected');
+    });
+});
+
+webSocketServer.on('close', (ws) => {
+    console.log('Client disconnected');
+})

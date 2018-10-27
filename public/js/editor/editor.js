@@ -9,12 +9,11 @@ editor.setOptions({
 
 let isResizing = false;
 let splitter = document.getElementById('splitter');
-
+let scriptsContainer = document.createElement('DIV');
 let editorContainer = document.getElementById('editor');
 let splitterHeight = Number.parseInt(document.defaultView.getComputedStyle(splitter).height);
 
-
-window.onload = setInitialEditorHeight;
+window.onload = onLoadHandler;
 splitter.addEventListener('mousedown', onMouseDown);
 window.addEventListener('mouseup', onMouseUp);
 window.addEventListener('mousemove', onMouseMove);
@@ -24,11 +23,21 @@ function onMouseDown() {
     isResizing = true;
 }
 
+/**
+ * Disables resizing once mouse 
+ * button is released and saves current
+ * size in local storage
+ */
 function onMouseUp() {
     isResizing = false;
     localStorage.setItem('editorHeight', editorContainer.style.height);
 }
 
+/**
+ * Resizes code editor within screen bounds 
+ * while mouse is being moved
+ * @param { Object } event 
+ */
 function onMouseMove(event) {
     if (isResizing) {
         let position = window.innerHeight - event.pageY - splitterHeight / 2;
@@ -56,4 +65,41 @@ function setInitialEditorHeight() {
         editorContainer.style.height = height;
         return;
     }
+}
+
+function onLoadHandler(){
+    loadScriptsContainer();
+    setInitialEditorHeight();
+}
+
+function loadScriptsContainer(){
+    scriptsContainer.className = 'scripts';
+    appendButton('+', 'btn btn-purple btn-adder');
+    appendButton('main.js', 'btn btn-purple btn-fluid', fetchScript);
+    editorContainer.appendChild(scriptsContainer);
+}
+
+function appendButton(innerHTML, className, onClickHandler = undefined){
+    let btn = document.createElement('button');
+    btn.innerHTML = innerHTML;
+    btn.className = className;
+    btn.onclick = onClickHandler;
+    scriptsContainer.appendChild(btn);
+}
+
+/* API CALLS */
+function fetchScript(){
+    let httpReq = new XMLHttpRequest();
+
+    httpReq.open('GET', `${window.location.origin}/scripts/${this.innerText}`, true);
+    //httpReq.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+    httpReq.send();
+
+    httpReq.onreadystatechange = (event) => {
+        console.log(httpReq.response);
+    }
+}
+
+function saveScript(){
+    
 }

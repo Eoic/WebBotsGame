@@ -83,7 +83,10 @@ function appendButton(innerHTML, onClickHandler = undefined) {
     let btn = document.createElement('button');
     btn.innerHTML = innerHTML;
     btn.className = 'btn btn-purple btn-fluid';
-    btn.onclick = onClickHandler;
+
+    if (onClickHandler !== undefined)
+        btn.onclick = onClickHandler;
+
     scriptsContainer.appendChild(btn);
 }
 
@@ -108,16 +111,33 @@ function fetchScripts() {
     request.send();
 
     request.onreadystatechange = (event) => {
-        if(request.readyState === 4 && request.status === 200){
+        if (request.readyState === 4 && request.status === 200) {
             request.response.forEach(element => {
-                appendButton(element.name);
+                appendButton(element.name, selectScript);
             });
         }
     }
 }
 
-function selectScript(){
+function selectScript(event) {
+    scriptsContainer.querySelectorAll('.btn-active').forEach(element => {
+        element.classList.remove('btn-active');
+    });
 
+    this.classList.add('btn-active');
+
+    let request = new XMLHttpRequest();
+    request.responseType = 'json';
+    request.open('GET', `${window.location.origin}/scripts/${this.innerText}`, true);
+    request.send();
+
+    request.onreadystatechange = (event) => {
+        if (request.readyState === 4 && request.status === 200) {
+            typeof request.response.code !== 'undefined' ?
+                editor.setValue(request.response.code, -1) :
+                editor.setValue('');
+        }
+    }
 }
 
 /**
@@ -132,22 +152,57 @@ function createScript(event) {
         request.open('POST', `${window.location.origin}/scripts`, true);
         request.responseType = 'json';
         request.setRequestHeader('Content-Type', 'application/json');
-        request.send(JSON.stringify({ filename: this.value }));
+        request.send(JSON.stringify({
+            filename: this.value
+        }));
 
         request.onreadystatechange = (event) => {
-            if(request.readyState === 4 && request.status === 200){
-                console.log(`${request.response.filename} created`);
-                appendButton(request.response.filename);
+            if (request.readyState === 4 && request.status === 200) {
+                //console.log(`${request.response.filename} created`);
+                appendButton(request.response.filename, selectScript);
                 this.value = '';
             }
         }
     }
 }
 
-function deleteScript(){
-    
-}
-
 function saveScript() {
 
+    let selected = document.querySelector('.btn-active');
+
+    if (selected === null)
+        return;
+
+    let request = new XMLHttpRequest();
+
+    request.open('PUT', `${window.location.origin}/scripts`, true);
+    request.responseType = 'json';
+    request.setRequestHeader('Content-Type', 'application/json');
+    request.send(JSON.stringify({
+        filename: selected.innerText,
+        code: editor.getValue()
+    }));
+
+    request.onreadystatechange = (event) => {
+        if (request.readyState === 4 && request.status === 200) {
+            console.log(request.response);
+        }
+    }
+}
+
+function deleteScript() {
+    let request = new XMLHttpRequest();
+    let selected = document.querySelector('.btn-active');
+
+    if(selected === null)
+        return;
+
+    request.open('DELETE', `${window.location.origin}/scripts/${selected.innerText}`, true);
+    request.send();
+
+    request.onreadystatechange = (event) => {
+        if (request.readyState === 4 && request.status === 200) {
+            selected.parentNode.removeChild(selected);
+        }
+    }
 }

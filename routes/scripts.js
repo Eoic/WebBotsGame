@@ -20,6 +20,24 @@ router.get('/', (req, res) => {
     });
 });
 
+router.get('/:id', (req, res) => {
+    User.findOne({
+        username: req.user.username
+    }).select({
+        scripts: {
+            $elemMatch: {
+                name: req.params.id
+            }
+        }
+    }).lean().then(response => {
+        if (response.scripts.length === 0) {
+            console.log('Script with such name doesn\'t exist');
+        } else {
+            res.json(response.scripts[0]);
+        }
+    });
+});
+
 /**
  * Creates new script
  */
@@ -44,13 +62,16 @@ router.post('/', (req, res) => {
     }, {
         $push: {
             scripts: {
-                name: req.body.filename
+                name: req.body.filename,
+                code: "console.log('New script...')"
             }
         }
     }).then(response => {
         if (response.nModified === 0)
             res.sendStatus(304);
-        else res.status(200).json({ filename });
+        else res.status(200).json({
+            filename
+        });
     }).catch(err => {
         res.status(500).send(err.message);
     });
@@ -64,21 +85,38 @@ router.put('/', (req, res) => {
     let filename = req.body.filename;
     let code = req.body.code;
 
-    User.update({
+    User.updateOne({
         username: req.user.username,
         "scripts.name": filename
     }, {
         $set: {
-            "scripts.$.name": filename,
             "scripts.$.code": code
         }
     }).then(response => {
-        console.log(response)
+        if(response)
+            return res.sendStatus(200);
+
+        return res.sendStatus(304)
     });
 });
 
 router.delete('/:id', (req, res) => {
-    
+    let filename = req.params.id;
+
+    User.updateOne({
+        username: req.user.username,
+        "scripts.name": filename
+    }, {
+        $pull: {
+            scripts: {
+                name: filename
+            }
+        }
+    }).then(response => {
+        if(response.nModified > 0)
+            return res.status(200).send('Script deleted successfully.');
+        return res.status(200).send('Failed to delete');
+    })
 });
 
 module.exports = router;

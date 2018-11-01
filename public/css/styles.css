@@ -57,6 +57,7 @@ body {
 /* Headers */
 .form-legend {
     font-size: 18px;
+    font-weight: normal;
     color: #494949;
     border-bottom: 1px solid #5c6bc0;
     padding-bottom: 10px;
@@ -206,4 +207,8 @@ body {
     height: 32px;
     font-weight: bold;
     margin: 10px;
+}
+
+.btn-active {
+    filter: brightness(145%);
 }

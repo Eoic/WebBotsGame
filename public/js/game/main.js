@@ -11,7 +11,7 @@ let app = new PIXI.Application({
     resolution: 1
 });
 
-PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
+//PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
 
 // Mount view to container
 gameMap.appendChild(app.view);

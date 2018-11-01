@@ -12,16 +12,12 @@ const useRoutes = require('./routes/routes');
 const flash = require('connect-flash');
 const { authStrategyCallback } = require('./utils/validator');
 const morgan = require('morgan');
-
-// Config
 const config = require('./config');
-
-// Mongo DB connection
 const MongoStore = require('connect-mongo')(session);
 const { connect, dbConnection } = require('./models/Index');
-connect(config.mongoURI);
-
-const port = process.env.PORT || 5000;
+connect(process.env.MONGO_URI || config.mongoURI);
+const port = process.env.PORT || config.devPort;
+const WebSocket = require('ws');
 
 // Create handlebars engine instance
 const hbs = expressHbs.create({
@@ -37,6 +33,7 @@ const hbs = expressHbs.create({
 // Set handlebars view engine
 app.set('view engine', '.hbs');
 app.engine('.hbs', hbs.engine);
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
@@ -44,13 +41,13 @@ app.use(session({
     resave: false,
     genid: () => uuidv4(),
     saveUninitialized: false,
-    secret: process.env.SESSION_KEY || 'a_Z6deADFf8F+6e8f-cs',
+    secret: process.env.SESSION_KEY || config.sessionKey,
     store: new MongoStore({
         mongooseConnection: dbConnection,
         collection: 'sessions'
     }),
     cookie: {
-        maxAge: 86400000 // 24 hours
+        maxAge: config.cookieAge || process.env.COOKIE_AGE
     }
 }));
 
@@ -71,6 +68,23 @@ passport.deserializeUser((userId, done) => {
     });
 });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
     console.log(`Server started on port ${port}`);
 });
+
+const webSocketServer = new WebSocket.Server({ server });
+
+webSocketServer.on('connection', (ws) => {
+
+    ws.on('message', (message) => {
+        console.log(message);
+    });
+
+    ws.on('close', () => {
+        console.log('Client disconnected');
+    });
+});
+
+webSocketServer.on('close', (ws) => {
+    console.log('Client disconnected');
+})

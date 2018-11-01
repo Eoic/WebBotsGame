@@ -9,6 +9,10 @@ body {
     background-color: #5c6bc0;
 }
 
+:root {
+    --scripts-window-width: 180px;
+}
+
 .form {
     padding: 40px 40px 40px 40px;
     background-color: aliceblue;
@@ -25,6 +29,10 @@ body {
 
 .form>.btn {
     margin-top: 6px;
+}
+
+.rounded {
+    border-radius: 2px;
 }
 
 .error-list {
@@ -72,42 +80,9 @@ body {
     box-shadow: 0px 0px 2px 0px rgb(66, 100, 255);
 }
 
-/* Mutual rules across different classes */
-.btn {
-    border-radius: 2px;
-    border-style: none;
-    transition: all 0.2s;
-    padding: 0.7em 1.7em;
-    font-size: 16px;
-}
-
-/* Color styles */
-/* PRIMARY */
-.btn-primary {
-    background-color: #3f51b5;
-    color: #ebebee;
-}
-
-.btn-primary:hover {
-    background-color: #303f9f;
-}
-
-.btn-primary:active {
-    background-color: #00186f;
-}
-
-.btn-primary:focus {
-    outline-color: #3f51b5;
-}
-
-.btn-fluid {
-    width: 100%;
-}
-
 /* Navigation */
 .navbar {
     position: fixed;
-    height: 60px;
     width: 100%;
     background-color: #f2f7f2;
     box-shadow: 0px 1px 6px #443850;
@@ -153,9 +128,9 @@ body {
 #editor {
     position: absolute;
     right: 0;
-    width: 100%;
-    bottom: 0;
+    width: calc(100% - var(--scripts-window-width));
     height: 300px;
+    bottom: 0;
     font-family: monospace;
 }
 
@@ -163,7 +138,72 @@ body {
     bottom: 300px;
     height: 40px;
     width: 100%;
-    background-color: cornflowerblue;
+    background-color: #555c81;
     position: absolute;
     cursor: ns-resize;
+}
+
+.scripts {
+    width: var(--scripts-window-width);
+    height: 100%;
+    position: fixed;
+    left: 0;
+    background-color: #443850;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.script-input {
+    padding: 0.3em;
+    width: 100%;
+    color: white;
+    background-color: #94819c;
+    border-style: none;
+    border-top: 1px solid #443850;
+}
+
+/* BUTTONS */
+/* MUTUAL RULES */
+.btn {
+    border-style: none;
+    transition: all 0.2s;
+    padding: 0.7em 1.7em;
+    font-size: 16px;
+    max-height: 40px;
+}
+
+/* COLOR STYLES */
+/* PRIMARY */
+.btn-primary {
+    background-color: #3f51b5;
+    color: #ebebee;
+}
+
+.btn-primary:hover { background-color: #303f9f; }
+.btn-primary:active { background-color: #00186f; }
+.btn-primary:focus { outline-color: #3f51b5; }
+
+/* PURPLE */
+.btn-purple {
+    background-color: #654f7e;
+    color: #ebebee;
+    border-top: 1px solid #443850;
+    border-bottom: 1px solid #443850;
+}
+.btn-purple:hover { background-color: #5d4675; }
+.btn-purple:active{ background-color: #523f66; }
+
+/* BUTTON SIZES */
+.btn-fluid {
+    width: 100%;
+}
+
+/* SPECIFIC BUTTONS */
+.btn-adder {
+    border-radius: 3px;
+    padding: 3px;
+    width: 32px;
+    height: 32px;
+    font-weight: bold;
+    margin: 10px;
 }

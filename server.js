@@ -33,6 +33,7 @@ const hbs = expressHbs.create({
 // Set handlebars view engine
 app.set('view engine', '.hbs');
 app.engine('.hbs', hbs.engine);
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 

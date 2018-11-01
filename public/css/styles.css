@@ -149,6 +149,17 @@ body {
     position: fixed;
     left: 0;
     background-color: #443850;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.script-input {
+    padding: 0.3em;
+    width: 100%;
+    color: white;
+    background-color: #94819c;
+    border-style: none;
+    border-top: 1px solid #443850;
 }
 
 /* BUTTONS */
@@ -176,7 +187,8 @@ body {
 .btn-purple {
     background-color: #654f7e;
     color: #ebebee;
-    border: 1px solid #443850;
+    border-top: 1px solid #443850;
+    border-bottom: 1px solid #443850;
 }
 .btn-purple:hover { background-color: #5d4675; }
 .btn-purple:active{ background-color: #523f66; }

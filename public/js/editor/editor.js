@@ -9,7 +9,7 @@ editor.setOptions({
 
 let isResizing = false;
 let splitter = document.getElementById('splitter');
-let scriptsContainer = document.createElement('DIV');
+let scriptsContainer = document.createElement('div');
 let editorContainer = document.getElementById('editor');
 let splitterHeight = Number.parseInt(document.defaultView.getComputedStyle(splitter).height);
 
@@ -60,46 +60,94 @@ function onMouseMove(event) {
 function setInitialEditorHeight() {
     let height = localStorage.getItem('editorHeight');
 
-    if (height !== null){
+    if (height !== null) {
         splitter.style.bottom = height;
         editorContainer.style.height = height;
         return;
     }
 }
 
-function onLoadHandler(){
+function onLoadHandler() {
     loadScriptsContainer();
     setInitialEditorHeight();
 }
 
-function loadScriptsContainer(){
+function loadScriptsContainer() {
     scriptsContainer.className = 'scripts';
-    appendButton('+', 'btn btn-purple btn-adder');
-    appendButton('main.js', 'btn btn-purple btn-fluid', fetchScript);
+    appendInput('script-input', createScript);
+    fetchScripts();
     editorContainer.appendChild(scriptsContainer);
 }
 
-function appendButton(innerHTML, className, onClickHandler = undefined){
+function appendButton(innerHTML, onClickHandler = undefined) {
     let btn = document.createElement('button');
     btn.innerHTML = innerHTML;
-    btn.className = className;
+    btn.className = 'btn btn-purple btn-fluid';
     btn.onclick = onClickHandler;
     scriptsContainer.appendChild(btn);
 }
 
+function appendInput(className, keyPressHandler) {
+    let input = document.createElement('input');
+    input.className = className;
+    input.placeholder = 'New script...';
+    input.onkeypress = keyPressHandler;
+    scriptsContainer.appendChild(input);
+}
+
 /* API CALLS */
-function fetchScript(){
-    let httpReq = new XMLHttpRequest();
+/**
+ * Fetch all scripts created by user
+ */
+function fetchScripts() {
+    let request = new XMLHttpRequest();
 
-    httpReq.open('GET', `${window.location.origin}/scripts/${this.innerText}`, true);
-    //httpReq.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-    httpReq.send();
+    request.open('GET', `${window.location.origin}/scripts`, true);
+    request.responseType = 'json';
+    request.setRequestHeader('Content-Type', 'application/json');
+    request.send();
 
-    httpReq.onreadystatechange = (event) => {
-        console.log(httpReq.response);
+    request.onreadystatechange = (event) => {
+        if(request.readyState === 4 && request.status === 200){
+            request.response.forEach(element => {
+                appendButton(element.name);
+            });
+        }
     }
 }
 
-function saveScript(){
+function selectScript(){
+
+}
+
+/**
+ * Send POST request to create new script
+ * on ENTER key press
+ * @param { Object } event 
+ */
+function createScript(event) {
+    if (event.keyCode === 13 && this.value.trim() !== '') {
+        let request = new XMLHttpRequest();
+
+        request.open('POST', `${window.location.origin}/scripts`, true);
+        request.responseType = 'json';
+        request.setRequestHeader('Content-Type', 'application/json');
+        request.send(JSON.stringify({ filename: this.value }));
+
+        request.onreadystatechange = (event) => {
+            if(request.readyState === 4 && request.status === 200){
+                console.log(`${request.response.filename} created`);
+                appendButton(request.response.filename);
+                this.value = '';
+            }
+        }
+    }
+}
+
+function deleteScript(){
     
+}
+
+function saveScript() {
+
 }

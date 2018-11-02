@@ -48,7 +48,7 @@ router.post('/', (req, res) => {
 
     let filename = req.body.filename.trim();
 
-    User.update({
+    User.updateOne({
         username: req.user.username,
         scripts: {
             $not: {

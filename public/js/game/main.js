@@ -1,4 +1,5 @@
 const ZOOM_SCALE = 0.95;
+const spritesDir = './public/img/sprites'
 
 // Setup PixiJS renderer
 let gameMap = document.getElementById('game-map');
@@ -20,12 +21,15 @@ gameMap.appendChild(app.view);
 const loader = PIXI.loader;
 const map = new PIXI.Container();
 const sprites = {};
-let anchor = {};   
+let anchor = {};
+let player = {};
 
-loader.add('map', './public/img/sprites/map-prop.png');
+loader.add('map', `${spritesDir}/map-prop.png`)
+      .add('player', `${spritesDir}/player.png`);
 
 loader.load((loader, resources) => {
     sprites.map = new PIXI.Sprite(resources.map.texture);
+    player = new PIXI.Sprite(resources.player.texture);
 });
 
 /**
@@ -34,6 +38,7 @@ loader.load((loader, resources) => {
 loader.onComplete.add(() => {
     map.pivot.set(sprites.map.width / 2, sprites.map.height / 2)
     map.addChild(sprites.map);
+    map.addChild(player);
     app.stage.addChild(map);
     loadMapCoordinates();
 });

@@ -50,6 +50,7 @@ function onMouseMove(event) {
 
         splitter.style.bottom = position + 'px'
         editorContainer.style.height = position + 'px';
+        editor.resize();
     }
 }
 

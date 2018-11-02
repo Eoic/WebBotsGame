@@ -1,5 +1,3 @@
-// TODO: Replace connect-monogo to connect-mongodb-session
-
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const bcrypt = require('bcryptjs');

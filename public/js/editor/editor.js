@@ -159,7 +159,7 @@ function createScript(event) {
 
         request.onreadystatechange = (event) => {
             if (request.readyState === 4 && request.status === 200) {
-                //console.log(`${request.response.filename} created`);
+                displayMessage('success', `Created <b>${request.response.filename}</b>`);
                 appendButton(request.response.filename, selectScript);
                 this.value = '';
             }
@@ -175,18 +175,19 @@ function saveScript() {
         return;
 
     let request = new XMLHttpRequest();
+    let filename = selected.innerText
 
     request.open('PUT', `${window.location.origin}/scripts`, true);
     request.responseType = 'json';
     request.setRequestHeader('Content-Type', 'application/json');
     request.send(JSON.stringify({
-        filename: selected.innerText,
+        filename,
         code: editor.getValue()
     }));
 
     request.onreadystatechange = (event) => {
         if (request.readyState === 4 && request.status === 200) {
-            console.log(request.response);
+            displayMessage('success', `Script <b> ${filename} </b> saved successfully`);
         }
     }
 }
@@ -195,15 +196,21 @@ function deleteScript() {
     let request = new XMLHttpRequest();
     let selected = document.querySelector('.btn-active');
 
+    console.log(selected);
+
     if(selected === null)
         return;
 
-    request.open('DELETE', `${window.location.origin}/scripts/${selected.innerText}`, true);
+    let filename = selected.innerText;
+
+    request.open('DELETE', `${window.location.origin}/scripts/${filename}`, true);
     request.send();
 
     request.onreadystatechange = (event) => {
         if (request.readyState === 4 && request.status === 200) {
             selected.parentNode.removeChild(selected);
+            editor.setValue('');
+            displayMessage('success', `Script <b>${filename}</b> deleted successfully`)
         }
     }
 }

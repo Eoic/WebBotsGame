@@ -120,6 +120,11 @@ function fetchScripts() {
     }
 }
 
+/**
+ * Display clicked button as selected and fetch code
+ * of selected script
+ * @param {Object} event On click event 
+ */
 function selectScript(event) {
     scriptsContainer.querySelectorAll('.btn-active').forEach(element => {
         element.classList.remove('btn-active');

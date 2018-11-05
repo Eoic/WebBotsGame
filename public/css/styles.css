@@ -142,6 +142,7 @@ body {
     background-color: rgb(51, 52, 59);
     position: absolute;
     cursor: ns-resize;
+    display: inline-flex;
 }
 
 .scripts {
@@ -178,6 +179,7 @@ body {
 .btn-primary {
     background-color: #3f51b5;
     color: #ebebee;
+    border: 1px solid #5565dd;
 }
 
 .btn-primary:hover {

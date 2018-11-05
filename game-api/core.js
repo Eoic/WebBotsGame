@@ -4,12 +4,15 @@
 
 const {
     VM,
+    VMScript,
     NodeVM
 } = require('vm2');
 const uuidv4 = require('uuid/v4');
+const { Player } = require('./api')
 
 const TICK_RATE = 60;
-const vm = new NodeVM({
+
+const nodeVM = new NodeVM({
     console: 'inherit'
 });
 
@@ -24,8 +27,10 @@ let connections = {};
 
 function update() {
     for (let clientID in connections) {
-        let clientCode = vm.run(connections[clientID].code);
-        clientCode.update();
+        
+        let modules = nodeVM.run(connections[clientID].playerOne.getCode());
+        connections[clientID].socket.send(JSON.stringify({x: 0, y: 10}))
+        modules.update()
     }
 }
 
@@ -48,10 +53,15 @@ const wsServerCallback = (ws) => {
     ws.on('message', (data) => {
         let code = JSON.parse(data).code;
         connections[ws.id] = {
-            code
+            playerOne: new Player(0, 0, code),
+            playerTwo: new Player(100, 100, code),
+            socket: ws
         }
-        //ws.send(JSON.stringify({ message: 'Reply from server' }));
     });
+
+    //connections.push(ws);
+
+    ws.send(JSON.stringify({ message: 'Reply from server' }))
 
     ws.on('close', () => {
         console.log('Client disconnected');

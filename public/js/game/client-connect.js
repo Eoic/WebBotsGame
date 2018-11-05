@@ -6,6 +6,9 @@ socket.onmessage = (event) => {
 }
 
 function runScript() {
+
+    displayMessage('warning', 'Running script...')
+
     socket.send(JSON.stringify({
         code: editor.getValue()
     }));

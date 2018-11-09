@@ -11,6 +11,7 @@ let isResizing = false;
 let splitter = document.getElementById('splitter');
 let scriptsContainer = document.createElement('div');
 let editorContainer = document.getElementById('editor');
+let scriptsSelect = document.getElementById('scripts-dropdown')
 let splitterHeight = Number.parseInt(document.defaultView.getComputedStyle(splitter).height);
 
 window.onload = onLoadHandler;
@@ -115,6 +116,10 @@ function fetchScripts() {
         if (request.readyState === 4 && request.status === 200) {
             request.response.forEach(element => {
                 appendButton(element.name, selectScript);
+                let option = document.createElement('option');
+                option.value = element.name;
+                option.innerText = element.name;
+                scriptsSelect.appendChild(option)
             });
         }
     }
@@ -152,7 +157,7 @@ function selectScript(event) {
  * @param { Object } event 
  */
 function createScript(event) {
-    if (event.keyCode === 13 && this.value.trim() !== '') {
+    if (event.keyCode === 13 && isFilenameValid(this.value)) {
         let request = new XMLHttpRequest();
 
         request.open('POST', `${window.location.origin}/scripts`, true);
@@ -163,13 +168,32 @@ function createScript(event) {
         }));
 
         request.onreadystatechange = (event) => {
-            if (request.readyState === 4 && request.status === 200) {
-                displayMessage('success', `Created <b>${request.response.filename}</b>`);
-                appendButton(request.response.filename, selectScript);
-                this.value = '';
+            if (request.readyState === 4) {
+                if (request.status === 200) {
+                    displayMessage('success', `Created <b>${request.response.filename}</b>`);
+                    appendButton(request.response.filename, selectScript);
+                    let option = document.createElement('option');
+                    option.innerText = request.response.filename;
+                    option.value = request.response.filename;
+                    scriptsSelect.appendChild(option);
+                    this.value = '';
+                } else if(request.status === 304) {
+                    displayMessage('error', "Script with this name is already created")
+                }
             }
         }
     }
+}
+
+function isFilenameValid(value) {
+    let trimmed = value.trim();
+
+    if (trimmed.length > 0 && trimmed.length < 16) {
+        return true;
+    }
+
+    displayMessage('error', 'Filename must be between 1 and 15 characters long')
+    return false;
 }
 
 function saveScript() {
@@ -203,7 +227,7 @@ function deleteScript() {
 
     console.log(selected);
 
-    if(selected === null)
+    if (selected === null)
         return;
 
     let filename = selected.innerText;
@@ -214,6 +238,11 @@ function deleteScript() {
     request.onreadystatechange = (event) => {
         if (request.readyState === 4 && request.status === 200) {
             selected.parentNode.removeChild(selected);
+
+            for (let i = 0; i < scriptsSelect.length; i++)
+                if (scriptsSelect.options[i].innerText === selected.innerText)
+                    scriptsSelect.removeChild(scriptsSelect.options[i]);
+
             editor.setValue('');
             displayMessage('success', `Script <b>${filename}</b> deleted successfully`)
         }

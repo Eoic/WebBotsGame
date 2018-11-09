@@ -4,7 +4,10 @@ const passport = require('passport');
 
 router.get('/', (req, res) => {
     res.render('login', {
-        title: 'Login'
+        title: 'Login',
+        active: {
+            login: true
+        }
         // Pollutes session store on every login page visit
         // errors: req.flash('error') 
     });

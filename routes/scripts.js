@@ -68,7 +68,7 @@ router.post('/', (req, res) => {
         }
     }).then(response => {
         if (response.nModified === 0)
-            res.sendStatus(304);
+            res.sendStatus(304)
         else res.status(200).json({
             filename
         });
@@ -93,7 +93,7 @@ router.put('/', (req, res) => {
             "scripts.$.code": code
         }
     }).then(response => {
-        if(response)
+        if (response)
             return res.sendStatus(200);
 
         return res.sendStatus(304)
@@ -113,7 +113,7 @@ router.delete('/:id', (req, res) => {
             }
         }
     }).then(response => {
-        if(response.nModified > 0)
+        if (response.nModified > 0)
             return res.status(200).send('Script deleted successfully.');
         return res.status(200).send('Failed to delete');
     })

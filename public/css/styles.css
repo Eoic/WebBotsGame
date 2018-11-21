@@ -5,6 +5,10 @@ body {
     font-family: 'Open Sans', sans-serif;
 }
 
+a {
+    color: #464646;
+}
+
 body {
     background-color: #5c6bc0;
 }
@@ -102,7 +106,8 @@ body {
 }
 
 .navbar-list>li>a {
-    color: #464646;
+    /*color: #464646; */
+    font-weight: 500;
     text-decoration: none;
     transition: all 0.1s;
     padding: 5px 23px;
@@ -113,6 +118,7 @@ body {
 }
 
 .navlink-active {
+    color:#f2f7f2;
     background-color: #a0a8df;
 }
 
@@ -299,4 +305,8 @@ body {
     background-color: #757575;
     color: #ffffff;
     padding: 10px;
+}
+
+.dropdown {
+    border-style: none;
 }

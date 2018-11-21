@@ -7,14 +7,9 @@ const MAP_HEIGHT = 464;
 const MOVEMENT_SPEED = 30;
 
 class Player {
-    constructor(x, y, codeString) {
+    constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.codeString = codeString;
-    }
-
-    getCode() {
-        return this.codeString;
     }
 }
 

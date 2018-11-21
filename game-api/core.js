@@ -9,6 +9,7 @@ const {
 } = require('vm2');
 const uuidv4 = require('uuid/v4');
 const { Player, MAP_WIDTH, MAP_HEIGHT, move } = require('./api')
+const User = require('../models/User');
 
 const TICK_RATE = 60;
 
@@ -30,7 +31,8 @@ const time = () => {
 
 let previous = time();
 let tickLength = 1000 / TICK_RATE;
-let connections = {};
+let gameStates = {};
+let socketConnections = [];
 
 /**
  * Updates pair of players and returns their updated state
@@ -38,19 +40,28 @@ let connections = {};
  * @param {double} delta Time since last frame
  */
 function update(delta) {
-    for (let clientID in connections) {
-        let modules = nodeVM.run(connections[clientID].playerOne.getCode());
-        move(delta, connections[clientID].playerOne, 1)
+    for (let clientID in gameStates) {
+        gameStates[clientID].playerOne.x++
+        gameStates[clientID].playerTwo.x--;
 
-        // If connection is established
-        if(connections[clientID].socket.readyState === 1) {
-            connections[clientID].socket.send(connections[clientID].playerOne.x)
+        /*
+        let modules = nodeVM.run(connections[clientID].playerOne.getCode());
+        move(delta, gameStates[clientID].playerOne, 1)
+        */
+
+        // Send state update
+        if (gameStates[clientID].socket.readyState === 1) {
+            gameStates[clientID].socket.send(JSON.stringify({
+                type: 'GAME_TICK_UPDATE',
+                playerOne: gameStates[clientID].playerOne,
+                playerTwo: gameStates[clientID].playerTwo
+            }))
         }
 
         //console.log(modules.update.toString())
         //let five = vm.run(modules.update.toString() + ' ' + "update()")
-        console.log(vm.run(modules.update.toString() + ' ' + "update()"))
-        console.log("Global: " + vm.sandbox)
+        //console.log(vm.run(modules.update.toString() + ' ' + "update()"))
+        //console.log("Global: " + vm.sandbox)
         //modules.update()
     }
 }
@@ -72,15 +83,37 @@ const wsServerCallback = (ws) => {
     ws.id = uuidv4();
 
     ws.on('message', (data) => {
-        let code = JSON.parse(data).code;
-        connections[ws.id] = {
-            playerOne: new Player(32, 32, code),
-            playerTwo: new Player(642, 432, code),
+
+        let message = JSON.parse(data);
+        let code = {};
+
+        switch (message.gameType) {
+            case 'SIMULATION':
+                // Get enemy script
+                User.findOne({ "scripts.name": "app", username: '' },
+                    {
+                        _id: 0, scripts: {
+                            $elemMatch: { name: message.enemy }
+                        }
+                    }).then(result => {
+                        console.log(result.scripts[0].code);
+                    });
+                break;
+            case 'MULTIPLAYER':
+                socketConnections.push(ws); // for matchmaking
+                break;
+            default:
+                return 0;
+        }
+
+        gameStates[ws.id] = {
+            playerOne: new Player(32, 32),
+            playerTwo: new Player(642, 432),
             socket: ws
         }
     });
 
-    ws.send(JSON.stringify({ message: 'Reply from server' }))
+    ws.send(JSON.stringify({ message: 'Reply from server', type: 'INFO' }))
 
     ws.on('close', () => {
         console.log('Client disconnected');
@@ -93,9 +126,9 @@ module.exports = {
 };
 
 /**
- * Queue connections only in multiplayer.
+ * Queue gameStates only in multiplayer.
  * When game is being created, dequeue 2 players and create pair with their 
- * socket connections and required objects(Player, etc.)
+ * socket gameStates and required objects(Player, etc.)
  */
 
 /**
@@ -115,3 +148,5 @@ module.exports = {
   *     them to player object. 
   * 5. Send updated data through web socket
   */
+
+// MAKE SCRIPT START HTTP REQUEST, SINCE SESSION DATA IS NEEDED

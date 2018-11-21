@@ -149,8 +149,20 @@ socket.onopen = (event) => {
 }
 
 socket.onmessage = (event) => {
-    let x = JSON.parse(event.data);
-    playerOne.position.x = x;
+    let payload = JSON.parse(event.data);
+
+    if (typeof payload.type === 'undefined')
+        return;
+
+    switch (payload.type) {
+        case 'GAME_TICK_UPDATE':
+            playerOne.position.set(payload.playerOne.x, payload.playerOne.y);
+            playerTwo.position.set(payload.playerTwo.x, payload.playerTwo.y);
+            break;
+        case 'INFO':
+            // Misc events 
+            break;
+    }
 }
 
 socket.onclose = (event) => {
@@ -166,16 +178,34 @@ function runScript() {
 
     let selected = document.getElementById('scripts-dropdown')
 
-    if(selected !== null){
-        console.log(selected.value)
+    let enemy = {
+        code: ''
     }
+
+    if (selected !== null) {
+
+        let request = new XMLHttpRequest();
+        request.responseType = 'json';
+        request.open('GET', `${window.location.origin}/scripts/${selected.value}`, true);
+        request.send();
+
+        request.onreadystatechange = (event) => {
+            if (request.readyState === 4 && request.status === 200) {
+                enemy.code = request.response.code;
+            }
+        }
+    }
+
+    // onreadystatechange is async...
 
     displayMessage('warning', 'Running script...')
 
+    // Specific for simulation
     socket.send(JSON.stringify({
         code: editor.getValue(),
-        type: 'CODE_VALUE',
-        gameType: 'SIMULATION'
+        payload: 'SCRIPT',
+        gameType: 'SIMULATION',
+        enemy: (selected !== null) ? selected.value : ''
     }));
 }
 

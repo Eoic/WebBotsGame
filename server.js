@@ -13,11 +13,14 @@ const flash = require('connect-flash');
 const { authStrategyCallback } = require('./utils/validator');
 const morgan = require('morgan');
 const config = require('./config');
-const MongoStore = require('connect-mongo')(session);
-const { connect, dbConnection } = require('./models/Index');
+const MongoDBStore = require('connect-mongodb-session')(session);
+const { connect } = require('./models/Index');
 connect(process.env.MONGO_URI || config.mongoURI);
 const port = process.env.PORT || config.devPort;
 const WebSocket = require('ws');
+
+// Game 
+const { loop, wsServerCallback } = require('./game-api/core');
 
 // Create handlebars engine instance
 const hbs = expressHbs.create({
@@ -28,6 +31,11 @@ const hbs = expressHbs.create({
         getValueOrEmpty: (data) => (typeof data !== 'undefined') ? data : '',
         isTrue: (value) => (value === true)
     }
+});
+
+let store = new MongoDBStore({
+    uri: process.env.MONGO_URI || config.mongoURI,
+    collection: 'sessions'
 });
 
 // Set handlebars view engine
@@ -42,10 +50,7 @@ app.use(session({
     genid: () => uuidv4(),
     saveUninitialized: false,
     secret: process.env.SESSION_KEY || config.sessionKey,
-    store: new MongoStore({
-        mongooseConnection: dbConnection,
-        collection: 'sessions'
-    }),
+    store,
     cookie: {
         maxAge: config.cookieAge || process.env.COOKIE_AGE
     }
@@ -68,23 +73,8 @@ passport.deserializeUser((userId, done) => {
     });
 });
 
-const server = app.listen(port, () => {
-    console.log(`Server started on port ${port}`);
-});
+const server = app.listen(port);
+const wsServer = new WebSocket.Server({ server });
 
-const webSocketServer = new WebSocket.Server({ server });
-
-webSocketServer.on('connection', (ws) => {
-
-    ws.on('message', (message) => {
-        console.log(message);
-    });
-
-    ws.on('close', () => {
-        console.log('Client disconnected');
-    });
-});
-
-webSocketServer.on('close', (ws) => {
-    console.log('Client disconnected');
-})
+wsServer.on('connection', wsServerCallback);
+loop();

@@ -1,19 +1,26 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const { validateRegistration } = require('../utils/validator');
-const { validationResult } = require('express-validator/check');
+const {
+    validateRegistration
+} = require('../utils/validator');
+const {
+    validationResult
+} = require('express-validator/check');
 
 router.get('/', (req, res) => {
     res.render('register', {
-        title: 'Register'
+        title: 'Register',
+        active: {
+            register: true
+        }
     });
 });
 
 router.post('/', validateRegistration, (req, res) => {
     const errors = validationResult(req);
 
-    if (!errors.isEmpty()){
+    if (!errors.isEmpty()) {
         return res.render('register', {
             title: 'Register',
             errors: errors.array(),
@@ -33,7 +40,7 @@ router.post('/', validateRegistration, (req, res) => {
     User.create(user).then(user => {
 
         req.login(user._id, (err) => {
-            if(err) res.redirect('/');
+            if (err) res.redirect('/');
         });
 
         res.render('profile', {
@@ -41,7 +48,9 @@ router.post('/', validateRegistration, (req, res) => {
             success: true
         });
     }).catch(err => {
-        res.status(422).json({ err });
+        res.status(422).json({
+            err
+        });
     });
 });
 

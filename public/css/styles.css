@@ -5,6 +5,10 @@ body {
     font-family: 'Open Sans', sans-serif;
 }
 
+a {
+    color: #464646;
+}
+
 body {
     background-color: #5c6bc0;
 }
@@ -92,21 +96,30 @@ body {
 
 .navbar-list {
     list-style-type: none;
+    padding-right: 20px;
 }
 
 .navbar-list>li {
     display: inline;
-    padding: 0px 20px;
+    border-radius: 3px;
+    transition: 0.3s all;
 }
 
 .navbar-list>li>a {
-    color: #464646;
+    /*color: #464646; */
+    font-weight: 500;
     text-decoration: none;
     transition: all 0.1s;
+    padding: 5px 23px;
 }
 
 .navbar-list>li>a:hover {
-    border-bottom: 4px solid #4b4b4b;
+    background-color: #c0c4dd;
+}
+
+.navlink-active {
+    color:#f2f7f2;
+    background-color: #a0a8df;
 }
 
 .menu-dropdown {
@@ -114,13 +127,13 @@ body {
     margin: 8px 12px 8px 8px;
 }
 
-@media only screen and (max-width: 805px) {
+@media only screen and (max-width: 864px) {
     .navbar-list {
         display: none;
     }
 }
 
-@media only screen and (min-width: 806px) {
+@media only screen and (min-width: 865px) {
     .menu-dropdown {
         display: none;
     }
@@ -139,9 +152,10 @@ body {
     bottom: 300px;
     height: 40px;
     width: 100%;
-    background-color: #555c81;
+    background-color: rgb(51, 52, 59);
     position: absolute;
     cursor: ns-resize;
+    display: inline-flex;
 }
 
 .scripts {
@@ -178,11 +192,20 @@ body {
 .btn-primary {
     background-color: #3f51b5;
     color: #ebebee;
+    border: 1px solid #5565dd;
 }
 
-.btn-primary:hover { background-color: #303f9f; }
-.btn-primary:active { background-color: #00186f; }
-.btn-primary:focus { outline-color: #3f51b5; }
+.btn-primary:hover {
+    background-color: #303f9f;
+}
+
+.btn-primary:active {
+    background-color: #00186f;
+}
+
+.btn-primary:focus {
+    outline-color: #3f51b5;
+}
 
 /* PURPLE */
 .btn-purple {
@@ -191,8 +214,14 @@ body {
     border-top: 1px solid #443850;
     border-bottom: 1px solid #443850;
 }
-.btn-purple:hover { background-color: #5d4675; }
-.btn-purple:active{ background-color: #523f66; }
+
+.btn-purple:hover {
+    background-color: #5d4675;
+}
+
+.btn-purple:active {
+    background-color: #523f66;
+}
 
 /* BUTTON SIZES */
 .btn-fluid {
@@ -211,4 +240,73 @@ body {
 
 .btn-active {
     filter: brightness(145%);
+}
+
+/* ---------- */
+/* Notifier   */
+/* ---------- */
+
+.notify {
+    color: #FFFFFF;
+    min-width: 260px;
+    text-align: center;
+    z-index: 100;
+    padding: 10px;
+    border-radius: 2px;
+    visibility: hidden;
+    display: block;
+    margin-top: 5px;
+}
+
+#messages-container {
+    left: calc(50% - 130px);
+    position: fixed;
+    margin-top: 55px;
+}
+
+.notify.visible {
+    visibility: visible;
+    animation: fade-in 0.7s, fade-out 0.7s 2.5s;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1
+    }
+}
+
+@keyframes fade-out {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0
+    }
+}
+
+.notify.success {
+    background-color: rgb(42, 172, 74);
+}
+
+.notify.warning {
+    background-color: rgb(255, 174, 0);
+}
+
+.notify.error {
+    background-color: rgb(255, 75, 75);
+}
+
+.label-light {
+    background-color: #757575;
+    color: #ffffff;
+    padding: 10px;
+}
+
+.dropdown {
+    border-style: none;
 }

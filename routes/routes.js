@@ -5,6 +5,7 @@ const logout = require('./logout');
 const register = require('./register');
 const practice = require('./practice');
 const scripts = require('./scripts');
+const multiplayer = require('./multiplayer')
 
 module.exports = function (app) {
     app.use((req, res, next) => {
@@ -18,4 +19,5 @@ module.exports = function (app) {
     app.use('/profile', profile);
     app.use('/practice', practice);
     app.use('/scripts', scripts);
+    app.use('/multiplayer', multiplayer);
 }

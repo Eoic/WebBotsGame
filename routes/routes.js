@@ -6,6 +6,7 @@ const register = require('./register');
 const practice = require('./practice');
 const scripts = require('./scripts');
 const multiplayer = require('./multiplayer')
+const { router } = require('../game-api/core');
 
 module.exports = function (app) {
     app.use((req, res, next) => {
@@ -20,4 +21,5 @@ module.exports = function (app) {
     app.use('/practice', practice);
     app.use('/scripts', scripts);
     app.use('/multiplayer', multiplayer);
+    app.use(router); // Starting point for running scripts 
 }

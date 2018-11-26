@@ -18,6 +18,15 @@ window.onload = onLoadHandler;
 splitter.addEventListener('mousedown', onMouseDown);
 window.addEventListener('mouseup', onMouseUp);
 window.addEventListener('mousemove', onMouseMove);
+window.addEventListener('resize', () => {
+    // Dont let editor container to be taller than window height
+    /*
+    let editorHeight = Number.parseInt(editorContainer.style.height);
+    if(editorHeight > window.innerHeight)
+        splitter.style.bottom = window.innerHeight - splitterHeight + 'px'
+        editorContainer.style.height = window.innerHeight - splitterHeight + 'px';
+        */
+})
 
 // Listener callbacks
 function onMouseDown() {
@@ -200,8 +209,10 @@ function saveScript() {
 
     let selected = document.querySelector('.btn-active');
 
-    if (selected === null)
+    if (selected === null){
+        displayMessage('error', 'No script is selected')
         return;
+    }
 
     let request = new XMLHttpRequest();
     let filename = selected.innerText

@@ -21,7 +21,7 @@ const WebSocket = require('ws');
 const https = require('https');
 const fs = require('fs')
 
-// Game 
+// Game logic
 const { loop, wsServerCallback } = require('./game-api/core');
 
 // Create handlebars engine instance

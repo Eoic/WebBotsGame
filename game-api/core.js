@@ -8,8 +8,10 @@ const {
     NodeVM
 } = require('vm2');
 const uuidv4 = require('uuid/v4');
-const { Player, MAP_WIDTH, MAP_HEIGHT, move } = require('./api')
+const { Player, CONSTANTS } = require('./api')
 const User = require('../models/User');
+const express = require('express');
+const router = express.Router();
 
 const TICK_RATE = 60;
 
@@ -17,10 +19,12 @@ const nodeVM = new NodeVM({
     console: 'inherit'
 });
 
-let context = {};
+const context = {
+    delta: 0,
+    robot: {}
+};
 
 const vm = new VM({
-    timeout: 1000,
     sandbox: { context }
 });
 
@@ -32,7 +36,36 @@ const time = () => {
 let previous = time();
 let tickLength = 1000 / TICK_RATE;
 let gameStates = {};
-let socketConnections = [];
+//let socketConnections = [];
+
+// Player API
+const util = {
+    moveForwardX: () => {
+        if(context.robot.x < CONSTANTS.MAP_WIDTH)
+            context.robot.x += context.delta * CONSTANTS.MOVEMENT_SPEED;
+    },
+    moveForwardY: () => {
+        if(context.robot.y > 0 && context.robot.y < CONSTANTS.MAP_HEIGHT)
+            context.robot.y -= context.delta * CONSTANTS.MOVEMENT_SPEED
+    },
+    moveBackX: () => {
+        if(context.robot.x > CONSTANTS.PLAYER_BOX_SIZE)
+            context.robot.x -= context.delta * CONSTANTS.MOVEMENT_SPEED;
+    },
+    moveBackY: () => {
+        if(context.robot.y + CONSTANTS.PLAYER_BOX_SIZE < CONSTANTS.MAP_HEIGHT)
+            context.robot.y += context.delta * CONSTANTS.MOVEMENT_SPEED
+    },
+    getState: () => {
+        return context.robot;
+    },
+    rotate: () => {
+           
+    }
+}
+
+vm.freeze(util, 'util');            // Game api calls
+vm.freeze(CONSTANTS, 'GAME');       // Constants
 
 /**
  * Updates pair of players and returns their updated state
@@ -41,15 +74,20 @@ let socketConnections = [];
  */
 function update(delta) {
     for (let clientID in gameStates) {
-        gameStates[clientID].playerOne.x++
-        gameStates[clientID].playerTwo.x--;
+        context.delta = delta
 
-        /*
-        let modules = nodeVM.run(connections[clientID].playerOne.getCode());
-        move(delta, gameStates[clientID].playerOne, 1)
-        */
+        // Player one
+        context.robot = gameStates[clientID].playerOne
+        gameStates[clientID].playerOne.refreshEnergy()
+        let modules = nodeVM.run(gameStates[clientID].code.playerOne);
+        vm.run(modules.update.toString() + 'update()');
 
-        // Send state update
+        // Player two
+        context.robot = gameStates[clientID].playerTwo;
+        modules = nodeVM.run(gameStates[clientID].code.playerTwo);
+        vm.run(modules.update.toString() + 'update()');
+
+        // Send game state update
         if (gameStates[clientID].socket.readyState === 1) {
             gameStates[clientID].socket.send(JSON.stringify({
                 type: 'GAME_TICK_UPDATE',
@@ -57,12 +95,6 @@ function update(delta) {
                 playerTwo: gameStates[clientID].playerTwo
             }))
         }
-
-        //console.log(modules.update.toString())
-        //let five = vm.run(modules.update.toString() + ' ' + "update()")
-        //console.log(vm.run(modules.update.toString() + ' ' + "update()"))
-        //console.log("Global: " + vm.sandbox)
-        //modules.update()
     }
 }
 
@@ -81,48 +113,64 @@ const loop = () => {
 const wsServerCallback = (ws) => {
 
     ws.id = uuidv4();
+    console.log("Conected: " + ws.id)
 
     ws.on('message', (data) => {
 
-        let message = JSON.parse(data);
-        let code = {};
+        let payload = JSON.parse(data);
 
-        switch (message.gameType) {
+        switch (payload.type) {
             case 'SIMULATION':
-                // Get enemy script
-                User.findOne({ "scripts.name": "app", username: '' },
-                    {
-                        _id: 0, scripts: {
-                            $elemMatch: { name: message.enemy }
-                        }
-                    }).then(result => {
-                        console.log(result.scripts[0].code);
-                    });
+                // Create pair of player objects and add them to loop list
+                gameStates[ws.id] = {
+                    playerOne: new Player(CONSTANTS.P_ONE_START_POS.X, CONSTANTS.P_ONE_START_POS.Y),
+                    playerTwo: new Player(CONSTANTS.P_TWO_START_POS.X, CONSTANTS.P_TWO_START_POS.Y),
+                    code: {
+                        playerOne: payload.playerCode,
+                        playerTwo: payload.enemyCode
+                    },
+                    socket: ws
+                }
                 break;
             case 'MULTIPLAYER':
-                socketConnections.push(ws); // for matchmaking
+                //socketConnections.push(ws);
                 break;
             default:
                 return 0;
-        }
-
-        gameStates[ws.id] = {
-            playerOne: new Player(32, 32),
-            playerTwo: new Player(642, 432),
-            socket: ws
         }
     });
 
     ws.send(JSON.stringify({ message: 'Reply from server', type: 'INFO' }))
 
+    // Delete player from gameStates array
     ws.on('close', () => {
-        console.log('Client disconnected');
+        delete gameStates[ws.id] // :(
+        console.log(gameStates)
     });
 }
 
+/** RUN CODE ROUTE (SIMULATION) */
+router.post('/run-code', (req, res) => {
+    let enemyScript = req.body.enemy;
+
+    // Fetch code from db
+    User.findOne({
+        username: req.user.username
+    }).select({
+        scripts: {
+            $elemMatch: {
+                name: enemyScript
+            }
+        }
+    }).lean().then(response => {
+        return res.json({ enemyCode: response.scripts[0].code });
+    });
+});
+
 module.exports = {
     loop,
-    wsServerCallback
+    wsServerCallback,
+    router
 };
 
 /**
@@ -149,4 +197,9 @@ module.exports = {
   * 5. Send updated data through web socket
   */
 
-// MAKE SCRIPT START HTTP REQUEST, SINCE SESSION DATA IS NEEDED
+  /**
+   * CODE EXECUTION
+   * 1. Create context object inside sandbox
+   * 2. Extract module functions through NodeVM
+   * 3. Run extracted functions by stringifying them into VM run()
+   */

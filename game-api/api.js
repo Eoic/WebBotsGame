@@ -2,44 +2,44 @@
  * Functions, classes and constants used in the game (i.e. move, rotate, shoot etc.)
  */
 
-const MAP_WIDTH = 674;
-const MAP_HEIGHT = 464;
-const MOVEMENT_SPEED = 30;
-
 class Player {
     constructor(x, y) {
         this.x = x;
         this.y = y;
+        this.health = CONSTANTS.HP_FULL
+        this.energy = CONSTANTS.EN_FULL
+    }
+
+    refreshEnergy(){
+        if(this.energy + CONSTANTS.ENERGY_REFRESH_STEP <= CONSTANTS.EN_FULL)
+            this.energy += CONSTANTS.ENERGY_REFRESH_STEP
+    }
+
+    reset(){
+        this.health = CONSTANTS.HP_FULL
+        this.energy = CONSTANTS.EN_FULL
     }
 }
 
-const Direction = Object.freeze({
-    LEFT:   0,
-    RIGHT:  1,
-    UP:     2,
-    DOWN:   3
-});
-
-function move(delta, player, direction) {
-    switch (direction) {
-        case 0:
-            player.x -= MOVEMENT_SPEED * delta;
-            break; 
-        case 1: 
-            player.x += MOVEMENT_SPEED * delta;
-            break;
-        case 2: 
-            player.y += MOVEMENT_SPEED * delta;
-            break;
-        case 3:
-            player.y -= MOVEMENT_SPEED * delta
-            break;
-    }   
+const CONSTANTS = {
+    MAP_WIDTH: 674,
+    MAP_HEIGHT: 464,
+    MOVEMENT_SPEED: 75,
+    P_ONE_START_POS: {
+        X: 32,
+        Y: 32
+    },
+    P_TWO_START_POS: {
+        X: 642,
+        Y: 432
+    },
+    PLAYER_BOX_SIZE: 20,
+    HP_FULL: 100,
+    EN_FULL: 100,
+    ENERGY_REFRESH_STEP: 10
 }
 
 module.exports = {
-    Player,
-    MAP_WIDTH,
-    MAP_HEIGHT,
-    move
+    CONSTANTS,
+    Player
 }

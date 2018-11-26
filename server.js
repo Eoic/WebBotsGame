@@ -19,7 +19,7 @@ connect(process.env.MONGO_URI || config.mongoURI);
 const port = process.env.PORT || config.devPort;
 const WebSocket = require('ws');
 
-// Game 
+// Game logic
 const { loop, wsServerCallback } = require('./game-api/core');
 
 // Create handlebars engine instance

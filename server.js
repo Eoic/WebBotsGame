@@ -18,6 +18,8 @@ const { connect } = require('./models/Index');
 connect(process.env.MONGO_URI || config.mongoURI);
 const port = process.env.PORT || config.devPort;
 const WebSocket = require('ws');
+const https = require('https');
+const fs = require('fs')
 
 // Game 
 const { loop, wsServerCallback } = require('./game-api/core');
@@ -73,7 +75,17 @@ passport.deserializeUser((userId, done) => {
     });
 });
 
-const server = app.listen(port);
+const privateKey = fs.readFileSync('ssl/key.pem', 'utf-8')
+const certificate = fs.readFileSync('ssl/cert.pem', 'utf-8')
+const auth = {
+    key: privateKey,
+    cert: certificate
+}
+
+let server = https.createServer(auth, app);
+server.listen(port);
+
+//const server = app.listen(port);
 const wsServer = new WebSocket.Server({ server });
 
 wsServer.on('connection', wsServerCallback);

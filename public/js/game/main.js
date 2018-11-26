@@ -141,7 +141,7 @@ function playerInit() {
 /**
  * SERVER CONNECTION
  */
-let connectionString = `ws://${window.location.host}`;
+let connectionString = `wss://${window.location.host}`;
 let socket = new WebSocket(connectionString);
 
 socket.onopen = (event) => {

@@ -189,7 +189,12 @@ function loadMapCoordinates() {
 /**
  * SERVER CONNECTION
  */
-let connectionString = `wss://${window.location.host}`;
+
+connectionType = (window.location.hostname === 'localhost') ? 'ws://' : 'wss://'; 
+
+if(window.location.hostname === 'localhost')
+    connectionString = `${connectionType}${window.location.host}`;
+
 let socket = new WebSocket(connectionString);
 
 socket.onopen = (event) => {

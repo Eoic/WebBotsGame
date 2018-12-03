@@ -78,14 +78,13 @@ function update(delta) {
 
         // Player one
         context.robot = gameStates[clientID].playerOne
-        gameStates[clientID].playerOne.refreshEnergy()
-        let modules = nodeVM.run(gameStates[clientID].code.playerOne);
-        vm.run(modules.update.toString() + 'update()');
+        //let modules = nodeVM.run(gameStates[clientID].code.playerOne);
+        vm.run(gameStates[clientID].code.playerOne + 'update()');
 
         // Player two
         context.robot = gameStates[clientID].playerTwo;
-        modules = nodeVM.run(gameStates[clientID].code.playerTwo);
-        vm.run(modules.update.toString() + 'update()');
+        //modules = nodeVM.run(gameStates[clientID].code.playerTwo);
+        vm.run(gameStates[clientID].code.playerTwo + 'update()');
 
         // Send game state update
         if (gameStates[clientID].socket.readyState === 1) {

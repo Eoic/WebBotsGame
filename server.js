@@ -75,18 +75,6 @@ passport.deserializeUser((userId, done) => {
     });
 });
 
-/*
-const privateKey = fs.readFileSync('ssl/key.pem', 'utf-8')
-const certificate = fs.readFileSync('ssl/cert.pem', 'utf-8')
-const auth = {
-    key: privateKey,
-    cert: certificate
-}
-
-let server = https.createServer(auth, app);
-server.listen(port);
-*/
-
 const server = app.listen(port);
 const wsServer = new WebSocket.Server({ server });
 

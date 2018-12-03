@@ -131,6 +131,7 @@ footer {
     box-shadow: 0px 1px 6px #443850;
     top: 0;
     z-index: 1;
+    /*padding: 0px 60px;*/
 }
 
 .navbar-list {
@@ -153,7 +154,8 @@ footer {
 }
 
 .navbar-list>li>a:hover {
-    background-color: #c0c4dd;
+    /*background-color: #c0c4dd;*/
+    background-color: #cecece;
 }
 
 .navlink-active {
@@ -363,3 +365,8 @@ footer {
     color: #FFFFFF;
 }
 
+.unselectable {
+    -moz-user-select: none;
+    -webkit-user-select: none;  
+    -ms-user-select: none;
+}

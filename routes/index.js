@@ -6,7 +6,8 @@ router.get('/', (req, res) => {
         title: 'Main page',
         active: {
             index: true
-        }
+        },
+        particles: true
     });
 });
 

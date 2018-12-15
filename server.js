@@ -31,7 +31,8 @@ const hbs = expressHbs.create({
     partialsDir: 'views/partials',
     helpers: {
         getValueOrEmpty: (data) => (typeof data !== 'undefined') ? data : '',
-        isTrue: (value) => (value === true)
+        isTrue: (value) => (value === true),
+        isDefined: (value) => (typeof value !== 'undefined') ? true : false
     }
 });
 
@@ -45,7 +46,7 @@ app.set('view engine', '.hbs');
 app.engine('.hbs', hbs.engine);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use('/public', express.static(path.join(__dirname, 'public')));
+app.use('/public', express.static(path.join(__dirname, '/public')));
 
 app.use(session({
     resave: false,

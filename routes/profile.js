@@ -8,9 +8,7 @@ router.get('/', (req, res, next) => {
 }, (req, res) => {
     res.render('profile', {
         title: 'Profile',
-        active: {
-            profile: true
-        }
+        active: { profile: true }
     });
 });
 

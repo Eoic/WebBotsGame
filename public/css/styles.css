@@ -449,3 +449,19 @@ td:not(:last-child) {
         padding-right: 50px;
     }
 }
+
+.profile-sidebar {
+    background-color: rgb(187, 187, 187);
+    float: left; 
+    width: 250px; 
+    height: 100%;
+    box-sizing: border-box;
+    padding: 85px 15px;
+    text-align: center;
+}
+
+.profile-section {
+    float: right; 
+    width: calc(100% - 250px); 
+    box-sizing: border-box;
+}

@@ -18,8 +18,8 @@ const { connect } = require('./models/Index');
 connect(process.env.MONGO_URI || config.mongoURI);
 const port = process.env.PORT || config.devPort;
 const WebSocket = require('ws');
-const https = require('https');
-const fs = require('fs')
+const Handlebars = require('handlebars')
+const Identicon = require('identicon.js');
 
 // Game logic
 const { loop, wsServerCallback } = require('./game-api/core');
@@ -32,7 +32,12 @@ const hbs = expressHbs.create({
     helpers: {
         getValueOrEmpty: (data) => (typeof data !== 'undefined') ? data : '',
         isTrue: (value) => (value === true),
-        isDefined: (value) => (typeof value !== 'undefined') ? true : false
+        isDefined: (value) => (typeof value !== 'undefined') ? true : false,
+        generateImageFromSource: (hash) => {
+            const identiconData = new Identicon(hash, { size: 420, foreground: [128, 145, 202, 255] }).toString()
+            const result = `<img src=data:image/png;base64,${identiconData} style='max-width: 128px; border-radius: 3px;' />`
+            return new Handlebars.SafeString(result);
+        }
     }
 });
 

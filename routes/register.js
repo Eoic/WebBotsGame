@@ -31,10 +31,14 @@ router.post('/', validateRegistration, (req, res) => {
         });
     }
 
+    const salt = "ef89esf288sefsef28sef8seg5sf5s5f9es9fs";
+    const base64Hash = Buffer.from(req.body.username.trim() + salt).toString('base64')
+
     const user = {
         username: req.body.username.trim(),
         password: req.body.password,
-        email: req.body.email
+        email: req.body.email,
+        identiconHash: base64Hash
     }
 
     User.create(user).then(user => {
@@ -43,10 +47,7 @@ router.post('/', validateRegistration, (req, res) => {
             if (err) res.redirect('/');
         });
 
-        res.render('profile', {
-            title: 'Profile',
-            success: true
-        });
+        res.redirect('/profile')
     }).catch(err => {
         res.status(422).json({
             err

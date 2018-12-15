@@ -105,6 +105,7 @@ function appendInput(className, keyPressHandler) {
     let input = document.createElement('input');
     input.className = className;
     input.placeholder = 'New script...';
+    input.maxLength = 15;
     input.onkeypress = keyPressHandler;
     scriptsContainer.appendChild(input);
 }

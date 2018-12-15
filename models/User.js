@@ -16,6 +16,10 @@ const UserSchema = new Schema({
         type: String,
         required: true
     },
+    identiconHash: {
+        type: String,
+        required: true
+    },
     scripts: [{
         _id: false,
         name: String,

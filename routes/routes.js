@@ -12,6 +12,13 @@ const { router } = require('../game-api/core');
 module.exports = function (app) {
     app.use((req, res, next) => {
         res.locals.auth = req.isAuthenticated();
+        if(req.isAuthenticated()){
+            res.locals.user = {
+                username: req.user.username,
+                email: req.user.email,
+                identiconHash: req.user.identiconHash
+            }
+        }
         next();
     });
     app.use(index);

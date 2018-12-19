@@ -12,7 +12,7 @@ router.get('/', (_req, res) => {
 })
 
 router.post('/', (req, res) => {
-    User.findOne({ username: req.body.username }).then(user => {
+    User.findOne({ username: req.body.username }, 'username password identiconHash').then(user => {
         if (user) {
             user.comparePasswords(req.body.password, (_err, success) => {
                 if (success) {

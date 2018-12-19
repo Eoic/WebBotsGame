@@ -14,6 +14,7 @@
   "license": "ISC",
   "homepage": "https://bitbucket.org/eoic/web-bots-it#readme",
   "dependencies": {
+    "@types/mongoose": "^5.3.5",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "connect-flash": "^0.1.1",

@@ -5,25 +5,25 @@ const SALT_ROUNDS = 10;
 
 const UserSchema = new Schema({
     username: {
-        type: String,
+        type: mongoose.Schema.Types.String,
         required: true
     }, 
     password: {
-        type: String,
+        type: mongoose.Schema.Types.String,
         required: true
     },
     email: {
-        type: String,
+        type: mongoose.Schema.Types.String,
         required: true
     },
     identiconHash: {
-        type: String,
+        type: mongoose.Schema.Types.String,
         required: true
     },
     scripts: [{
         _id: false,
-        name: String,
-        code: String
+        name: mongoose.Schema.Types.String,
+        code: mongoose.Schema.Types.String
     }]
 }, {
     timestamps: true

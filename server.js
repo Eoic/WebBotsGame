@@ -5,15 +5,10 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const uuidv4 = require('uuid/v4');
-const passport = require('passport');
-const User = require('./models/User');
-const LocalStrategy = require('passport-local').Strategy;
+const cookieParser = require('cookie-parser')
 const useRoutes = require('./routes/routes');
-const flash = require('connect-flash');
-const { authStrategyCallback } = require('./utils/validator');
 const morgan = require('morgan');
 const config = require('./config');
-const MongoDBStore = require('connect-mongodb-session')(session);
 const { connect } = require('./models/Index');
 connect(process.env.MONGO_URI || config.mongoURI);
 const port = process.env.PORT || config.devPort;
@@ -35,15 +30,10 @@ const hbs = expressHbs.create({
         isDefined: (value) => (typeof value !== 'undefined') ? true : false,
         generateImageFromSource: (hash) => {
             const identiconData = new Identicon(hash, { size: 420, foreground: [128, 145, 202, 255] }).toString()
-            const result = `<img src=data:image/png;base64,${identiconData} style='max-width: 128px; border-radius: 3px;' />`
+            const result = `<img src=data:image/png;base64,${identiconData} style='max-width: 95px; border-radius: 3px;' />`
             return new Handlebars.SafeString(result);
         }
     }
-});
-
-let store = new MongoDBStore({
-    uri: process.env.MONGO_URI || config.mongoURI,
-    collection: 'sessions'
 });
 
 // Set handlebars view engine
@@ -57,32 +47,20 @@ app.use(session({
     resave: false,
     genid: () => uuidv4(),
     saveUninitialized: false,
-    secret: process.env.SESSION_KEY || config.sessionKey,
-    store,
+    secret: config.sessionKey || process.env.SESSION_KEY,
+    key: 'connect_sid',
     cookie: {
         maxAge: config.cookieAge || process.env.COOKIE_AGE
     }
 }));
 
-app.use(flash());
 app.use(morgan('tiny'));
-app.use(passport.initialize());
-app.use(passport.session());
-passport.use(new LocalStrategy(authStrategyCallback));
+app.use(cookieParser())
 useRoutes(app);
 
-passport.serializeUser((user, done) => {
-    done(null, user._id);
-});
-
-passport.deserializeUser((userId, done) => {
-    User.findById(userId, (err, user) => {
-        done(err, user);
-    });
-});
-
 const server = app.listen(port);
-const wsServer = new WebSocket.Server({ server });
 
+// Start game web socket server and game loop
+const wsServer = new WebSocket.Server({ server });
 wsServer.on('connection', wsServerCallback);
 loop();

@@ -154,7 +154,7 @@ router.post('/run-code', (req, res) => {
 
     // Fetch code from db
     User.findOne({
-        username: req.user.username
+        username: req.session.user.username
     }).select({
         scripts: {
             $elemMatch: {

@@ -8,7 +8,7 @@ const {
     validationResult
 } = require('express-validator/check');
 
-router.get('/', (req, res) => {
+router.get('/', (_req, res) => {
     res.render('register', {
         title: 'Register',
         active: {
@@ -41,17 +41,13 @@ router.post('/', validateRegistration, (req, res) => {
         identiconHash: base64Hash
     }
 
-    User.create(user).then(user => {
-
-        req.login(user._id, (err) => {
-            if (err) res.redirect('/');
-        });
-
+    User.create(user).then(newUser => {
+        req.session.user = {
+            username: newUser.username
+        }
         res.redirect('/profile')
     }).catch(err => {
-        res.status(422).json({
-            err
-        });
+        res.status(422).json({ err });
     });
 });
 

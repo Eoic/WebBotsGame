@@ -10,16 +10,21 @@ const lobby = require('./lobby')
 const { router } = require('../game-api/core');
 
 module.exports = function (app) {
+    // Clear cookies from browser if user is not set
+    // Set response locals
     app.use((req, res, next) => {
-        res.locals.auth = req.isAuthenticated();
-        if(req.isAuthenticated()){
+        if (req.cookies.connect_sid && !req.session.user)
+            res.clearCookie('connect_sid')
+        
+        if(req.session.user && req.cookies.connect_sid){
+            res.locals.authenticated = true
             res.locals.user = {
-                username: req.user.username,
-                email: req.user.email,
-                identiconHash: req.user.identiconHash
+                identiconHash: req.session.user.identiconHash,
+                username: req.session.user.username,
             }
         }
-        next();
+
+        next()
     });
     app.use(index);
     app.use('/login', login);

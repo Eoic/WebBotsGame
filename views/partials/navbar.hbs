@@ -6,7 +6,7 @@
         <li> <a class="{{#if active.tutorial}}navlink-active{{/if}}" href='/tutorial'> Tutorial </a> </li>
         <li> <a class="{{#if active.documentation}}navlink-active{{/if}}" href='/documentation'> Documentation </a></li>
         
-        {{#if auth}}
+        {{#if authenticated}}
             <li> <a class="{{#if active.practice}}navlink-active{{/if}}" href='/practice'> Practice </a> </li>
             <li> <a class="{{#if active.multiplayer}}navlink-active{{/if}}" href='/lobby'> Multiplayer </a> </li>
             <li style="float: right"> <a href="/logout"> Logout </a></li>

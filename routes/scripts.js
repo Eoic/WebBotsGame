@@ -7,7 +7,7 @@ const User = require('../models/User');
  */
 router.get('/', (req, res) => {
     User.findOne({
-        username: req.user.username
+        username: req.session.user.username
     }).select({
         'scripts.name': 1
     }).lean().then(user => {
@@ -22,7 +22,7 @@ router.get('/', (req, res) => {
 
 router.get('/:id', (req, res) => {
     User.findOne({
-        username: req.user.username
+        username: req.session.user.username
     }).select({
         scripts: {
             $elemMatch: {
@@ -49,7 +49,7 @@ router.post('/', (req, res) => {
     let filename = req.body.filename.trim();
 
     User.updateOne({
-        username: req.user.username,
+        username: req.session.user.username,
         scripts: {
             $not: {
                 $elemMatch: {
@@ -86,7 +86,7 @@ router.put('/', (req, res) => {
     let code = req.body.code;
 
     User.updateOne({
-        username: req.user.username,
+        username: req.session.user.username,
         "scripts.name": filename
     }, {
         $set: {
@@ -104,7 +104,7 @@ router.delete('/:id', (req, res) => {
     let filename = req.params.id;
 
     User.updateOne({
-        username: req.user.username,
+        username: req.session.user.username,
         "scripts.name": filename
     }, {
         $pull: {

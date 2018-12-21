@@ -15,6 +15,11 @@ const AchievementSchema = new Schema({
     description: {
         type: mongoose.Schema.Types.String,
         required: false
+    },
+    expValue: {
+        type: mongoose.Schema.Types.Number,
+        default: 0,
+        min: 0
     }
 })
 

@@ -30,7 +30,8 @@ const hbs = expressHbs.create({
         isDefined: (value) => (typeof value !== 'undefined') ? true : false,
         generateImageFromSource: (hash) => {
             const identiconData = new Identicon(hash, { size: 420, foreground: [128, 145, 202, 255] }).toString()
-            const result = `<img src=data:image/png;base64,${identiconData} style='max-width: 95px; border-radius: 3px;' />`
+            const result = `<img src="data:image/png;base64,${identiconData}" 
+                            style='max-width: 95px; border-radius: 3px;' alt="User avatar" />`
             return new Handlebars.SafeString(result);
         }
     }

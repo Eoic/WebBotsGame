@@ -27,7 +27,7 @@ main article {
 
 header {
     margin: 0 auto;
-    padding: 95px 50px 50px 50px;
+    padding: 75px 50px 50px 50px;
     color: #d3d4cd;
     font-size: 25px;
     text-align: center;
@@ -54,10 +54,6 @@ a {
 footer {
     background-color: #464646;
     height: 100px;
-}
-
-:root {
-    --scripts-window-width: 180px;
 }
 
 .form {
@@ -189,7 +185,7 @@ footer {
 #editor {
     position: absolute;
     right: 0;
-    width: calc(100% - var(--scripts-window-width));
+    width: calc(100% - 180px);
     height: 300px;
     bottom: 0;
     font-family: monospace;
@@ -209,7 +205,7 @@ footer {
 }
 
 .scripts {
-    width: var(--scripts-window-width);
+    width: 180px;
     height: 100%;
     position: fixed;
     left: 0;
@@ -413,7 +409,7 @@ table {
 }
 
 table, td, th {
-    border: 1px solid #353535;
+    border: 1px solid #505050;
 }
 
 tr {
@@ -421,7 +417,7 @@ tr {
 }
 
 tr:hover {
-    background-color: rgb(228, 227, 227);
+    background-color: rgb(206, 206, 206); 
 }
 
 td:not(:last-child) {
@@ -432,8 +428,8 @@ td:not(:last-child) {
 /* Section */
 .section-full-size {
     padding-top: 85px; 
-    background-color:rgb(206, 206, 206); 
-    height: 100%
+    background-color: rgb(228, 227, 227);
+    height: 100%;
 }
 
 /* ( Statistics page ) */
@@ -464,4 +460,49 @@ td:not(:last-child) {
     float: right; 
     width: calc(100% - 250px); 
     box-sizing: border-box;
+}
+
+.achievement-item {
+    width: 100%; 
+    background-color:rgb(239, 236, 255); 
+    padding: 15px; 
+    box-sizing: border-box;
+    box-shadow: 0px 1px 3px 0px #2f2f2f;
+    margin-top: 9px;
+}
+
+/* Headers */
+
+h2.section-header {
+    padding-left: 150px; 
+    padding-bottom: 20px; 
+    margin-top: -13px;
+    box-shadow: inset 0px -6px 9px -8px #2f2f2f;
+    color: #333333;
+}
+
+.section-paragraph {
+    padding-left: 150px;
+    color: #333333;
+}
+
+.html-tag-icon {
+    color: #6275ff;
+}
+
+.docs-code-block {
+    background-color: #ebebeb;
+    margin-left: 150px; 
+    border: 1px; 
+    padding: 10px; 
+    margin-top: 10px;
+    border-radius: 3px; width: 70%; 
+    box-shadow: 0px 0px 3px 0px #2f2f2f;
+}
+
+.docs-code-block > h3 {
+    font-size: 22px; 
+    border-radius: 3px; 
+    width: 100px; 
+    color:rgb(6, 131, 89);
 }

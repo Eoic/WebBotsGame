@@ -39,33 +39,33 @@ let gameStates = {};
 //let socketConnections = [];
 
 // Player API
-const util = {
+const player = {
     moveForwardX: () => {
         if(context.robot.x < CONSTANTS.MAP_WIDTH - CONSTANTS.PLAYER_BOX_SIZE)
             context.robot.x += context.delta * CONSTANTS.MOVEMENT_SPEED;
     },
     moveForwardY: () => {
-        if(context.robot.y > 0 && context.robot.y < CONSTANTS.MAP_HEIGHT + CONSTANTS.PLAYER_BOX_SIZE)
-            context.robot.y -= context.delta * CONSTANTS.MOVEMENT_SPEED
+        if(context.robot.rotate(-1, 0, context.delta))
+            if(context.robot.y > CONSTANTS.PLAYER_BOX_SIZE)
+                context.robot.y -= context.delta * CONSTANTS.MOVEMENT_SPEED
     },
     moveBackX: () => {
-        if(context.robot.x > CONSTANTS.PLAYER_BOX_SIZE)
-            context.robot.x -= context.delta * CONSTANTS.MOVEMENT_SPEED;
+        if(context.robot.rotate(0, -1, context.delta))
+            if(context.robot.x > CONSTANTS.PLAYER_BOX_SIZE)
+                context.robot.x -= context.delta * CONSTANTS.MOVEMENT_SPEED;
     },
     moveBackY: () => {
-        if(context.robot.y + CONSTANTS.PLAYER_BOX_SIZE < CONSTANTS.MAP_HEIGHT)
-            context.robot.y += context.delta * CONSTANTS.MOVEMENT_SPEED
+        if(context.robot.rotate(1, 0, context.delta))
+            if(context.robot.y + CONSTANTS.PLAYER_BOX_SIZE < CONSTANTS.MAP_HEIGHT)
+                context.robot.y += context.delta * CONSTANTS.MOVEMENT_SPEED
     },
     getState: () => {
         return context.robot;
-    },
-    rotate: () => {
-        
     }
 }
 
-vm.freeze(util, 'util');            // Game api calls
-vm.freeze(CONSTANTS, 'GAME');       // Constants
+vm.freeze(player, 'player');    // Game api calls
+vm.freeze(CONSTANTS, 'GAME');   // Constants
 
 /**
  * Updates pair of players and returns their updated state
@@ -78,13 +78,21 @@ function update(delta) {
 
         // Player one
         context.robot = gameStates[clientID].playerOne
-        //let modules = nodeVM.run(gameStates[clientID].code.playerOne);
-        vm.run(gameStates[clientID].code.playerOne + 'update()');
+
+        try {
+            vm.run(gameStates[clientID].code.playerOne + 'update()');   
+        } catch (err) {
+            console.log(err)
+        }
 
         // Player two
         context.robot = gameStates[clientID].playerTwo;
-        //modules = nodeVM.run(gameStates[clientID].code.playerTwo);
-        vm.run(gameStates[clientID].code.playerTwo + 'update()');
+
+        try {
+            vm.run(gameStates[clientID].code.playerTwo + 'update()');
+        } catch(err){
+            console.log(err)
+        }
 
         // Send game state update
         if (gameStates[clientID].socket.readyState === 1) {

@@ -211,6 +211,8 @@ socket.onmessage = (event) => {
     switch (payload.type) {
         case 'GAME_TICK_UPDATE':
             // Update positions
+            gameObjects.playerOne.rotation = payload.playerOne.rotation
+            gameObjects.playerTwo.rotation = payload.playerTwo.rotation
             gameObjects.playerOne.position.set(payload.playerOne.x, payload.playerOne.y);
             gameObjects.playerTwo.position.set(payload.playerTwo.x, payload.playerTwo.y);
             updateGameInfoPanel(0, payload.playerOne.health, payload.playerOne.energy)

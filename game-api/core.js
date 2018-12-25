@@ -13,7 +13,7 @@ const User = require('../models/User');
 const express = require('express');
 const router = express.Router();
 
-const TICK_RATE = 60;
+const TICK_RATE = 30;
 
 const nodeVM = new NodeVM({
     console: 'inherit'
@@ -41,11 +41,11 @@ let gameStates = {};
 // Player API
 const util = {
     moveForwardX: () => {
-        if(context.robot.x < CONSTANTS.MAP_WIDTH)
+        if(context.robot.x < CONSTANTS.MAP_WIDTH - CONSTANTS.PLAYER_BOX_SIZE)
             context.robot.x += context.delta * CONSTANTS.MOVEMENT_SPEED;
     },
     moveForwardY: () => {
-        if(context.robot.y > 0 && context.robot.y < CONSTANTS.MAP_HEIGHT)
+        if(context.robot.y > 0 && context.robot.y < CONSTANTS.MAP_HEIGHT + CONSTANTS.PLAYER_BOX_SIZE)
             context.robot.y -= context.delta * CONSTANTS.MOVEMENT_SPEED
     },
     moveBackX: () => {
@@ -60,7 +60,7 @@ const util = {
         return context.robot;
     },
     rotate: () => {
-           
+        
     }
 }
 

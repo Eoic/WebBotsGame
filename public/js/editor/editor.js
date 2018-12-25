@@ -25,7 +25,7 @@ window.addEventListener('resize', () => {
     if(editorHeight > window.innerHeight)
         splitter.style.bottom = window.innerHeight - splitterHeight + 'px'
         editorContainer.style.height = window.innerHeight - splitterHeight + 'px';
-        */
+    */
 })
 
 // Listener callbacks

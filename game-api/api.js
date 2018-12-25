@@ -8,6 +8,7 @@ class Player {
         this.y = y;
         this.health = CONSTANTS.HP_FULL
         this.energy = CONSTANTS.EN_FULL
+        this.logs = []
     }
 
     refreshEnergy(){
@@ -33,7 +34,7 @@ const CONSTANTS = {
         X: 642,
         Y: 432
     },
-    PLAYER_BOX_SIZE: 20,
+    PLAYER_BOX_SIZE: 25,
     HP_FULL: 100,
     EN_FULL: 100,
     ENERGY_REFRESH_STEP: 10

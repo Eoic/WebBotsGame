@@ -23,14 +23,15 @@ gameInfo[1] = {
 // Setup PixiJS renderer
 let gameMap = document.getElementById('game-map');
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
+PIXI.settings.RENDER_OPTIONS.antialias = true;
+PIXI.settings.RENDER_OPTIONS.forceFXAA = true;
 
 let app = new PIXI.Application({
     autoResize: true,
     width: window.innerWidth,
     height: window.innerHeight - 5,
     backgroundColor: 0x2a2a2a,
-    resolution: 1,
-    antialias: true
+    resolution: 1
 });
 
 gameMap.appendChild(app.view);
@@ -71,8 +72,8 @@ loader.onComplete.add(() => {
     playerTwo.addChild(sprites.robotTurretPlayerTwo)
 
     // Scaling and positioning
-    playerOne.scale.set(0.2, 0.2)
-    playerTwo.scale.set(0.2, 0.2)
+    playerOne.scale.set(0.15, 0.15)
+    playerTwo.scale.set(0.15, 0.15)
 
     // Events
     setInteractionEvents(playerOne)
@@ -181,9 +182,9 @@ function loadMapCoordinates() {
     let position = JSON.parse(localStorage.getItem('mapPosition'));
 
     if (position !== null)
-        map.position.set(position.x, position.y);
+        map.position.set((window.innerWidth - 270) / 2, position.y);
     else
-        map.position.set(0, 60);
+        map.position.set((window.innerWidth - 270) / 2, window.innerHeight / 2);
 }
 
 /**

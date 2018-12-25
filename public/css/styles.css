@@ -252,6 +252,10 @@ footer {
     outline-color: #3f51b5;
 }
 
+.btn-primary-selected {
+    background-color: #000051;
+}
+
 /* PURPLE */
 .btn-purple {
     background-color: #654f7e;
@@ -505,4 +509,18 @@ h2.section-header {
     border-radius: 3px; 
     width: 100px; 
     color:rgb(6, 131, 89);
+}
+
+/* EDITOR OUTPUT */
+p.output-line {
+    margin: 0;
+    padding: 3px;
+    color: #2f2f2f;
+    transition: all 0.1s;
+    cursor: default;
+}
+
+p.output-line:hover {
+    color: #d4d4d4;
+    background-color: #6173ff;
 }

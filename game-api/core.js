@@ -8,7 +8,7 @@ const {
     NodeVM
 } = require('vm2');
 const uuidv4 = require('uuid/v4');
-const { Player, CONSTANTS } = require('./api')
+const { Player, Bullet, CONSTANTS, utilities } = require('./api')
 const User = require('../models/User');
 const express = require('express');
 const router = express.Router();
@@ -41,23 +41,49 @@ let gameStates = {};
 // Player API
 const player = {
     moveForwardX: () => {
-        if(context.robot.x < CONSTANTS.MAP_WIDTH - CONSTANTS.PLAYER_BOX_SIZE)
+        if(utilities.checkBoundsUpperX(context.robot.x))
             context.robot.x += context.delta * CONSTANTS.MOVEMENT_SPEED;
     },
     moveForwardY: () => {
         if(context.robot.rotate(-1, 0, context.delta))
-            if(context.robot.y > CONSTANTS.PLAYER_BOX_SIZE)
+            if(utilities.checkBoundsUpperY(context.robot.y))
                 context.robot.y -= context.delta * CONSTANTS.MOVEMENT_SPEED
     },
     moveBackX: () => {
         if(context.robot.rotate(0, -1, context.delta))
-            if(context.robot.x > CONSTANTS.PLAYER_BOX_SIZE)
+            if(utilities.checkBoundsLowerX(context.robot.x))
                 context.robot.x -= context.delta * CONSTANTS.MOVEMENT_SPEED;
     },
     moveBackY: () => {
         if(context.robot.rotate(1, 0, context.delta))
-            if(context.robot.y + CONSTANTS.PLAYER_BOX_SIZE < CONSTANTS.MAP_HEIGHT)
+            if(utilities.checkBoundsLowerY(context.robot.y))
                 context.robot.y += context.delta * CONSTANTS.MOVEMENT_SPEED
+    },
+    moveForward: () => {
+        if(!utilities.checkMapBounds(context.robot.x, context.robot.y))
+            return;
+
+        context.robot.x += context.delta * Math.cos(context.robot.rotation) * CONSTANTS.MOVEMENT_SPEED
+        context.robot.y += context.delta * Math.sin(context.robot.rotation) * CONSTANTS.MOVEMENT_SPEED
+    },
+    moveBack: () => {
+        if(!utilities.checkMapBounds(context.robot.x, context.robot.y))
+            return;
+
+        context.robot.x -= context.delta * Math.cos(context.robot.rotation) * CONSTANTS.MOVEMENT_SPEED
+        context.robot.y -= context.delta * Math.sin(context.robot.rotation) * CONSTANTS.MOVEMENT_SPEED
+    },
+    rotate: (degrees) => {
+        degrees += 90;
+        let radians = degrees * (Math.PI / 180)
+        context.robot.rotate(Math.cos(radians), Math.sin(radians), context.delta)
+    },
+    shoot: (x, y) => {
+        if(context.robot.energy >= CONSTANTS.BULLET_COST){
+            // TODO: rotate turret to face position (x; y)
+            let bullet = new Bullet(context.robot.x, context.robot.y, contex.robot.turretRotation)
+            context.robot.bulletPool.push(bullet)
+        }
     },
     getState: () => {
         return context.robot;

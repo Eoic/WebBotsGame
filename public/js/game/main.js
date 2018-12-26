@@ -1,10 +1,22 @@
 const MAP_WIDTH = 674
 const MAP_HEIGHT = 464
 const ZOOM_SCALE = 0.95;
+const ROBOT_SCALE = 0.15
 const spritesDir = './public/img/sprites'
+const playerObjectKeys = ['playerOne', 'playerTwo']
+const initPositions = [
+    { x: 32,  y: 32  },
+    { x: 642, y: 432 }
+]
+const baseAnchor =   { x: 0.5, y: 0.5 }
+const turretAnchor = { x: 0.5, y: 0.7 }
 
 /** GAME INFO CONTAINER */
 let gameInfo = [];
+
+/** LOADING BLANKET */
+let loadingWindow = document.getElementById('loader-section')
+let loadingProgress = document.getElementById('progress-foreground')
 
 gameInfo[0] = {
     playerHP: document.getElementById('player-one-hp'),
@@ -40,62 +52,64 @@ const loader = PIXI.loader;         // Resources loader
 const map = new PIXI.Container();   // Map container
 const sprites = {}                  // Loaded sprites
 const gameObjects = {}              // Created game objects        
-let resourcesLoaded = false;        // Indicates whether all game resources were loaded
 
 loader.add('map', `${spritesDir}/map-prop.png`)
       .add('robotBase', `${spritesDir}/robot_base.png`)
-      .add('robotTurret', `${spritesDir}/robot_turret.png`);
+      .add('robotTurret', `${spritesDir}/robot_turret.png`)
+      .on('progress', loadingProgressHandler);
 
-loader.load((loader, resources) => {
-    sprites.robotBasePlayerOne = new PIXI.Sprite(resources.robotBase.texture)
-    sprites.robotBasePlayerTwo = new PIXI.Sprite(resources.robotBase.texture)
-    sprites.robotTurretPlayerOne = new PIXI.Sprite(resources.robotTurret.texture)
-    sprites.robotTurretPlayerTwo = new PIXI.Sprite(resources.robotTurret.texture)
+loader.load((_loader, resources) => {
+    playerObjectKeys.forEach(key => {
+        let keyUpperCase = key.charAt(0).toUpperCase() + key.slice(1)
+        sprites['robotBase' + keyUpperCase] = new PIXI.Sprite(resources.robotBase.texture)
+        sprites['robotTurret' + keyUpperCase] = new PIXI.Sprite(resources.robotTurret.texture)
+    })
+
     sprites.map = new PIXI.Sprite(resources.map.texture);
 });
 
 loader.onComplete.add(() => {
-    // Sprite containers
-    let playerOne = new PIXI.Container()
-    let playerTwo = new PIXI.Container()
+    playerObjectKeys.forEach((key, index)=> {
 
-    // Set graphics anchor points
-    sprites.robotBasePlayerOne.anchor.set(0.5, 0.5);
-    sprites.robotBasePlayerTwo.anchor.set(0.5, 0.5);
-    sprites.robotTurretPlayerOne.anchor.set(0.5, 0.7);
-    sprites.robotTurretPlayerTwo.anchor.set(0.5, 0.7);
+        // Set graphics anchor points
+        let keyUpperCase = key.charAt(0).toUpperCase() + key.slice(1)
+        let baseSpriteKey = 'robotBase' + keyUpperCase
+        let turretSpriteKey = 'robotTurret' + keyUpperCase
+        sprites[baseSpriteKey].anchor.set(baseAnchor.x, baseAnchor.y)
+        sprites[turretSpriteKey].anchor.set(turretAnchor.x, turretAnchor.y)
 
-    // Adding graphics
-    playerOne.addChild(sprites.robotBasePlayerOne)
-    playerTwo.addChild(sprites.robotBasePlayerTwo)
-    playerOne.addChild(sprites.robotTurretPlayerOne)
-    playerTwo.addChild(sprites.robotTurretPlayerTwo)
-
-    // Scaling and positioning
-    playerOne.scale.set(0.15, 0.15)
-    playerTwo.scale.set(0.15, 0.15)
-
-    // Events
-    setInteractionEvents(playerOne)
-    setInteractionEvents(playerTwo)
-
-    playerWidth = playerOne.width;
-    playerHeight = playerOne.height
-    playerOne.position.set(0 + playerWidth, 0 + playerHeight)
-    playerTwo.position.set(MAP_WIDTH - playerWidth, MAP_HEIGHT - playerHeight);
-
-    // Add reference to gameObjects
-    gameObjects.playerOne = playerOne
-    gameObjects.playerTwo = playerTwo
+        // Create player instances
+        gameObjects[key] = createPlayerInstance(sprites[baseSpriteKey], sprites[turretSpriteKey], initPositions[index])
+    })
 
     map.pivot.set(sprites.map.width / 2, sprites.map.height / 2)
     map.addChild(sprites.map);
-    map.addChild(gameObjects.playerOne);
-    map.addChild(gameObjects.playerTwo);
-    app.stage.addChild(map);
 
+    playerObjectKeys.forEach(key => {
+        map.addChild(gameObjects[key])
+    })
+
+    app.stage.addChild(map);
     loadMapCoordinates();
+
+    // Finally, hide loading window
+    setTimeout(() => {
+        loadingWindow.style.visibility = 'hidden'
+    }, 1000)
 })
+
+function loadingProgressHandler(loader, _resource){
+    loadingProgress.style.width = loader.progress + '%'
+}
+
+function createPlayerInstance(spriteBase, spriteTurret, initialPosition){
+    let player = new PIXI.Container()
+    player.addChild(spriteBase)
+    player.addChild(spriteTurret)
+    player.scale.set(ROBOT_SCALE, ROBOT_SCALE)
+    player.position.set(initialPosition.x, initialPosition.y)
+    return player
+}
 
 /**
  * Binds events on player container 
@@ -119,7 +133,7 @@ function onDragStart(event) {
 /**
  * Called while map is being dragged.
  */
-function onDragMove(event) {
+function onDragMove(_event) {
     if (this.dragging) {
         let newPosition = this.data.getLocalPosition(this.parent);
         this.x = (newPosition.x + map.pivot.x * map.scale.x) - (this.startPosition.x * map.scale.x);
@@ -187,18 +201,24 @@ function loadMapCoordinates() {
         map.position.set((window.innerWidth - 270) / 2, window.innerHeight / 2);
 }
 
+function updateProjectiles(_bullets){
+    playerObjectKeys.forEach(_key => {
+        
+    })
+}
+
 /**
  * SERVER CONNECTION
  */
 
-connectionType = (window.location.hostname === 'localhost') ? 'ws://' : 'wss://'; 
+let connectionType = (window.location.hostname === 'localhost') ? 'ws://' : 'wss://'; 
 
 if(window.location.hostname === 'localhost')
     connectionString = `${connectionType}${window.location.host}`;
 
 let socket = new WebSocket(connectionString);
 
-socket.onopen = (event) => {
+socket.onopen = (_event) => {
     displayMessage('success', 'Connected to server')
 }
 
@@ -211,10 +231,11 @@ socket.onmessage = (event) => {
     switch (payload.type) {
         case 'GAME_TICK_UPDATE':
             // Update positions
-            gameObjects.playerOne.rotation = payload.playerOne.rotation
-            gameObjects.playerTwo.rotation = payload.playerTwo.rotation
-            gameObjects.playerOne.position.set(payload.playerOne.x, payload.playerOne.y);
-            gameObjects.playerTwo.position.set(payload.playerTwo.x, payload.playerTwo.y);
+            playerObjectKeys.forEach(key => {
+                gameObjects[key].rotation = payload[key].rotation
+                gameObjects[key].position.set(payload[key].x, payload[key].y);
+            })
+
             updateGameInfoPanel(0, payload.playerOne.health, payload.playerOne.energy)
             updateGameInfoPanel(1, payload.playerTwo.health, payload.playerTwo.energy)
             break;
@@ -224,7 +245,7 @@ socket.onmessage = (event) => {
     }
 }
 
-socket.onclose = (event) => {
+socket.onclose = (_event) => {
     displayMessage('warning', 'Disconnected')
 }
 
@@ -254,7 +275,7 @@ function runScript() {
             enemy: selected.value.trim()
         }));
 
-        request.onreadystatechange = (event) => {
+        request.onreadystatechange = (_event) => {
             if (request.readyState === 4 && request.status === 200) {
                 socket.send(JSON.stringify({
                     enemyCode: request.response.enemyCode,

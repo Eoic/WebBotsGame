@@ -524,3 +524,40 @@ p.output-line:hover {
     color: #d4d4d4;
     background-color: #6173ff;
 }
+
+/* LOADING WINDOW */
+section.loading-window {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background-color: #2f2f2f;
+    visibility: visible;
+    z-index: 10;
+}
+
+div.loading-background {
+    position: relative;
+    transform: translateY(-50%);
+    top: 50%;
+    height: 30px;
+    width: 50%;
+    background-color: #bebed0;
+    margin: 0 auto;
+    border-radius: 3px;
+    box-shadow: 0px 0px 7px 1px #3f51b5
+}
+
+div.loading-foreground {
+    height: 30px;
+    background-color: #3f51b5;
+    max-width: 100%;
+    width: 0%;
+    border-radius: 2px; 
+}
+
+p.loading-text {
+    position: fixed;
+    margin: 4px 0px 0px 0px;
+    left: 46%;
+    color: rgb(255, 255, 255);
+}

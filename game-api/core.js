@@ -8,16 +8,17 @@ const {
     NodeVM
 } = require('vm2');
 const uuidv4 = require('uuid/v4');
-const { Player, Bullet, CONSTANTS, utilities } = require('./api')
+const { Player, Bullet, CONSTANTS, MESSAGE_TYPE, utilities } = require('./api')
 const User = require('../models/User');
 const express = require('express');
 const router = express.Router();
 
-const TICK_RATE = 30;
+const TICK_RATE = 24;
+const playerKeys = ['playerOne', 'playerTwo']
 
 const nodeVM = new NodeVM({
     console: 'inherit'
-});
+}); 
 
 const context = {
     delta: 0,
@@ -36,7 +37,6 @@ const time = () => {
 let previous = time();
 let tickLength = 1000 / TICK_RATE;
 let gameStates = {};
-//let socketConnections = [];
 
 // Player API
 const player = {
@@ -76,22 +76,43 @@ const player = {
     rotate: (degrees) => {
         degrees += 90;
         let radians = degrees * (Math.PI / 180)
-        context.robot.rotate(Math.cos(radians), Math.sin(radians), context.delta)
+        return context.robot.rotate(Math.cos(radians), Math.sin(radians), context.delta)
+    },
+    rotateTurret: (degrees) => {
+        degrees += 90
+        let radians = degrees * (Math.PI / 180)
+        return context.robot.rotateTurret(Math.cos(radians), Math.sin(radians), context.delta)
     },
     shoot: (x, y) => {
         if(context.robot.energy >= CONSTANTS.BULLET_COST){
-            // TODO: rotate turret to face position (x; y)
-            let bullet = new Bullet(context.robot.x, context.robot.y, contex.robot.turretRotation)
-            context.robot.bulletPool.push(bullet)
+            let radians = Math.atan2(x, y)
+            if(player.rotateTurret((radians * (180 / Math.PI)) + 90)) {
+                let bullet = new Bullet(context.robot.x, context.robot.y, context.robot.turretRotation)
+                context.robot.bulletPool.push(bullet)
+                return true
+            }
         }
+
+        return false 
     },
     getState: () => {
         return context.robot;
     }
 }
 
+const logger = {
+    log: (message, messageType) => {
+        context.robot.messages.push({
+            message,
+            type: messageType
+        })
+    }
+}
+
 vm.freeze(player, 'player');    // Game api calls
 vm.freeze(CONSTANTS, 'GAME');   // Constants
+vm.freeze(logger, 'logger')     // Info output
+vm.freeze(MESSAGE_TYPE, 'MESSAGE_TYPE')
 
 /**
  * Updates pair of players and returns their updated state
@@ -101,24 +122,18 @@ vm.freeze(CONSTANTS, 'GAME');   // Constants
 function update(delta) {
     for (let clientID in gameStates) {
         context.delta = delta
+    
+        // Run code
+        playerKeys.forEach(key => {
+            context.robot = gameStates[clientID][key]
+            context.robot.messages = []
 
-        // Player one
-        context.robot = gameStates[clientID].playerOne
-
-        try {
-            vm.run(gameStates[clientID].code.playerOne + 'update()');   
-        } catch (err) {
-            console.log(err)
-        }
-
-        // Player two
-        context.robot = gameStates[clientID].playerTwo;
-
-        try {
-            vm.run(gameStates[clientID].code.playerTwo + 'update()');
-        } catch(err){
-            console.log(err)
-        }
+            try {
+                vm.run(gameStates[clientID].code[key] + 'update()')
+            } catch (err) {
+                console.log(err)
+            }
+        });
 
         // Send game state update
         if (gameStates[clientID].socket.readyState === 1) {
@@ -130,7 +145,7 @@ function update(delta) {
         }
     }
 }
-
+    
 const loop = () => {
     setTimeout(loop, tickLength);
     let now = time();

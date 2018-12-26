@@ -21,6 +21,10 @@ router.get('/', (req, res) => {
 });
 
 router.get('/:id', (req, res) => {
+
+    if(typeof req.session.user.username === 'undefined')
+        return res.sendStatus(403)
+
     User.findOne({
         username: req.session.user.username
     }).select({

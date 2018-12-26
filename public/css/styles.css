@@ -522,7 +522,22 @@ p.output-line {
 
 p.output-line:hover {
     color: #d4d4d4;
-    background-color: #6173ff;
+    background-color: #53566B;
+}
+
+button.clear-button {
+    padding: 4px;
+    border-style: none;
+    transition: all 0.2s;
+    color: #2f2f2f;
+}
+
+button.clear-button:hover {
+    background-color: crimson;
+}
+
+button.clear-button:hover > span {
+    color: rgb(243, 243, 243);
 }
 
 /* LOADING WINDOW */

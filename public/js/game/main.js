@@ -1,6 +1,8 @@
 const MAP_WIDTH = 674
 const MAP_HEIGHT = 464
-const ZOOM_SCALE = 0.95;
+const ZOOM_SCALE = 0.95
+const MIN_ZOOM = 0.75
+const MAX_ZOOM = 2.4
 const ROBOT_SCALE = 0.15
 const spritesDir = './public/img/sprites'
 const playerObjectKeys = ['playerOne', 'playerTwo']
@@ -169,12 +171,16 @@ window.onresize = () =>
 
 window.onwheel = (event) => {
     if (event.deltaY < 0) {
-        map.scale.x = map.scale.x * ZOOM_SCALE;
-        map.scale.y = map.scale.y * ZOOM_SCALE;
+        map.scale.x = clampNumber(map.scale.x * ZOOM_SCALE, MIN_ZOOM, MAX_ZOOM)
+        map.scale.y = clampNumber(map.scale.x * ZOOM_SCALE, MIN_ZOOM, MAX_ZOOM)
     } else {
-        map.scale.x = map.scale.x / ZOOM_SCALE;
-        map.scale.y = map.scale.y / ZOOM_SCALE;
+        map.scale.x = clampNumber(map.scale.x / ZOOM_SCALE, MIN_ZOOM, MAX_ZOOM)
+        map.scale.y = clampNumber(map.scale.x / ZOOM_SCALE, MIN_ZOOM, MAX_ZOOM)
     }
+}
+
+function clampNumber(value, min, max){
+    return Math.max(min, Math.min(value, max))
 }
 
 /**
@@ -233,7 +239,13 @@ socket.onmessage = (event) => {
             // Update positions
             playerObjectKeys.forEach(key => {
                 gameObjects[key].rotation = payload[key].rotation
-                gameObjects[key].position.set(payload[key].x, payload[key].y);
+                gameObjects[key].position.set(payload[key].x, payload[key].y)
+                gameObjects[key].getChildAt(1).rotation = payload[key].turretRotation
+                
+                // TODO: exclude from MP
+                payload[key].messages.forEach(item => {
+                    appendMessage(item.message, item.type)
+                });
             })
 
             updateGameInfoPanel(0, payload.playerOne.health, payload.playerOne.energy)

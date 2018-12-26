@@ -2,6 +2,12 @@
  * Functions, classes and constants used in the game (i.e. move, rotate, shoot etc.)
  */
 
+const MESSAGE_TYPE = {
+    INFO: 1,
+    WARNING: 2,
+    DANGER: 3
+}
+
 class Player {
     constructor(x, y) {
         this.x = x;
@@ -10,7 +16,8 @@ class Player {
         this.energy = CONSTANTS.EN_FULL
         this.rotation = 0,
         this.turretRotation = 0,
-        this.bulletPool = []
+        this.bulletPool = [],
+        this.messages = []
     }
 
     refreshEnergy(){
@@ -36,6 +43,20 @@ class Player {
             return true;
         }
     }
+
+    rotateTurret(x, y, delta) {
+        let destinationDegree = Math.atan2(x, y);
+        let direction = (destinationDegree > 0) ? 1 : -1; 
+
+        if(Math.abs(this.turretRotation - destinationDegree) > CONSTANTS.PRECISION){
+            this.turretRotation += direction * delta
+            return false;
+        }
+        else {
+            this.turretRotation = Math.atan2(x, y)
+            return true;
+        }
+    }
 }
 
 class Bullet {
@@ -47,6 +68,7 @@ class Bullet {
 }
 
 const CONSTANTS = {
+
     // Game info
     MAP_WIDTH: 674,
     MAP_HEIGHT: 464,
@@ -97,6 +119,7 @@ const utilities = {
 
 module.exports = {
     CONSTANTS,
+    MESSAGE_TYPE,
     Player,
     Bullet,
     utilities

@@ -16,14 +16,14 @@ const router = express.Router();
 const TICK_RATE = 24;
 const playerKeys = ['playerOne', 'playerTwo']
 
-const nodeVM = new NodeVM({
-    console: 'inherit'
-}); 
-
 const context = {
     delta: 0,
     robot: {}
 };
+
+const nodeVM = new NodeVM({
+    sandbox: { context }
+}); 
 
 const vm = new VM({
     sandbox: { context }
@@ -109,10 +109,10 @@ const logger = {
     }
 }
 
-vm.freeze(player, 'player');    // Game api calls
-vm.freeze(CONSTANTS, 'GAME');   // Constants
-vm.freeze(logger, 'logger')     // Info output
-vm.freeze(MESSAGE_TYPE, 'MESSAGE_TYPE')
+nodeVM.freeze(player, 'player');    // Game api calls
+nodeVM.freeze(CONSTANTS, 'GAME');   // Constants
+nodeVM.freeze(logger, 'logger')     // Info output
+nodeVM.freeze(MESSAGE_TYPE, 'MESSAGE_TYPE')
 
 /**
  * Updates pair of players and returns their updated state
@@ -129,7 +129,7 @@ function update(delta) {
             context.robot.messages = []
 
             try {
-                vm.run(gameStates[clientID].code[key] + 'update()')
+                gameStates[clientID].code[key].update()
             } catch (err) {
                 console.log(err)
             }
@@ -174,8 +174,8 @@ const wsServerCallback = (ws) => {
                     playerOne: new Player(CONSTANTS.P_ONE_START_POS.X, CONSTANTS.P_ONE_START_POS.Y),
                     playerTwo: new Player(CONSTANTS.P_TWO_START_POS.X, CONSTANTS.P_TWO_START_POS.Y),
                     code: {
-                        playerOne: payload.playerCode,
-                        playerTwo: payload.enemyCode
+                        playerOne: nodeVM.run(payload.playerCode),
+                        playerTwo: nodeVM.run(payload.enemyCode)
                     },
                     socket: ws
                 }

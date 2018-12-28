@@ -16,6 +16,9 @@ let splitterHeight = Number.parseInt(document.defaultView.getComputedStyle(split
 
 window.onload = onLoadHandler;
 splitter.addEventListener('mousedown', onMouseDown);
+scriptsSelect.onchange = function(event) {
+    document.getElementById('player-two-name').innerText = event.target.value
+}
 window.addEventListener('mouseup', onMouseUp);
 window.addEventListener('mousemove', onMouseMove);
 window.addEventListener('resize', () => {
@@ -131,6 +134,9 @@ function fetchScripts() {
                 option.innerText = element.name;
                 scriptsSelect.appendChild(option)
             });
+
+            if(typeof(scriptsSelect.children[0].innerText) !== 'undefined')
+                document.getElementById('player-two-name').innerText = scriptsSelect.children[0].innerText
         }
     }
 }
@@ -146,6 +152,7 @@ function selectScript(event) {
     });
 
     this.classList.add('btn-active');
+    document.getElementById('player-one-name').innerText = this.innerText
 
     let request = new XMLHttpRequest();
     request.responseType = 'json';

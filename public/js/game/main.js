@@ -328,7 +328,7 @@ function runScript() {
                 socket.send(JSON.stringify({
                     enemyCode: request.response.enemyCode,
                     playerCode: editor.getValue(),          
-                    type: 'SIMULATION'                      // Payload type
+                    type: 'SIMULATION'                     
                 }))
             }
         }
@@ -338,8 +338,3 @@ function runScript() {
 function endSession() {
     socket.close();
 }
-
-/**
- * gameObjects.playerOne.getChildAt(0) <- Robot base
- *                       getChildAt(1) <- Turret
- */

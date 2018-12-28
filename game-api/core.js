@@ -12,7 +12,7 @@ const User = require('../models/User');
 const express = require('express');
 const router = express.Router();
 
-const TICK_RATE = 24;
+const TICK_RATE = 24
 const playerKeys = ['playerOne', 'playerTwo']
 
 const context = {
@@ -134,13 +134,13 @@ function update(delta) {
         if (gameStates[clientID].socket.readyState === 1) {
             gameStates[clientID].socket.send(JSON.stringify({
                 type: 'GAME_TICK_UPDATE',
-                playerOne: gameStates[clientID].playerOne,
-                playerTwo: gameStates[clientID].playerTwo
+                playerOne: gameStates[clientID].playerOne.getObjectState(),
+                playerTwo: gameStates[clientID].playerTwo.getObjectState()
             }))
         }
     }
 }
-    
+
 const loop = () => {
     setTimeout(loop, tickLength);
     let now = time();

@@ -32,7 +32,7 @@ class Player {
     }
 
     applyDamage(damage) {
-        if(this.health - damage > 0)
+        if (this.health - damage > 0)
             this.health -= damage
         else this.health = 0
     }
@@ -105,6 +105,19 @@ class Player {
         else {
             this.turretRotation = Math.atan2(x, y)
             return true;
+        }
+    }
+
+    getObjectState() {
+        return {
+            x: this.x,
+            y: this.y,
+            health: this.health,
+            energy: this.energy,
+            rotation: this.rotation,
+            turretRotation: this.turretRotation,
+            bulletPool: this.bulletPool,
+            messages: this.messages
         }
     }
 }

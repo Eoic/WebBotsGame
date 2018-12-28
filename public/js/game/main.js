@@ -4,6 +4,7 @@ const ZOOM_SCALE = 0.95
 const MIN_ZOOM = 0.75
 const MAX_ZOOM = 2.4
 const ROBOT_SCALE = 0.15
+const PROJECTILE_POOL_SIZE = 20
 const spritesDir = './public/img/sprites'
 const playerObjectKeys = ['playerOne', 'playerTwo']
 const initPositions = [
@@ -11,7 +12,7 @@ const initPositions = [
     { x: 642, y: 432 }
 ]
 const baseAnchor =   { x: 0.5, y: 0.5 }
-const turretAnchor = { x: 0.5, y: 0.7 }
+const turretAnchor = { x: 0.3, y: 0.5 }
 
 /** GAME INFO CONTAINER */
 let gameInfo = [];
@@ -53,11 +54,14 @@ gameMap.appendChild(app.view);
 const loader = PIXI.loader;         // Resources loader
 const map = new PIXI.Container();   // Map container
 const sprites = {}                  // Loaded sprites
-const gameObjects = {}              // Created game objects        
+const gameObjects = {}              // Created game objects
+let bulletTexture = {}
+let bulletSprite = {}        
 
 loader.add('map', `${spritesDir}/map-prop.png`)
       .add('robotBase', `${spritesDir}/robot_base.png`)
       .add('robotTurret', `${spritesDir}/robot_turret.png`)
+      .add('bullet', `${spritesDir}/bullet.png`)
       .on('progress', loadingProgressHandler);
 
 loader.load((_loader, resources) => {
@@ -65,6 +69,7 @@ loader.load((_loader, resources) => {
         let keyUpperCase = key.charAt(0).toUpperCase() + key.slice(1)
         sprites['robotBase' + keyUpperCase] = new PIXI.Sprite(resources.robotBase.texture)
         sprites['robotTurret' + keyUpperCase] = new PIXI.Sprite(resources.robotTurret.texture)
+        bulletTexture = resources.bullet.texture
     })
 
     sprites.map = new PIXI.Sprite(resources.map.texture);
@@ -89,6 +94,7 @@ loader.onComplete.add(() => {
 
     playerObjectKeys.forEach(key => {
         map.addChild(gameObjects[key])
+        gameObjects[key].bullets = createProjectilePool()
     })
 
     app.stage.addChild(map);
@@ -111,6 +117,30 @@ function createPlayerInstance(spriteBase, spriteTurret, initialPosition){
     player.scale.set(ROBOT_SCALE, ROBOT_SCALE)
     player.position.set(initialPosition.x, initialPosition.y)
     return player
+}
+
+function createProjectilePool(){
+    let bullets = []
+    
+    for(let i = 0; i < PROJECTILE_POOL_SIZE; i++) {
+        bullets.push(new PIXI.Sprite(bulletTexture))
+        bullets[i].visible = false
+        bullets[i].anchor.set(0.1, 0.5)
+        map.addChild(bullets[i])
+    }
+
+    return bullets
+}
+
+function resetProjectilePool() {
+    playerObjectKeys.forEach(key => {
+        gameObjects[key].bullets.forEach(bullet => {
+            bullet.x = 0
+            bullet.y = 0
+            bullet.rotation = 0
+            bullet.visible = false
+        })
+    })
 }
 
 /**
@@ -207,9 +237,12 @@ function loadMapCoordinates() {
         map.position.set((window.innerWidth - 270) / 2, window.innerHeight / 2);
 }
 
-function updateProjectiles(_bullets){
-    playerObjectKeys.forEach(_key => {
-        
+function updateProjectiles(bullets, key){
+    bullets.forEach((bullet, index) => {
+        gameObjects[key].bullets[index].x = bullet.x
+        gameObjects[key].bullets[index].y = bullet.y
+        gameObjects[key].bullets[index].visible = bullet.isAlive
+        gameObjects[key].bullets[index].rotation = bullet.rotation
     })
 }
 
@@ -237,11 +270,12 @@ socket.onmessage = (event) => {
     switch (payload.type) {
         case 'GAME_TICK_UPDATE':
             // Update positions
-            playerObjectKeys.forEach(key => {
+            playerObjectKeys.forEach((key, index)=> {
                 gameObjects[key].rotation = payload[key].rotation
                 gameObjects[key].position.set(payload[key].x, payload[key].y)
                 gameObjects[key].getChildAt(1).rotation = payload[key].turretRotation
-                
+                updateProjectiles(payload[key].bulletPool, key)
+
                 // TODO: exclude from MP
                 payload[key].messages.forEach(item => {
                     appendMessage(item.message, item.type)
@@ -266,6 +300,8 @@ socket.onclose = (_event) => {
  * received value through web socket initialize new game session
  */
 function runScript() {
+
+    resetProjectilePool()
 
     if (!document.querySelector('.btn-active') === null || editor.getValue().trim() === '') {
         displayMessage('error', 'Nothing to run...');

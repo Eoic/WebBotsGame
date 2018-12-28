@@ -207,7 +207,6 @@ function isFilenameValid(value) {
 }
 
 function saveScript() {
-
     let selected = document.querySelector('.btn-active');
 
     if (selected === null){
@@ -227,6 +226,7 @@ function saveScript() {
     }));
 
     request.onreadystatechange = (event) => {
+        console.log(event)
         if (request.readyState === 4 && request.status === 200) {
             displayMessage('success', `Script <b> ${filename} </b> saved successfully`);
         }

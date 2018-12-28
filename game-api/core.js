@@ -4,11 +4,10 @@
 
 const {
     VM,
-    VMScript,
     NodeVM
 } = require('vm2');
 const uuidv4 = require('uuid/v4');
-const { Player, Bullet, CONSTANTS, MESSAGE_TYPE, utilities } = require('./api')
+const { Player, CONSTANTS, MESSAGE_TYPE, utilities } = require('./api')
 const User = require('../models/User');
 const express = require('express');
 const router = express.Router();
@@ -24,10 +23,6 @@ const context = {
 const nodeVM = new NodeVM({
     sandbox: { context }
 }); 
-
-const vm = new VM({
-    sandbox: { context }
-});
 
 const time = () => {
     let time = process.hrtime();
@@ -61,10 +56,11 @@ const player = {
     },
     moveForward: () => {
         if(!utilities.checkMapBounds(context.robot.x, context.robot.y))
-            return;
+            return false
 
         context.robot.x += context.delta * Math.cos(context.robot.rotation) * CONSTANTS.MOVEMENT_SPEED
         context.robot.y += context.delta * Math.sin(context.robot.rotation) * CONSTANTS.MOVEMENT_SPEED
+        return true
     },
     moveBack: () => {
         if(!utilities.checkMapBounds(context.robot.x, context.robot.y))
@@ -83,14 +79,10 @@ const player = {
         let radians = degrees * (Math.PI / 180)
         return context.robot.rotateTurret(Math.cos(radians), Math.sin(radians), context.delta)
     },
-    shoot: (x, y) => {
+    shoot: () => {
         if(context.robot.energy >= CONSTANTS.BULLET_COST){
-            let radians = Math.atan2(x, y)
-            if(player.rotateTurret((radians * (180 / Math.PI)) + 90)) {
-                let bullet = new Bullet(context.robot.x, context.robot.y, context.robot.turretRotation)
-                context.robot.bulletPool.push(bullet)
-                return true
-            }
+            context.robot.createBullet()
+            return true
         }
 
         return false 
@@ -124,7 +116,7 @@ function update(delta) {
         context.delta = delta
     
         // Run code
-        playerKeys.forEach(key => {
+        playerKeys.forEach((key, index) => {
             context.robot = gameStates[clientID][key]
             context.robot.messages = []
 
@@ -133,6 +125,9 @@ function update(delta) {
             } catch (err) {
                 console.log(err)
             }
+
+            utilities.checkForHits(gameStates[clientID][playerKeys[1 ^ index]].bulletPool, context.robot)
+            context.robot.updateBulletPositions(context.delta)
         });
 
         // Send game state update
@@ -169,14 +164,23 @@ const wsServerCallback = (ws) => {
 
         switch (payload.type) {
             case 'SIMULATION':
-                // Create pair of player objects and add them to loop list
+                
+                let code = {
+                    playerOne: {},
+                    playerTwo: {}
+                };
+
+                try {
+                    code.playerOne = nodeVM.run(payload.playerCode),
+                    code.playerTwo = nodeVM.run(payload.enemyCode)
+                } catch (err) {
+                    console.log(err)
+                }
+
                 gameStates[ws.id] = {
                     playerOne: new Player(CONSTANTS.P_ONE_START_POS.X, CONSTANTS.P_ONE_START_POS.Y),
                     playerTwo: new Player(CONSTANTS.P_TWO_START_POS.X, CONSTANTS.P_TWO_START_POS.Y),
-                    code: {
-                        playerOne: nodeVM.run(payload.playerCode),
-                        playerTwo: nodeVM.run(payload.enemyCode)
-                    },
+                    code,
                     socket: ws
                 }
                 break;

@@ -8,14 +8,17 @@ const PROJECTILE_POOL_SIZE = 20
 const spritesDir = './public/img/sprites'
 const playerObjectKeys = ['playerOne', 'playerTwo']
 const initPositions = [
-    { x: 32,  y: 32  },
+    { x: 32, y: 32 },
     { x: 642, y: 432 }
 ]
-const baseAnchor =   { x: 0.5, y: 0.5 }
+const baseAnchor = { x: 0.5, y: 0.5 }
 const turretAnchor = { x: 0.3, y: 0.5 }
 
 /** GAME INFO CONTAINER */
 let gameInfo = [];
+
+/** ZOOM INDICATOR */
+let canZoom = false
 
 /** LOADING BLANKET */
 let loadingWindow = document.getElementById('loader-section')
@@ -23,7 +26,7 @@ let loadingProgress = document.getElementById('progress-foreground')
 
 gameInfo[0] = {
     playerHP: document.getElementById('player-one-hp'),
-    playerEN: document.getElementById('player-one-en'),    
+    playerEN: document.getElementById('player-one-en'),
     playerHPVal: document.getElementById('player-one-hp-val'),
     playerENVal: document.getElementById('player-one-en-val'),
 }
@@ -56,13 +59,13 @@ const map = new PIXI.Container();   // Map container
 const sprites = {}                  // Loaded sprites
 const gameObjects = {}              // Created game objects
 let bulletTexture = {}
-let bulletSprite = {}        
+let bulletSprite = {}
 
 loader.add('map', `${spritesDir}/map-prop.png`)
-      .add('robotBase', `${spritesDir}/robot_base.png`)
-      .add('robotTurret', `${spritesDir}/robot_turret.png`)
-      .add('bullet', `${spritesDir}/bullet.png`)
-      .on('progress', loadingProgressHandler);
+    .add('robotBase', `${spritesDir}/robot_base.png`)
+    .add('robotTurret', `${spritesDir}/robot_turret.png`)
+    .add('bullet', `${spritesDir}/bullet.png`)
+    .on('progress', loadingProgressHandler);
 
 loader.load((_loader, resources) => {
     playerObjectKeys.forEach(key => {
@@ -76,7 +79,7 @@ loader.load((_loader, resources) => {
 });
 
 loader.onComplete.add(() => {
-    playerObjectKeys.forEach((key, index)=> {
+    playerObjectKeys.forEach((key, index) => {
 
         // Set graphics anchor points
         let keyUpperCase = key.charAt(0).toUpperCase() + key.slice(1)
@@ -106,11 +109,11 @@ loader.onComplete.add(() => {
     }, 1000)
 })
 
-function loadingProgressHandler(loader, _resource){
+function loadingProgressHandler(loader, _resource) {
     loadingProgress.style.width = loader.progress + '%'
 }
 
-function createPlayerInstance(spriteBase, spriteTurret, initialPosition){
+function createPlayerInstance(spriteBase, spriteTurret, initialPosition) {
     let player = new PIXI.Container()
     player.addChild(spriteBase)
     player.addChild(spriteTurret)
@@ -119,10 +122,10 @@ function createPlayerInstance(spriteBase, spriteTurret, initialPosition){
     return player
 }
 
-function createProjectilePool(){
+function createProjectilePool() {
     let bullets = []
-    
-    for(let i = 0; i < PROJECTILE_POOL_SIZE; i++) {
+
+    for (let i = 0; i < PROJECTILE_POOL_SIZE; i++) {
         bullets.push(new PIXI.Sprite(bulletTexture))
         bullets[i].visible = false
         bullets[i].anchor.set(0.1, 0.5)
@@ -146,7 +149,7 @@ function resetProjectilePool() {
 /**
  * Binds events on player container 
  */
-function setInteractionEvents(playerContainer){
+function setInteractionEvents(playerContainer) {
     playerContainer.interactive = true;
     playerContainer.mouseover = () => {
         console.log(`X: ${playerContainer.position.x} Y: ${playerContainer.position.y}`)
@@ -173,7 +176,7 @@ function onDragMove(_event) {
     }
 }
 
-function updateGameInfoPanel(playerIndex, hp, en){
+function updateGameInfoPanel(playerIndex, hp, en) {
     gameInfo[playerIndex].playerHP.innerText = hp;
     gameInfo[playerIndex].playerEN.innerText = en;
     gameInfo[playerIndex].playerHPVal.value = hp;
@@ -193,23 +196,27 @@ map.interactive = true;
 map.on('pointerdown', onDragStart)
     .on('pointerup', onDragEnd)
     .on('pointerupoutside', onDragEnd)
-    .on('pointermove', onDragMove);
+    .on('pointermove', onDragMove)
+    .on('mouseover', () => canZoom = true)
+    .on('mouseout', () => canZoom = false)
 
 // Event Listeners
 window.onresize = () =>
     app.renderer.resize(window.innerWidth, window.innerHeight - 5);
 
 window.onwheel = (event) => {
-    if (event.deltaY < 0) {
-        map.scale.x = clampNumber(map.scale.x * ZOOM_SCALE, MIN_ZOOM, MAX_ZOOM)
-        map.scale.y = clampNumber(map.scale.x * ZOOM_SCALE, MIN_ZOOM, MAX_ZOOM)
-    } else {
-        map.scale.x = clampNumber(map.scale.x / ZOOM_SCALE, MIN_ZOOM, MAX_ZOOM)
-        map.scale.y = clampNumber(map.scale.x / ZOOM_SCALE, MIN_ZOOM, MAX_ZOOM)
+    if (canZoom) {
+        if (event.deltaY < 0) {
+            map.scale.x = clampNumber(map.scale.x * ZOOM_SCALE, MIN_ZOOM, MAX_ZOOM)
+            map.scale.y = clampNumber(map.scale.x * ZOOM_SCALE, MIN_ZOOM, MAX_ZOOM)
+        } else {
+            map.scale.x = clampNumber(map.scale.x / ZOOM_SCALE, MIN_ZOOM, MAX_ZOOM)
+            map.scale.y = clampNumber(map.scale.x / ZOOM_SCALE, MIN_ZOOM, MAX_ZOOM)
+        }
     }
 }
 
-function clampNumber(value, min, max){
+function clampNumber(value, min, max) {
     return Math.max(min, Math.min(value, max))
 }
 
@@ -237,7 +244,7 @@ function loadMapCoordinates() {
         map.position.set((window.innerWidth - 270) / 2, window.innerHeight / 2);
 }
 
-function updateProjectiles(bullets, key){
+function updateProjectiles(bullets, key) {
     bullets.forEach((bullet, index) => {
         gameObjects[key].bullets[index].x = bullet.x
         gameObjects[key].bullets[index].y = bullet.y
@@ -250,9 +257,9 @@ function updateProjectiles(bullets, key){
  * SERVER CONNECTION
  */
 
-let connectionType = (window.location.hostname === 'localhost') ? 'ws://' : 'wss://'; 
+let connectionType = (window.location.hostname === 'localhost') ? 'ws://' : 'wss://';
 
-if(window.location.hostname === 'localhost')
+if (window.location.hostname === 'localhost')
     connectionString = `${connectionType}${window.location.host}`;
 
 let socket = new WebSocket(connectionString);
@@ -270,7 +277,7 @@ socket.onmessage = (event) => {
     switch (payload.type) {
         case 'GAME_TICK_UPDATE':
             // Update positions
-            playerObjectKeys.forEach((key, index)=> {
+            playerObjectKeys.forEach((key, index) => {
                 gameObjects[key].rotation = payload[key].rotation
                 gameObjects[key].position.set(payload[key].x, payload[key].y)
                 gameObjects[key].getChildAt(1).rotation = payload[key].turretRotation
@@ -319,7 +326,7 @@ function runScript() {
         request.open('POST', `${window.location.origin}/run-code`, true);
         request.responseType = 'json';
         request.setRequestHeader('Content-Type', 'application/json');
-        request.send(JSON.stringify({ 
+        request.send(JSON.stringify({
             enemy: selected.value.trim()
         }));
 
@@ -327,8 +334,8 @@ function runScript() {
             if (request.readyState === 4 && request.status === 200) {
                 socket.send(JSON.stringify({
                     enemyCode: request.response.enemyCode,
-                    playerCode: editor.getValue(),          
-                    type: 'SIMULATION'                     
+                    playerCode: editor.getValue(),
+                    type: 'SIMULATION'
                 }))
             }
         }

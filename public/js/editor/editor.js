@@ -135,8 +135,9 @@ function fetchScripts() {
                 scriptsSelect.appendChild(option)
             });
 
-            if(typeof(scriptsSelect.children[0].innerText) !== 'undefined')
+            if(typeof(scriptsSelect.children[0]) !== 'undefined') {
                 document.getElementById('player-two-name').innerText = scriptsSelect.children[0].innerText
+            }
         }
     }
 }
@@ -194,6 +195,10 @@ function createScript(event) {
                     option.value = request.response.filename;
                     scriptsSelect.appendChild(option);
                     this.value = '';
+                    
+                    // Update game info panel
+                    if(scriptsSelect.childElementCount == 1)
+                        document.getElementById('player-two-name').innerText = request.response.filename
                 } else if(request.status === 304) {
                     displayMessage('error', "Script with this name is already created")
                 }

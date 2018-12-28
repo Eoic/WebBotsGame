@@ -12,8 +12,7 @@ function loadConsole(){
     consoleWindow.style.height = '100%'
     consoleWindow.style.backgroundColor = '#403939'
     consoleWindow.style.zIndex = 4
-    consoleWindow.style.marginLeft = '1px'
-    consoleWindow.style.marginTop = '1px'
+    consoleWindow.style.border = '1px solid #2F2F2F'
     consoleWindow.style.overflowY = 'auto';
 
     clearButton.style.position = 'sticky'

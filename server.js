@@ -33,6 +33,10 @@ const hbs = expressHbs.create({
             const result = `<img src="data:image/png;base64,${identiconData}" 
                             style='max-width: 95px; border-radius: 3px;' alt="User avatar" />`
             return new Handlebars.SafeString(result);
+        },
+        compareStrings: (left, right) => {
+            if(left.equals(right))
+                return "selected"
         }
     }
 });

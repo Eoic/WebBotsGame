@@ -246,7 +246,7 @@ const wsServerCallback = (ws) => {
 
         switch (payload.type) {
             case 'SIMULATION':
-                
+            case 'MULTIPLAYER':
                 let code = {
                     playerOne: {},
                     playerTwo: {}
@@ -265,9 +265,6 @@ const wsServerCallback = (ws) => {
                     code,
                     socket: ws
                 }
-                break;
-            case 'MULTIPLAYER':
-                //socketConnections.push(ws);
                 break;
             default:
                 return 0;

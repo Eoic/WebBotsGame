@@ -1,3 +1,5 @@
+<div id='messages-container'></div>
+
 <aside class="profile-sidebar">
     {{generateImageFromSource user.identiconHash}}
     <h3> @{{user.username}} </h3>
@@ -5,6 +7,16 @@
     <p style="margin: 0; text-align: left; margin-left: 29px;"> Exp. (68 / 148) </p>
     <progress max="148" value="68"> </progress>
     <hr />
+    <label for="multiplayer-script" style="margin-bottom: 5px; display: block;"> Multiplayer script </label>
+    <select id="multiplayer-script-list" style="width: 80%; float: left;">
+        <option value="0"> None </option>
+        {{#each scripts}}
+            <option value="{{_id}}" {{{compareStrings _id ../selectedScript}}}> {{name}}</option>
+        {{/each}}
+    </select>
+    <button class="btn-small" onclick="submitSelection()">
+        <span class="fa fa-save"></span>
+    </button>
 </aside>
 
 <section class="padded section-full-size profile-section">
@@ -61,3 +73,6 @@
     <p> </p>
     <a style="margin-top: 10px; color: #313131; text-decoration: none;" href="#"> View all achievements </a>
 </section>
+
+<script src="./public/js/ui/notifier.js"></script>
+<script src="./public/js/ui/selectMultiplayerScript.js"></script>

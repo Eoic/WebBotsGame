@@ -10,4 +10,9 @@ router.get('/', (_req, res) => {
     });
 })
 
+router.post('/', (req, res) => {
+    console.log(req.body)
+    res.json({})
+})
+
 module.exports = router;

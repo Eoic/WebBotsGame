@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const mongoose = require('mongoose')
 
 /**
  * Gets all scripts of specific user
@@ -22,7 +23,7 @@ router.get('/', (req, res) => {
 
 router.get('/:id', (req, res) => {
 
-    if(typeof req.session.user.username === 'undefined')
+    if (typeof req.session.user.username === 'undefined')
         return res.sendStatus(403)
 
     User.findOne({
@@ -64,21 +65,21 @@ router.post('/', (req, res) => {
             }
         }
     }, {
-        $push: {
-            scripts: {
-                name: req.body.filename,
-                code: "console.log('New script...')"
+            $push: {
+                scripts: {
+                    name: req.body.filename,
+                    code: "console.log('New script...')"
+                }
             }
-        }
-    }).then(response => {
-        if (response.nModified === 0)
-            res.sendStatus(304)
-        else res.status(200).json({
-            filename
+        }).then(response => {
+            if (response.nModified === 0)
+                res.sendStatus(304)
+            else res.status(200).json({
+                filename
+            });
+        }).catch(err => {
+            res.status(500).send(err.message);
         });
-    }).catch(err => {
-        res.status(500).send(err.message);
-    });
 });
 
 /**
@@ -93,15 +94,15 @@ router.put('/', (req, res) => {
         username: req.session.user.username,
         "scripts.name": filename
     }, {
-        $set: {
-            "scripts.$.code": code
-        }
-    }).then(response => {
-        if (response)
-            return res.sendStatus(200);
+            $set: {
+                "scripts.$.code": code
+            }
+        }).then(response => {
+            if (response)
+                return res.sendStatus(200);
 
-        return res.sendStatus(304)
-    });
+            return res.sendStatus(304)
+        });
 });
 
 router.delete('/:id', (req, res) => {
@@ -111,16 +112,28 @@ router.delete('/:id', (req, res) => {
         username: req.session.user.username,
         "scripts.name": filename
     }, {
-        $pull: {
-            scripts: {
-                name: filename
+            $pull: {
+                scripts: {
+                    name: filename
+                }
             }
-        }
-    }).then(response => {
-        if (response.nModified > 0)
-            return res.status(200).send('Script deleted successfully.');
-        return res.status(200).send('Failed to delete');
-    })
+        }).then(response => {
+            if (response.nModified > 0)
+                return res.status(200).send('Script deleted successfully.');
+            return res.status(200).send('Failed to delete');
+        })
 });
+
+router.post('/select-mp-script', (req, res) => {
+    let selectedScriptId = null
+
+    if (typeof req.body._id !== 'undefined')
+        if (mongoose.Types.ObjectId.isValid(req.body._id))
+            selectedScriptId = req.body._id
+
+    User.findOneAndUpdate({ username: req.session.user.username }, { multiplayerScript: selectedScriptId }).then(response => {
+        res.sendStatus(200)
+    }).catch(err => res.sendStatus(400))
+})
 
 module.exports = router;

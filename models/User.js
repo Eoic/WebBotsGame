@@ -21,10 +21,13 @@ const UserSchema = new Schema({
         required: true
     },
     scripts: [{
-        _id: false,
         name: mongoose.Schema.Types.String,
         code: mongoose.Schema.Types.String
-    }]
+    }],
+    multiplayerScript: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: false
+    }
 }, {
     timestamps: true
 });

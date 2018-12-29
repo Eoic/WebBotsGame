@@ -81,7 +81,7 @@ class Player {
                 this.bulletPool[i] = {
                     x: this.x,
                     y: this.y,
-                    rotation: this.turretRotation,
+                    rotation: this.rotation + this.turretRotation,
                     isAlive: true
                 }
 
@@ -143,7 +143,7 @@ const CONSTANTS = {
     EN_FULL: 100,
     BULLET_COST: 6,
     BULLET_POOL_SIZE: 20,
-    BULLET_TRAVEL_SPEED: 150,
+    BULLET_TRAVEL_SPEED: 250,
     BULLET_DAMAGE: 15,
     PLAYER_HALF_WIDTH: 28,
     PLAYER_HALF_HEIGHT: 21.3,
@@ -167,10 +167,21 @@ const utilities = {
     checkBoundsUpperY: (y) => {
         return (y > CONSTANTS.PLAYER_BOX_SIZE)
     },
+
+    /**
+     * Check if given coordinates (x, y) are inside a map
+     */
     checkMapBounds: (x, y) => {
         return (utilities.checkBoundsLowerX(x) && utilities.checkBoundsLowerY(y) &&
             utilities.checkBoundsUpperX(x) && utilities.checkBoundsUpperY(y))
     },
+
+    /**
+     * Checks if any of fired bullet hit enemy player.
+     * If hit was detected, dispose bullet and apply damage
+     * @param {Array} playerBulletPool 
+     * @param {Object} enemyInstance 
+     */
     checkForHits(playerBulletPool, enemyInstance) {
         playerBulletPool.forEach(bullet => {
             if (bullet.isAlive) {
@@ -183,6 +194,158 @@ const utilities = {
                 }
             }
         })
+    },
+
+    /**
+     * Checks if function of given name was called 
+     * during current frame
+     * @param {Object} callMap Function calls lookup object
+     * @param {String} functionKey Function name
+     */
+    functionCalledThisFrame(callMap, functionKey){
+        if(callMap[functionKey] == true)
+            return true
+
+        callMap[functionKey] = true
+        return false
+    },
+
+    /**
+     * Sets all game API function as uncalled before each game update
+     * @param {Object} callMap Function calls lookup object
+     */
+    resetCallMap(callMap){
+        Object.keys(callMap).forEach(key => {
+            callMap[key] = false
+        })
+    }
+}
+
+// Player API
+const player = {
+
+    /**
+     * Moves player forwards along by x axis
+     */
+    moveForwardX: () => {
+        if(utilities.functionCalledThisFrame(callMap, player.moveForwardX.name))
+            return;
+        
+        if(utilities.checkBoundsUpperX(context.robot.x))
+            context.robot.x += context.delta * CONSTANTS.MOVEMENT_SPEED;
+    },
+
+    /**
+     * Moves player forwards along y axis
+     */
+    moveForwardY: () => {
+        if(utilities.functionCalledThisFrame(callMap, player.moveBackY.name))
+            return;
+
+        if(context.robot.rotate(-1, 0, context.delta))
+            if(utilities.checkBoundsUpperY(context.robot.y))
+                context.robot.y -= context.delta * CONSTANTS.MOVEMENT_SPEED
+    },
+
+    /**
+     * Moves player backwards along x axis
+     */
+    moveBackX: () => {
+        if(utilities.functionCalledThisFrame(callMap, player.moveBackX.name))
+            return
+        
+        if(context.robot.rotate(0, -1, context.delta))
+            if(utilities.checkBoundsLowerX(context.robot.x))
+                context.robot.x -= context.delta * CONSTANTS.MOVEMENT_SPEED;
+    },
+
+    /**
+     * Moves player backwards along y axis
+     */
+    moveBackY: () => {
+        if(utilities.functionCalledThisFrame(callMap, player.moveBackY.name))
+            return
+
+        if(context.robot.rotate(1, 0, context.delta))
+            if(utilities.checkBoundsLowerY(context.robot.y))
+                context.robot.y += context.delta * CONSTANTS.MOVEMENT_SPEED
+    },
+
+    /**
+     * Moves player forwards according to its rotation
+     */
+    moveForward: () => {
+        if(utilities.functionCalledThisFrame(callMap, player.moveForward.name))
+            return
+
+        if(!utilities.checkMapBounds(context.robot.x, context.robot.y))
+            return false
+
+        context.robot.x += context.delta * Math.cos(context.robot.rotation) * CONSTANTS.MOVEMENT_SPEED
+        context.robot.y += context.delta * Math.sin(context.robot.rotation) * CONSTANTS.MOVEMENT_SPEED
+        return true
+    },
+
+    /**
+     * Moves layer backwards according to its rotation
+     */
+    moveBack: () => {
+        if(utilities.functionCalledThisFrame(callMap, player.moveBack.name))
+            return
+
+        if(!utilities.checkMapBounds(context.robot.x, context.robot.y))
+            return
+
+        context.robot.x -= context.delta * Math.cos(context.robot.rotation) * CONSTANTS.MOVEMENT_SPEED
+        context.robot.y -= context.delta * Math.sin(context.robot.rotation) * CONSTANTS.MOVEMENT_SPEED
+    },
+
+    /**
+     * Rotates player clockwise if degrees < 0, 
+     * and counter-clockwise if degrees > 0
+     */
+    rotate: (degrees) => {
+        if(utilities.functionCalledThisFrame(callMap, player.rotate.name))
+            return
+
+        degrees += 90;
+        let radians = degrees * (Math.PI / 180)
+        return context.robot.rotate(Math.cos(radians), Math.sin(radians), context.delta)
+    },
+
+    /**
+     * Rotates player clockwise if degrees < 0, 
+     * and counter-clockwise if degrees > 0
+     */
+    rotateTurret: (degrees) => {
+        if(utilities.functionCalledThisFrame(callMap, player.rotateTurret.name))
+            return
+
+        degrees += 90
+        let radians = degrees * (Math.PI / 180)
+        return context.robot.rotateTurret(Math.cos(radians), Math.sin(radians), context.delta)
+    },
+
+    /**
+     * Shoots bullets by direction of turet rotation
+     */
+    shoot: () => {
+        if(utilities.functionCalledThisFrame(callMap, player.shoot.name))
+            return
+
+        if(context.robot.energy >= CONSTANTS.BULLET_COST){
+            context.robot.createBullet()
+            return true
+        }
+
+        return false 
+    },
+
+    /**
+     * Returns info about player
+     */
+    getState: () => {
+        return context.robot.getObjectState();
     }
 }
 
@@ -190,5 +353,6 @@ module.exports = {
     CONSTANTS,
     MESSAGE_TYPE,
     Player,
+    player,
     utilities
 }

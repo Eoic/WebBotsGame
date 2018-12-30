@@ -27,22 +27,22 @@
 
 <div id='game-map'></div>
 <div id='splitter'>
-    <button id='script-tab' class="btn btn-primary btn-primary-selected" onclick="hideConsole()" title="Code"> 
+    <button id='script-tab' class="btn btn-primary btn-primary-selected unselectable" onclick="hideConsole()" title="Code"> 
         <span class="fa fa-code"></span> CODE
     </button>
-    <button id='console-tab' class="btn btn-primary" onclick="showConsole()" title="Output"> 
+    <button id='console-tab' class="btn btn-primary unselectable" onclick="showConsole()" title="Output"> 
         <span class="fa fa-file-alt"></span> OUTPUT
     </button>
     <hr style="border: 0"/>
     <label for='scripts-dropdown' class='label-light unselectable'> Simulate against </label>
     <select id='scripts-dropdown' class='dropdown'></select>
-    <button class="btn btn-primary" onclick="runScript()" title="Run"> 
+    <button class="btn btn-primary unselectable" onclick="runScript()" title="Run"> 
         <span class='fa fa-play'></span> RUN
     </button>
-    <button class="btn btn-primary" onclick="saveScript()" title="Save">
+    <button class="btn btn-primary unselectable" onclick="saveScript()" title="Save">
         <span class="fa fa-save"></span> SAVE
     </button>
-    <button class="btn btn-primary" onclick="deleteScript()" title="Delete">
+    <button class="btn btn-primary unselectable" onclick="deleteScript()" title="Delete">
         <span class="fa fa-trash"></span> DELETE
     </button>
 </div>

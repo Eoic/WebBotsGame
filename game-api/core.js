@@ -44,7 +44,8 @@ let callMap = {
     rotateTurret: false
 }
 
-// Player API
+// API
+// Robot control functions
 const player = {
 
     /**
@@ -172,6 +173,18 @@ const player = {
     }
 }
 
+// For detecting enemy position
+const scanner = {
+    /**
+     * Traces a line from where turret is pointing
+     * to map border
+     */
+    scan: () => {
+
+    }
+}
+
+// For logging messaget so output window
 const logger = {
     log: (message, messageType) => {
         context.robot.messages.push({
@@ -183,7 +196,7 @@ const logger = {
 
 nodeVM.freeze(player, 'player');                // Game API calls
 nodeVM.freeze(CONSTANTS, 'GAME');               // Constants
-nodeVM.freeze(logger, 'logger')               // Info output
+nodeVM.freeze(logger, 'logger')                 // Info output
 nodeVM.freeze(MESSAGE_TYPE, 'MESSAGE_TYPE')
 
 /**
@@ -208,8 +221,8 @@ function update(delta) {
                 console.log(err)
             }
 
-            utilities.checkForHits(gameStates[clientID][playerKeys[1 ^ index]].bulletPool, context.robot)
-            context.robot.updateBulletPositions(context.delta)
+            utilities.checkForHits(gameStates[clientID][playerKeys[1 ^ index]].bulletPool, context.robot, utilities.getExportedFunction(gameStates[clientID].code[key], 'onBulletHit'))
+            context.robot.updateBulletPositions(context.delta, utilities.getExportedFunction(gameStates[clientID].code[key], 'onBulletMiss'))
         });
 
         // Send game state update

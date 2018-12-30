@@ -62,12 +62,16 @@ class Player {
         }
     }
 
-    updateBulletPositions(delta) {
+    updateBulletPositions(delta, onBulletMissCallback) {
         this.bulletPool.filter(bullet => bullet.isAlive == true).forEach(bullet => {
             if (bullet.x > CONSTANTS.MAP_WIDTH + CONSTANTS.VISIBLE_MAP_OFFSET ||
                 bullet.x < -CONSTANTS.VISIBLE_MAP_OFFSET || bullet.y < -CONSTANTS.VISIBLE_MAP_OFFSET ||
                 bullet.y > CONSTANTS.MAP_HEIGHT + CONSTANTS.VISIBLE_MAP_OFFSET) {
                 bullet.isAlive = false
+
+                // Bullet is outside map. Call bullet miss
+                if(typeof onBulletMissCallback !== 'undefined')
+                    onBulletMissCallback()
             } else {
                 bullet.x += delta * Math.cos(bullet.rotation) * CONSTANTS.BULLET_TRAVEL_SPEED
                 bullet.y += delta * Math.sin(bullet.rotation) * CONSTANTS.BULLET_TRAVEL_SPEED
@@ -169,11 +173,11 @@ const utilities = {
     },
 
     /**
-     * Check if given coordinates (x, y) are inside a map
+     * Checks if object with coordinates (x; y) is not hitting a wall
      */
     checkMapBounds: (x, y) => {
         return (utilities.checkBoundsLowerX(x) && utilities.checkBoundsLowerY(y) &&
-            utilities.checkBoundsUpperX(x) && utilities.checkBoundsUpperY(y))
+                utilities.checkBoundsUpperX(x) && utilities.checkBoundsUpperY(y))
     },
 
     /**
@@ -182,7 +186,7 @@ const utilities = {
      * @param {Array} playerBulletPool 
      * @param {Object} enemyInstance 
      */
-    checkForHits(playerBulletPool, enemyInstance) {
+    checkForHits(playerBulletPool, enemyInstance, onBulletHitCallback) {
         playerBulletPool.forEach(bullet => {
             if (bullet.isAlive) {
                 if (bullet.x >= enemyInstance.x - CONSTANTS.PLAYER_HALF_WIDTH &&
@@ -191,6 +195,19 @@ const utilities = {
                     bullet.y <= enemyInstance.y + CONSTANTS.PLAYER_HALF_HEIGHT) {
                     bullet.isAlive = false
                     enemyInstance.applyDamage(CONSTANTS.BULLET_DAMAGE)
+
+                    // Pass info event of enemy being hit
+                    // Should be wrappet inside try / catch
+                    if (typeof onBulletHitCallback !== 'undefined') {
+                        onBulletHitCallback({
+                            getHealth: () => enemyInstance.health,
+                            getEnergy: () => enemyInstance.energy,
+                            getHitPosition: () => ({
+                                x: enemyInstance.x,
+                                y: enemyInstance.y
+                            })
+                        })
+                    }
                 }
             }
         })
@@ -202,8 +219,8 @@ const utilities = {
      * @param {Object} callMap Function calls lookup object
      * @param {String} functionKey Function name
      */
-    functionCalledThisFrame(callMap, functionKey){
-        if(callMap[functionKey] == true)
+    functionCalledThisFrame(callMap, functionKey) {
+        if (callMap[functionKey] == true)
             return true
 
         callMap[functionKey] = true
@@ -214,10 +231,23 @@ const utilities = {
      * Sets all game API function as uncalled before each game update
      * @param {Object} callMap Function calls lookup object
      */
-    resetCallMap(callMap){
+    resetCallMap(callMap) {
         Object.keys(callMap).forEach(key => {
             callMap[key] = false
         })
+    },
+
+    /**
+     * Checks if player exported function with name of 
+     * functionName and returns it
+     * @param {Object} apiFunctions 
+     * @param {String} functionName 
+     */
+    getExportedFunction(apiFunctions, functionName) {
+        if (apiFunctions.hasOwnProperty(functionName))
+            return apiFunctions[functionName]
+
+        return undefined
     }
 }
 

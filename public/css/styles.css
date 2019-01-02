@@ -179,6 +179,10 @@ footer {
   float: right;
 }
 
+.navbar-items-none {
+  display: none;
+}
+
 @media only screen and (max-width: 999px) {
 
     .navbar-list > li {

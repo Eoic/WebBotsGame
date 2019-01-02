@@ -37,7 +37,7 @@ function onMouseDown() {
 }
 
 /**
- * Disables resizing once mouse 
+ * Disables resizing once mouse
  * button is released and saves current
  * size in local storage
  */
@@ -47,9 +47,9 @@ function onMouseUp() {
 }
 
 /**
- * Resizes code editor within screen bounds 
+ * Resizes code editor within screen bounds
  * while mouse is being moved
- * @param { Object } event 
+ * @param { Object } event
  */
 function onMouseMove(event) {
     if (isResizing) {
@@ -125,7 +125,7 @@ function fetchScripts() {
     request.setRequestHeader('Content-Type', 'application/json');
     request.send();
 
-    request.onreadystatechange = (event) => {
+    request.onreadystatechange = (_event) => {
         if (request.readyState === 4 && request.status === 200) {
             request.response.forEach(element => {
                 appendButton(element.name, selectScript);
@@ -145,9 +145,9 @@ function fetchScripts() {
 /**
  * Display clicked button as selected and fetch code
  * of selected script
- * @param {Object} event On click event 
+ * @param {Object} event On click event
  */
-function selectScript(event) {
+function selectScript(_event) {
     scriptsContainer.querySelectorAll('.btn-active').forEach(element => {
         element.classList.remove('btn-active');
     });
@@ -160,7 +160,7 @@ function selectScript(event) {
     request.open('GET', `${window.location.origin}/scripts/${this.innerText}`, true);
     request.send();
 
-    request.onreadystatechange = (event) => {
+    request.onreadystatechange = (_event) => {
         if (request.readyState === 4 && request.status === 200) {
             typeof request.response.code !== 'undefined' ?
                 editor.setValue(request.response.code, -1) :
@@ -195,7 +195,7 @@ function createScript(event) {
                     option.value = request.response.filename;
                     scriptsSelect.appendChild(option);
                     this.value = '';
-                    
+
                     // Update game info panel
                     if(scriptsSelect.childElementCount == 1)
                         document.getElementById('player-two-name').innerText = request.response.filename
@@ -248,8 +248,6 @@ function saveScript() {
 function deleteScript() {
     let request = new XMLHttpRequest();
     let selected = document.querySelector('.btn-active');
-
-    console.log(selected);
 
     if (selected === null)
         return;

@@ -29,6 +29,8 @@ const time = () => {
     return time[0] * 1000 + time[1] / 1000000;
 }
 
+let tickCount = 0;
+let gameUpdateStep = TICK_RATE; 
 let previous = time();
 let tickLength = 1000 / TICK_RATE;
 let gameStates = {};
@@ -226,13 +228,17 @@ function update(delta) {
         });
 
         // Send game state update
-        if (gameStates[clientID].socket.readyState === 1) {
-            gameStates[clientID].socket.send(JSON.stringify({
-                type: 'GAME_TICK_UPDATE',
-                playerOne: gameStates[clientID].playerOne.getObjectState(),
-                playerTwo: gameStates[clientID].playerTwo.getObjectState()
-            }))
-        }
+        sendUpdate(gameStates, clientID)
+    }
+}
+
+function sendUpdate(gameStates, cliendId) {
+    if (gameStates[cliendId].socket.readyState === 1 && tickCount % gameUpdateStep === 0) {
+        gameStates[cliendId].socket.send(JSON.stringify({
+            type: 'GAME_TICK_UPDATE',
+            playerOne: gameStates[cliendId].playerOne.getObjectState(),
+            playerTwo: gameStates[cliendId].playerTwo.getObjectState()
+        }))
     }
 }
 
@@ -240,6 +246,7 @@ const loop = () => {
     setTimeout(loop, tickLength);
     let now = time();
     let delta = (now - previous) / 1000;
+    tickCount++
     update(delta);
     previous = now;
 }

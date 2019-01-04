@@ -54,7 +54,11 @@ let app = new PIXI.Application({
     width: window.innerWidth - 270,
     height: window.innerHeight - 40,
     backgroundColor: 0x2a2a2a,
-    resolution: 1
+    /*
+    // High res
+    resolution: 2,
+    antialias: true
+    */
 });
 
 gameMap.appendChild(app.view);

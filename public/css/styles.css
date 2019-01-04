@@ -16,13 +16,9 @@ body {
 
 main {
     background-color: #cecece;
-    margin: 0 auto;
-    display: block;
-}
-
-main article {
-    max-width: 1024px;
-    margin: 0 auto;
+    display: grid;
+    justify-content: center;
+    grid-template-columns: minmax(200px, 1050px);
 }
 
 select {
@@ -46,10 +42,37 @@ article {
 
 article h3 {
     color: rgb(187, 57, 47);
+    font-size: 23px;
 }
 
 article p {
     color: #2f2f2f;
+    line-height: 28px;
+}
+
+.article-img {
+    border-radius: 3px;
+    box-shadow: 5px 4px 4px 2px #ababab;
+}
+
+@media only screen and (min-width: 900px) {
+    article:nth-child(even) > h3 {
+        text-align: right;
+    }
+}
+
+article:nth-child(odd) .article-img {
+    margin-left: 15px;
+}
+
+article:nth-child(even) .article-img {
+    margin-right: 15px;
+}
+
+@media only screen and (max-width: 900px) {
+    .article-img {
+        display: none;
+    }
 }
 
 a {
@@ -455,21 +478,38 @@ table {
     }
 }
 
-table, td, th {
-    border: 1px solid #505050;
+/* TABLE */
+table {
+    border-radius: 3px;
+    border-collapse: collapse;
+}
+
+th {
+    color: whitesmoke;
+    padding: 8px;
 }
 
 tr {
     transition: all 0.3s;
+    border-top: 1px solid #cccccc;
+}
+
+thead > tr {
+    background-color: #2468ce; 
+}
+
+tbody > tr {
+    background-color: rgb(243, 243, 243);
 }
 
 tr:hover {
-    background-color: rgb(206, 206, 206);
+    filter: brightness(105%);
 }
 
-td:not(:last-child) {
+td {
+    color: #2f2f2f;
     text-align: center;
-    padding: 5px 10px;
+    padding: 10px;
 }
 
 /* Section */

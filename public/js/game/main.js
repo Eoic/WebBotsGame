@@ -338,10 +338,8 @@ function updateProjectiles(bullets, key) {
 /**
  * Define socket server connection type
  */
-let connectionType = (window.location.hostname === 'localhost') ? 'ws://' : 'wss://';
-
-if (window.location.hostname === 'localhost')
-    connectionString = `${connectionType}${window.location.host}`;
+const connectionType = (window.location.hostname === 'localhost') ? 'ws://' : 'wss://';
+const connectionString = `${connectionType}${window.location.host}`;
 
 let socket = new WebSocket(connectionString);
 

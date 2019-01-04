@@ -1,7 +1,11 @@
 <section class="section-full-size">
+    <h2 class="section-header">
+        MULTIPLAYER
+    </h2>
     <table>
         <thead>
             <tr>
+                <th></th>
                 <th> Username </th>
                 <th> Level </th>
                 <th> </th>
@@ -9,12 +13,27 @@
         </thead>
         <tbody>
             <tr>
+                <td> 1 </td>
                 <td> eoic </td>
                 <td> 1 </td>
-                <td style="width: 100.84px"> 
-                    <button class="btn btn-primary"> Select </button>
+                <td style="width: 60px">
+                    <button onclick="createGame('eoic')" title="Select opponent">
+                        <span class="fa fa-play"> </span>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td> 2 </td>
+                <td> other_user </td>
+                <td> 8 </td>
+                <td>
+                    <button>
+                        <span class="fa fa-play"> </span>
+                    </button>
                 </td>
             </tr>
         </tbody>
     </table>
 </section>
+
+<script src="./public/js/game/lobby.js"></script>

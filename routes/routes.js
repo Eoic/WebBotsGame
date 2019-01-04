@@ -7,11 +7,14 @@ const practice = require('./practice');
 const scripts = require('./scripts');
 const multiplayer = require('./multiplayer')
 const lobby = require('./lobby')
+const leaderboards = require('./leaderboards')
+const docs = require('./docs')
+const robots = require('./robots')
 const { router } = require('../game-api/core');
 
 module.exports = function (app) {
     // Clear cookies from browser if user is not set
-    // Set response locals
+    // Sets response locals
     app.use((req, res, next) => {
         if (req.cookies.connect_sid && !req.session.user)
             res.clearCookie('connect_sid')
@@ -27,13 +30,16 @@ module.exports = function (app) {
         next()
     });
     app.use(index);
+    app.use('/robots.txt', robots);
     app.use('/login', login);
     app.use('/register', register);
+    app.use('/documentation', docs)
     app.use('/logout', logout);
     app.use('/profile', profile);
     app.use('/practice', practice);
     app.use('/scripts', scripts);
     app.use('/multiplayer', multiplayer);
     app.use('/lobby', lobby);
+    app.use('/leaderboards', leaderboards)
     app.use(router); // Starting point for running scripts 
 }

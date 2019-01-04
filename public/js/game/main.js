@@ -1,14 +1,37 @@
+/** GAME PROPERTIES */
 const MAP_WIDTH = 674
 const MAP_HEIGHT = 464
-const ZOOM_SCALE = 0.95;
+const ZOOM_SCALE = 0.95
+const MIN_ZOOM = 0.75
+const MAX_ZOOM = 2.4
+const ROBOT_SCALE = 0.15
+const PROJECTILE_POOL_SIZE = 20
+const MOVEMENT_SPEED = 75
 const spritesDir = './public/img/sprites'
+const playerObjectKeys = ['playerOne', 'playerTwo']
+const initPositions = [
+    { x: 32, y: 32 },
+    { x: 642, y: 432 }
+]
+const baseAnchor = { x: 0.5, y: 0.5 }
+const turretAnchor = { x: 0.3, y: 0.5 }
+
+/** DATA SYNCHRONIZATION PRECISION */
+let positionDelta = 4       // Difference between calculated position of client and server coordinates
 
 /** GAME INFO CONTAINER */
 let gameInfo = [];
 
+/** ZOOM INDICATOR */
+let canZoom = false
+
+/** LOADING BLANKET */
+let loadingWindow = document.getElementById('loader-section')
+let loadingProgress = document.getElementById('progress-foreground')
+
 gameInfo[0] = {
     playerHP: document.getElementById('player-one-hp'),
-    playerEN: document.getElementById('player-one-en'),    
+    playerEN: document.getElementById('player-one-en'),
     playerHPVal: document.getElementById('player-one-hp-val'),
     playerENVal: document.getElementById('player-one-en-val'),
 }
@@ -26,11 +49,14 @@ PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
 
 let app = new PIXI.Application({
     autoResize: true,
-    width: window.innerWidth,
-    height: window.innerHeight - 5,
+    width: window.innerWidth - 270,
+    height: window.innerHeight - 40,
     backgroundColor: 0x2a2a2a,
-    resolution: 1,
+    /*
+    // High res
+    resolution: 2,
     antialias: true
+    */
 });
 
 gameMap.appendChild(app.view);
@@ -38,68 +64,147 @@ gameMap.appendChild(app.view);
 const loader = PIXI.loader;         // Resources loader
 const map = new PIXI.Container();   // Map container
 const sprites = {}                  // Loaded sprites
-const gameObjects = {}              // Created game objects        
-let resourcesLoaded = false;        // Indicates whether all game resources were loaded
+let gameObjectsServer = {}        // Game object states received from server
+let gameObjects = {}                // Created game objects displayed on client side
+let bulletTexture = {}              // Robot bullet textures
+let bulletSprite = {}               // Robot bullet sprites
 
+/**
+ * Defines fields
+ */
+function initServerGameObjects() {
+    playerObjectKeys.forEach((key, index) => {
+        gameObjectsServer[key] = {
+            position: {
+                x: initPositions[index].x,
+                y: initPositions[index].y
+            },
+            turretRotation: 0,
+            rotation: 0,
+        }
+    })
+}
+
+/**
+ * Add resources to load from public folder
+ */
 loader.add('map', `${spritesDir}/map-prop.png`)
-      .add('robotBase', `${spritesDir}/robot_base.png`)
-      .add('robotTurret', `${spritesDir}/robot_turret.png`);
+    .add('robotBase', `${spritesDir}/robot_base.png`)
+    .add('robotTurret', `${spritesDir}/robot_turret.png`)
+    .add('bullet', `${spritesDir}/bullet.png`)
+    .on('progress', loadingProgressHandler);
 
-loader.load((loader, resources) => {
-    sprites.robotBasePlayerOne = new PIXI.Sprite(resources.robotBase.texture)
-    sprites.robotBasePlayerTwo = new PIXI.Sprite(resources.robotBase.texture)
-    sprites.robotTurretPlayerOne = new PIXI.Sprite(resources.robotTurret.texture)
-    sprites.robotTurretPlayerTwo = new PIXI.Sprite(resources.robotTurret.texture)
+/**
+ * Load all resources added to loader
+ */
+loader.load((_loader, resources) => {
+    playerObjectKeys.forEach(key => {
+        let keyUpperCase = key.charAt(0).toUpperCase() + key.slice(1)
+        sprites['robotBase' + keyUpperCase] = new PIXI.Sprite(resources.robotBase.texture)
+        sprites['robotTurret' + keyUpperCase] = new PIXI.Sprite(resources.robotTurret.texture)
+        bulletTexture = resources.bullet.texture
+    })
+
     sprites.map = new PIXI.Sprite(resources.map.texture);
 });
 
+/**
+ * Called once game resources are loaded
+ */
 loader.onComplete.add(() => {
-    // Sprite containers
-    let playerOne = new PIXI.Container()
-    let playerTwo = new PIXI.Container()
+    initServerGameObjects()
 
-    // Set graphics anchor points
-    sprites.robotBasePlayerOne.anchor.set(0.5, 0.5);
-    sprites.robotBasePlayerTwo.anchor.set(0.5, 0.5);
-    sprites.robotTurretPlayerOne.anchor.set(0.5, 0.7);
-    sprites.robotTurretPlayerTwo.anchor.set(0.5, 0.7);
+    playerObjectKeys.forEach((key, index) => {
 
-    // Adding graphics
-    playerOne.addChild(sprites.robotBasePlayerOne)
-    playerTwo.addChild(sprites.robotBasePlayerTwo)
-    playerOne.addChild(sprites.robotTurretPlayerOne)
-    playerTwo.addChild(sprites.robotTurretPlayerTwo)
+        // Set graphics anchor points
+        let keyUpperCase = key.charAt(0).toUpperCase() + key.slice(1)
+        let baseSpriteKey = 'robotBase' + keyUpperCase
+        let turretSpriteKey = 'robotTurret' + keyUpperCase
+        sprites[baseSpriteKey].anchor.set(baseAnchor.x, baseAnchor.y)
+        sprites[turretSpriteKey].anchor.set(turretAnchor.x, turretAnchor.y)
 
-    // Scaling and positioning
-    playerOne.scale.set(0.2, 0.2)
-    playerTwo.scale.set(0.2, 0.2)
-
-    // Events
-    setInteractionEvents(playerOne)
-    setInteractionEvents(playerTwo)
-
-    playerWidth = playerOne.width;
-    playerHeight = playerOne.height
-    playerOne.position.set(0 + playerWidth, 0 + playerHeight)
-    playerTwo.position.set(MAP_WIDTH - playerWidth, MAP_HEIGHT - playerHeight);
-
-    // Add reference to gameObjects
-    gameObjects.playerOne = playerOne
-    gameObjects.playerTwo = playerTwo
+        // Create player instances
+        gameObjects[key] = createPlayerInstance(sprites[baseSpriteKey], sprites[turretSpriteKey], initPositions[index])
+    })
 
     map.pivot.set(sprites.map.width / 2, sprites.map.height / 2)
     map.addChild(sprites.map);
-    map.addChild(gameObjects.playerOne);
-    map.addChild(gameObjects.playerTwo);
-    app.stage.addChild(map);
 
+    playerObjectKeys.forEach(key => {
+        map.addChild(gameObjects[key])
+        gameObjects[key].bullets = createProjectilePool()
+    })
+
+    app.stage.addChild(map);
     loadMapCoordinates();
+
+    //app.ticker.add(delta => gameLoop(delta))
+
+    // Finally, hide loading window and start game loop
+    setTimeout(() => {
+        loadingWindow.style.visibility = 'hidden'
+    }, 1000)
 })
+
+/**
+ * Updates game loading bar
+ * @param {Object} loader 
+ * @param {Object} _resource 
+ */
+function loadingProgressHandler(loader, _resource) {
+    loadingProgress.style.width = loader.progress + '%'
+}
+
+/**
+ * Returns robot sprite with initial position in game scene
+ * @param {Object} spriteBase 
+ * @param {Object} spriteTurret 
+ * @param {Object} initialPosition  
+ */
+function createPlayerInstance(spriteBase, spriteTurret, initialPosition) {
+    let player = new PIXI.Container()
+    player.addChild(spriteBase)
+    player.addChild(spriteTurret)
+    player.scale.set(ROBOT_SCALE, ROBOT_SCALE)
+    player.position.set(initialPosition.x, initialPosition.y)
+    return player
+}
+
+/**
+ * Creates array of projectile sprites used by robot
+ */
+function createProjectilePool() {
+    let bullets = []
+
+    for (let i = 0; i < PROJECTILE_POOL_SIZE; i++) {
+        bullets.push(new PIXI.Sprite(bulletTexture))
+        bullets[i].visible = false
+        bullets[i].anchor.set(0.1, 0.5)
+        map.addChild(bullets[i])
+    }
+
+    return bullets
+}
+
+/**
+ * Resets positions and rotation of all projectiles
+ * in projectile pool array
+ */
+function resetProjectilePool() {
+    playerObjectKeys.forEach(key => {
+        gameObjects[key].bullets.forEach(bullet => {
+            bullet.x = 0
+            bullet.y = 0
+            bullet.rotation = 0
+            bullet.visible = false
+        })
+    })
+}
 
 /**
  * Binds events on player container 
  */
-function setInteractionEvents(playerContainer){
+function setInteractionEvents(playerContainer) {
     playerContainer.interactive = true;
     playerContainer.mouseover = () => {
         console.log(`X: ${playerContainer.position.x} Y: ${playerContainer.position.y}`)
@@ -118,7 +223,7 @@ function onDragStart(event) {
 /**
  * Called while map is being dragged.
  */
-function onDragMove(event) {
+function onDragMove(_event) {
     if (this.dragging) {
         let newPosition = this.data.getLocalPosition(this.parent);
         this.x = (newPosition.x + map.pivot.x * map.scale.x) - (this.startPosition.x * map.scale.x);
@@ -126,7 +231,13 @@ function onDragMove(event) {
     }
 }
 
-function updateGameInfoPanel(playerIndex, hp, en){
+/**
+ * Updates right sidebar whitch displays robot health and energy
+ * @param {Number} playerIndex Player position in array
+ * @param {Number} hp Health points 
+ * @param {Number} en Energy points
+ */
+function updateGameInfoPanel(playerIndex, hp, en) {
     gameInfo[playerIndex].playerHP.innerText = hp;
     gameInfo[playerIndex].playerEN.innerText = en;
     gameInfo[playerIndex].playerHPVal.value = hp;
@@ -142,24 +253,48 @@ function onDragEnd() {
     saveMapCoordinates();
 }
 
+/**
+ * Set map to be interactable with pointer and
+ * add pointer events for dragging and moving
+ */
 map.interactive = true;
 map.on('pointerdown', onDragStart)
     .on('pointerup', onDragEnd)
     .on('pointerupoutside', onDragEnd)
-    .on('pointermove', onDragMove);
+    .on('pointermove', onDragMove)
+    .on('mouseover', () => canZoom = true)
+    .on('mouseout', () => canZoom = false)
 
-// Event Listeners
+/**
+ * Add event listener for window
+ */
 window.onresize = () =>
-    app.renderer.resize(window.innerWidth, window.innerHeight - 5);
+    app.renderer.resize(window.innerWidth - 270, window.innerHeight - 40);
 
+/**
+ * Add event listener for map zooming
+ * using mouse wheel
+ */
 window.onwheel = (event) => {
-    if (event.deltaY < 0) {
-        map.scale.x = map.scale.x * ZOOM_SCALE;
-        map.scale.y = map.scale.y * ZOOM_SCALE;
-    } else {
-        map.scale.x = map.scale.x / ZOOM_SCALE;
-        map.scale.y = map.scale.y / ZOOM_SCALE;
+    if (canZoom) {
+        if (event.deltaY < 0) {
+            map.scale.x = clampNumber(map.scale.x * ZOOM_SCALE, MIN_ZOOM, MAX_ZOOM)
+            map.scale.y = clampNumber(map.scale.x * ZOOM_SCALE, MIN_ZOOM, MAX_ZOOM)
+        } else {
+            map.scale.x = clampNumber(map.scale.x / ZOOM_SCALE, MIN_ZOOM, MAX_ZOOM)
+            map.scale.y = clampNumber(map.scale.x / ZOOM_SCALE, MIN_ZOOM, MAX_ZOOM)
+        }
     }
+}
+
+/**
+ * Limits number value to defined min and max bounds
+ * @param {Number} value 
+ * @param {Number} min 
+ * @param {Number} max 
+ */
+function clampNumber(value, min, max) {
+    return Math.max(min, Math.min(value, max))
 }
 
 /**
@@ -181,23 +316,36 @@ function loadMapCoordinates() {
     let position = JSON.parse(localStorage.getItem('mapPosition'));
 
     if (position !== null)
-        map.position.set(position.x, position.y);
+        map.position.set((window.innerWidth - 270) / 2, position.y);
     else
-        map.position.set(0, 60);
+        map.position.set((window.innerWidth - 270) / 2, window.innerHeight / 2);
 }
 
 /**
- * SERVER CONNECTION
+ * Updates projectile positions on the map
+ * @param {Array} bullets 
+ * @param {String} key 
  */
+function updateProjectiles(bullets, key) {
+    bullets.forEach((bullet, index) => {
+        gameObjects[key].bullets[index].x = bullet.x
+        gameObjects[key].bullets[index].y = bullet.y
+        gameObjects[key].bullets[index].visible = bullet.isAlive
+        gameObjects[key].bullets[index].rotation = bullet.rotation
+    })
+}
 
-connectionType = (window.location.hostname === 'localhost') ? 'ws://' : 'wss://'; 
+/**
+ * Define socket server connection type
+ */
+let connectionType = (window.location.hostname === 'localhost') ? 'ws://' : 'wss://';
 
-if(window.location.hostname === 'localhost')
+if (window.location.hostname === 'localhost')
     connectionString = `${connectionType}${window.location.host}`;
 
 let socket = new WebSocket(connectionString);
 
-socket.onopen = (event) => {
+socket.onopen = (_event) => {
     displayMessage('success', 'Connected to server')
 }
 
@@ -209,9 +357,20 @@ socket.onmessage = (event) => {
 
     switch (payload.type) {
         case 'GAME_TICK_UPDATE':
+
             // Update positions
-            gameObjects.playerOne.position.set(payload.playerOne.x, payload.playerOne.y);
-            gameObjects.playerTwo.position.set(payload.playerTwo.x, payload.playerTwo.y);
+            playerObjectKeys.forEach((key, index) => {
+                gameObjects[key].position = { x: payload[key].x, y: payload[key].y }
+                gameObjects[key].rotation = payload[key].rotation
+                gameObjects[key].getChildAt(1).rotation = payload[key].turretRotation
+                updateProjectiles(payload[key].bulletPool, key)
+
+                // TODO: exclude from MP
+                payload[key].messages.forEach(item => {
+                    appendMessage(item.message, item.type)
+                });
+            })
+
             updateGameInfoPanel(0, payload.playerOne.health, payload.playerOne.energy)
             updateGameInfoPanel(1, payload.playerTwo.health, payload.playerTwo.energy)
             break;
@@ -221,7 +380,34 @@ socket.onmessage = (event) => {
     }
 }
 
-socket.onclose = (event) => {
+/*
+function startGameLoop() {
+    var lastTime = 0
+    var deltaTime = 0
+
+    requestAnimationFrame(update);
+    
+    function update(time) {
+        deltaTime = (time - lastTime) / 1000;
+        console.log(deltaTime)
+        lastTime = time;
+        //app.render(app.stage);
+        requestAnimationFrame(update);
+    }
+}
+*/
+
+/* GAME LOOP */
+/*
+function gameLoop(delta) {
+    console.log(app.ticker.FPS)
+    playerObjectKeys.forEach((key, index)=> {
+        gameObjects[key].position.x += delta * MOVEMENT_SPEED
+    })    
+}
+*/
+
+socket.onclose = (_event) => {
     displayMessage('warning', 'Disconnected')
 }
 
@@ -230,6 +416,8 @@ socket.onclose = (event) => {
  * received value through web socket initialize new game session
  */
 function runScript() {
+
+    resetProjectilePool()
 
     if (!document.querySelector('.btn-active') === null || editor.getValue().trim() === '') {
         displayMessage('error', 'Nothing to run...');
@@ -247,27 +435,25 @@ function runScript() {
         request.open('POST', `${window.location.origin}/run-code`, true);
         request.responseType = 'json';
         request.setRequestHeader('Content-Type', 'application/json');
-        request.send(JSON.stringify({ 
+        request.send(JSON.stringify({
             enemy: selected.value.trim()
         }));
 
-        request.onreadystatechange = (event) => {
+        request.onreadystatechange = (_event) => {
             if (request.readyState === 4 && request.status === 200) {
                 socket.send(JSON.stringify({
                     enemyCode: request.response.enemyCode,
-                    playerCode: editor.getValue(),          
-                    type: 'SIMULATION'                      // Payload type
+                    playerCode: editor.getValue(),
+                    type: 'SIMULATION'
                 }))
             }
         }
     }
 }
 
+/**
+ * End conket connection
+ */
 function endSession() {
     socket.close();
 }
-
-/**
- * gameObjects.playerOne.getChildAt(0) <- Robot base
- *                       getChildAt(1) <- Turret
- */

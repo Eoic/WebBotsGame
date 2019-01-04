@@ -1,24 +1,26 @@
 <nav class='navbar'>
+    <!-- Mobile -->
+    <div class="nav-dropdown" style="width: 100%; height: 56px; background-color: #464141;">
+      <button class="btn btn-primary menu-button" id='list-menu-button' style="display: block">
+          <span class="fa fa-bars"> </span>
+      </button>
+    </div>
 
     <!-- Large screen -->
-    <ul class='navbar-list'>
+    <ul class='navbar-list' id='navbar-items'>
         <li> <a class="{{#if active.index}}navlink-active{{/if}}" href='/'> Home </a> </li>
         <li> <a class="{{#if active.tutorial}}navlink-active{{/if}}" href='/tutorial'> Tutorial </a> </li>
         <li> <a class="{{#if active.documentation}}navlink-active{{/if}}" href='/documentation'> Documentation </a></li>
-        
+        <li> <a class="{{#if active.leaderboards}}navlink-active{{/if}}" href='/leaderboards'> Leaderboards </a></li>
+
         {{#if authenticated}}
             <li> <a class="{{#if active.practice}}navlink-active{{/if}}" href='/practice'> Practice </a> </li>
             <li> <a class="{{#if active.multiplayer}}navlink-active{{/if}}" href='/lobby'> Multiplayer </a> </li>
-            <li style="float: right"> <a href="/logout"> Logout </a></li>
-            <li style="float: right"> <a class="{{#if active.profile}}navlink-active{{/if}}" href="/profile"> My Profile </a></li>
+            <li class="navlink-right"> <a href="/logout"> Logout </a></li>
+            <li class="navlink-right"> <a class="{{#if active.profile}}navlink-active{{/if}}" href="/profile"> My Profile </a></li>
         {{else}}
-            <li style="float: right"> <a class="{{#if active.login}}navlink-active{{/if}}" href="/login"> Login </a> </li>
-            <li style="float: right"> <a class="{{#if active.register}}navlink-active{{/if}}" href="/register"> Register</a> </li>
+            <li class="navlink-right"> <a class="{{#if active.login}}navlink-active{{/if}}" href="/login"> Login </a> </li>
+            <li class="navlink-right"> <a class="{{#if active.register}}navlink-active{{/if}}" href="/register"> Register</a> </li>
         {{/if}}
     </ul>
-
-    <!-- Mobile -->
-    <button class="btn btn-primary menu-dropdown">
-        MENU
-    </button>
 </nav>

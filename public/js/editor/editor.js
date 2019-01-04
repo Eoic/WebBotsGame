@@ -4,7 +4,8 @@ editor.setOptions({
     fontSize: '12pt',
     printMargin: false,
     theme: 'ace/theme/tomorrow_night',
-    mode: 'ace/mode/javascript'
+    mode: 'ace/mode/javascript',
+    minLines: 100
 });
 
 let isResizing = false;
@@ -16,6 +17,9 @@ let splitterHeight = Number.parseInt(document.defaultView.getComputedStyle(split
 
 window.onload = onLoadHandler;
 splitter.addEventListener('mousedown', onMouseDown);
+scriptsSelect.onchange = function(event) {
+    document.getElementById('player-two-name').innerText = event.target.value
+}
 window.addEventListener('mouseup', onMouseUp);
 window.addEventListener('mousemove', onMouseMove);
 window.addEventListener('resize', () => {
@@ -25,7 +29,7 @@ window.addEventListener('resize', () => {
     if(editorHeight > window.innerHeight)
         splitter.style.bottom = window.innerHeight - splitterHeight + 'px'
         editorContainer.style.height = window.innerHeight - splitterHeight + 'px';
-        */
+    */
 })
 
 // Listener callbacks
@@ -34,7 +38,7 @@ function onMouseDown() {
 }
 
 /**
- * Disables resizing once mouse 
+ * Disables resizing once mouse
  * button is released and saves current
  * size in local storage
  */
@@ -44,9 +48,9 @@ function onMouseUp() {
 }
 
 /**
- * Resizes code editor within screen bounds 
+ * Resizes code editor within screen bounds
  * while mouse is being moved
- * @param { Object } event 
+ * @param { Object } event
  */
 function onMouseMove(event) {
     if (isResizing) {
@@ -81,6 +85,7 @@ function setInitialEditorHeight() {
 function onLoadHandler() {
     loadScriptsContainer();
     setInitialEditorHeight();
+    editor.resize()
 }
 
 function loadScriptsContainer() {
@@ -122,7 +127,7 @@ function fetchScripts() {
     request.setRequestHeader('Content-Type', 'application/json');
     request.send();
 
-    request.onreadystatechange = (event) => {
+    request.onreadystatechange = (_event) => {
         if (request.readyState === 4 && request.status === 200) {
             request.response.forEach(element => {
                 appendButton(element.name, selectScript);
@@ -131,6 +136,10 @@ function fetchScripts() {
                 option.innerText = element.name;
                 scriptsSelect.appendChild(option)
             });
+
+            if(typeof(scriptsSelect.children[0]) !== 'undefined') {
+                document.getElementById('player-two-name').innerText = scriptsSelect.children[0].innerText
+            }
         }
     }
 }
@@ -138,21 +147,22 @@ function fetchScripts() {
 /**
  * Display clicked button as selected and fetch code
  * of selected script
- * @param {Object} event On click event 
+ * @param {Object} event On click event
  */
-function selectScript(event) {
+function selectScript(_event) {
     scriptsContainer.querySelectorAll('.btn-active').forEach(element => {
         element.classList.remove('btn-active');
     });
 
     this.classList.add('btn-active');
+    document.getElementById('player-one-name').innerText = this.innerText
 
     let request = new XMLHttpRequest();
     request.responseType = 'json';
     request.open('GET', `${window.location.origin}/scripts/${this.innerText}`, true);
     request.send();
 
-    request.onreadystatechange = (event) => {
+    request.onreadystatechange = (_event) => {
         if (request.readyState === 4 && request.status === 200) {
             typeof request.response.code !== 'undefined' ?
                 editor.setValue(request.response.code, -1) :
@@ -187,6 +197,10 @@ function createScript(event) {
                     option.value = request.response.filename;
                     scriptsSelect.appendChild(option);
                     this.value = '';
+
+                    // Update game info panel
+                    if(scriptsSelect.childElementCount == 1)
+                        document.getElementById('player-two-name').innerText = request.response.filename
                 } else if(request.status === 304) {
                     displayMessage('error', "Script with this name is already created")
                 }
@@ -207,7 +221,6 @@ function isFilenameValid(value) {
 }
 
 function saveScript() {
-
     let selected = document.querySelector('.btn-active');
 
     if (selected === null){
@@ -236,8 +249,6 @@ function saveScript() {
 function deleteScript() {
     let request = new XMLHttpRequest();
     let selected = document.querySelector('.btn-active');
-
-    console.log(selected);
 
     if (selected === null)
         return;

@@ -4,29 +4,26 @@
 
 const {
     VM,
-    VMScript,
     NodeVM
 } = require('vm2');
 const uuidv4 = require('uuid/v4');
-const { Player, CONSTANTS } = require('./api')
+const { Player, CONSTANTS, MESSAGE_TYPE, utilities } = require('./api')
 const User = require('../models/User');
 const express = require('express');
 const router = express.Router();
 
-const TICK_RATE = 60;
-
-const nodeVM = new NodeVM({
-    console: 'inherit'
-});
+const TICK_RATE = 5
+const playerKeys = ['playerOne', 'playerTwo']
 
 const context = {
     delta: 0,
     robot: {}
 };
 
-const vm = new VM({
-    sandbox: { context }
-});
+const nodeVM = new NodeVM({
+    sandbox: { context },
+    console: 'inherit'
+}); 
 
 const time = () => {
     let time = process.hrtime();
@@ -36,36 +33,174 @@ const time = () => {
 let previous = time();
 let tickLength = 1000 / TICK_RATE;
 let gameStates = {};
-//let socketConnections = [];
+let callMap = {
+    moveForwardX: false,
+    moveForwardY: false,
+    moveForward: false,
+    moveBackX: false,
+    moveBackY: false,
+    moveBack: false,
+    shoot: false,
+    rotate: false,
+    rotateTurret: false
+}
 
-// Player API
-const util = {
+// API
+// Robot control functions
+const player = {
+
+    /**
+     * Moves player forwards along by x axis
+     */
     moveForwardX: () => {
-        if(context.robot.x < CONSTANTS.MAP_WIDTH)
+        if(utilities.functionCalledThisFrame(callMap, player.moveForwardX.name))
+            return;
+        
+        if(utilities.checkBoundsUpperX(context.robot.x))
             context.robot.x += context.delta * CONSTANTS.MOVEMENT_SPEED;
     },
+
+    /**
+     * Moves player forwards along y axis
+     */
     moveForwardY: () => {
-        if(context.robot.y > 0 && context.robot.y < CONSTANTS.MAP_HEIGHT)
-            context.robot.y -= context.delta * CONSTANTS.MOVEMENT_SPEED
+        if(utilities.functionCalledThisFrame(callMap, player.moveBackY.name))
+            return;
+
+        if(context.robot.rotate(-1, 0, context.delta))
+            if(utilities.checkBoundsUpperY(context.robot.y))
+                context.robot.y -= context.delta * CONSTANTS.MOVEMENT_SPEED
     },
+
+    /**
+     * Moves player backwards along x axis
+     */
     moveBackX: () => {
-        if(context.robot.x > CONSTANTS.PLAYER_BOX_SIZE)
-            context.robot.x -= context.delta * CONSTANTS.MOVEMENT_SPEED;
+        if(utilities.functionCalledThisFrame(callMap, player.moveBackX.name))
+            return
+        
+        if(context.robot.rotate(0, -1, context.delta))
+            if(utilities.checkBoundsLowerX(context.robot.x))
+                context.robot.x -= context.delta * CONSTANTS.MOVEMENT_SPEED;
     },
+
+    /**
+     * Moves player backwards along y axis
+     */
     moveBackY: () => {
-        if(context.robot.y + CONSTANTS.PLAYER_BOX_SIZE < CONSTANTS.MAP_HEIGHT)
-            context.robot.y += context.delta * CONSTANTS.MOVEMENT_SPEED
+        if(utilities.functionCalledThisFrame(callMap, player.moveBackY.name))
+            return
+
+        if(context.robot.rotate(1, 0, context.delta))
+            if(utilities.checkBoundsLowerY(context.robot.y))
+                context.robot.y += context.delta * CONSTANTS.MOVEMENT_SPEED
     },
+
+    /**
+     * Moves player forwards according to its rotation
+     */
+    moveForward: () => {
+        if(utilities.functionCalledThisFrame(callMap, player.moveForward.name))
+            return
+
+        if(!utilities.checkMapBounds(context.robot.x, context.robot.y))
+            return false
+
+        context.robot.x += context.delta * Math.cos(context.robot.rotation) * CONSTANTS.MOVEMENT_SPEED
+        context.robot.y += context.delta * Math.sin(context.robot.rotation) * CONSTANTS.MOVEMENT_SPEED
+        return true
+    },
+
+    /**
+     * Moves layer backwards according to its rotation
+     */
+    moveBack: () => {
+        if(utilities.functionCalledThisFrame(callMap, player.moveBack.name))
+            return
+
+        if(!utilities.checkMapBounds(context.robot.x, context.robot.y))
+            return
+
+        context.robot.x -= context.delta * Math.cos(context.robot.rotation) * CONSTANTS.MOVEMENT_SPEED
+        context.robot.y -= context.delta * Math.sin(context.robot.rotation) * CONSTANTS.MOVEMENT_SPEED
+    },
+
+    /**
+     * Rotates player clockwise if degrees < 0, 
+     * and counter-clockwise if degrees > 0
+     */
+    rotate: (degrees) => {
+        if(utilities.functionCalledThisFrame(callMap, player.rotate.name))
+            return
+
+        degrees += 90;
+        let radians = degrees * (Math.PI / 180)
+        return context.robot.rotate(Math.cos(radians), Math.sin(radians), context.delta)
+    },
+
+    /**
+     * Rotates player clockwise if degrees < 0, 
+     * and counter-clockwise if degrees > 0
+     */
+    rotateTurret: (degrees) => {
+        if(utilities.functionCalledThisFrame(callMap, player.rotateTurret.name))
+            return
+
+        degrees += 90
+        let radians = degrees * (Math.PI / 180)
+        return context.robot.rotateTurret(Math.cos(radians), Math.sin(radians), context.delta)
+    },
+
+    /**
+     * Shoots bullets by direction of turet rotation
+     */
+    shoot: () => {
+        if(utilities.functionCalledThisFrame(callMap, player.shoot.name))
+            return
+
+        if(context.robot.energy >= CONSTANTS.BULLET_COST){
+            context.robot.createBullet()
+            return true
+        }
+
+        return false 
+    },
+
+    /**
+     * Returns info about player
+     */
     getState: () => {
-        return context.robot;
-    },
-    rotate: () => {
-           
+        return context.robot.getObjectState();
     }
 }
 
-vm.freeze(util, 'util');            // Game api calls
-vm.freeze(CONSTANTS, 'GAME');       // Constants
+// For detecting enemy position
+const scanner = {
+    /**
+     * Traces a line from where turret is pointing
+     * to map border
+     */
+    scan: () => {
+
+    }
+}
+
+// For logging messaget so output window
+const logger = {
+    log: (message, messageType) => {
+        context.robot.messages.push({
+            message,
+            type: messageType
+        })
+
+        console.log("Calling logger with content: " + message)
+    }
+}
+
+nodeVM.freeze(player, 'player');                // Game API calls
+nodeVM.freeze(CONSTANTS, 'GAME');               // Constants
+nodeVM.freeze(logger, 'logger')                 // Info output
+nodeVM.freeze(MESSAGE_TYPE, 'MESSAGE_TYPE')     // Logger message type
 
 /**
  * Updates pair of players and returns their updated state
@@ -73,30 +208,46 @@ vm.freeze(CONSTANTS, 'GAME');       // Constants
  * @param {double} delta Time since last frame
  */
 function update(delta) {
+    // Iterate throug player pairs
     for (let clientID in gameStates) {
         context.delta = delta
 
-        // Player one
-        context.robot = gameStates[clientID].playerOne
-        //let modules = nodeVM.run(gameStates[clientID].code.playerOne);
-        vm.run(gameStates[clientID].code.playerOne + 'update()');
+        // Run code for each player
+        playerKeys.forEach((key, index) => {
+            utilities.resetCallMap(callMap)    
+            context.robot = gameStates[clientID][key]
+            context.robot.messages = []
 
-        // Player two
-        context.robot = gameStates[clientID].playerTwo;
-        //modules = nodeVM.run(gameStates[clientID].code.playerTwo);
-        vm.run(gameStates[clientID].code.playerTwo + 'update()');
+            try {
+                let a = 1000
+                gameStates[clientID].code[key].update()
+            } catch (err) {
+                console.log(err)
+            }
+
+            utilities.checkForHits(gameStates[clientID][playerKeys[1 ^ index]].bulletPool, context.robot, utilities.getExportedFunction(gameStates[clientID].code[key], 'onBulletHit'))
+            context.robot.updateBulletPositions(context.delta, utilities.getExportedFunction(gameStates[clientID].code[key], 'onBulletMiss'))
+        });
 
         // Send game state update
-        if (gameStates[clientID].socket.readyState === 1) {
-            gameStates[clientID].socket.send(JSON.stringify({
-                type: 'GAME_TICK_UPDATE',
-                playerOne: gameStates[clientID].playerOne,
-                playerTwo: gameStates[clientID].playerTwo
-            }))
-        }
+        sendUpdate(gameStates, clientID)
     }
 }
 
+function sendUpdate(gameStates, cliendId) {
+    if (gameStates[cliendId].socket.readyState) {
+        gameStates[cliendId].socket.send(JSON.stringify({
+            type: 'GAME_TICK_UPDATE',
+            playerOne: gameStates[cliendId].playerOne.getObjectState(),
+            playerTwo: gameStates[cliendId].playerTwo.getObjectState()
+        }))
+    }
+}
+
+/**
+ * Calls game loop and calculates 
+ * time between frames
+ */
 const loop = () => {
     setTimeout(loop, tickLength);
     let now = time();
@@ -112,7 +263,6 @@ const loop = () => {
 const wsServerCallback = (ws) => {
 
     ws.id = uuidv4();
-    console.log("Conected: " + ws.id)
 
     ws.on('message', (data) => {
 
@@ -120,19 +270,25 @@ const wsServerCallback = (ws) => {
 
         switch (payload.type) {
             case 'SIMULATION':
-                // Create pair of player objects and add them to loop list
+            case 'MULTIPLAYER':
+                let code = {
+                    playerOne: {},
+                    playerTwo: {}
+                };
+
+                try {
+                    code.playerOne = nodeVM.run(payload.playerCode),
+                    code.playerTwo = nodeVM.run(payload.enemyCode)
+                } catch (err) {
+                    console.log(err)
+                }
+
                 gameStates[ws.id] = {
                     playerOne: new Player(CONSTANTS.P_ONE_START_POS.X, CONSTANTS.P_ONE_START_POS.Y),
                     playerTwo: new Player(CONSTANTS.P_TWO_START_POS.X, CONSTANTS.P_TWO_START_POS.Y),
-                    code: {
-                        playerOne: payload.playerCode,
-                        playerTwo: payload.enemyCode
-                    },
+                    code,
                     socket: ws
                 }
-                break;
-            case 'MULTIPLAYER':
-                //socketConnections.push(ws);
                 break;
             default:
                 return 0;

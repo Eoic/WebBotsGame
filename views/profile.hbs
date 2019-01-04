@@ -1,20 +1,78 @@
+<div id='messages-container'></div>
+
 <aside class="profile-sidebar">
+    {{generateImageFromSource user.identiconHash}}
     <h3> @{{user.username}} </h3>
-    <hr/>
+    <p> Level 1</p>
+    <p style="margin: 0; text-align: left; margin-left: 29px;"> Exp. (68 / 148) </p>
+    <progress max="148" value="68"> </progress>
+    <hr />
+    <label for="multiplayer-script" style="margin-bottom: 5px; display: block;"> Multiplayer script </label>
+    <select id="multiplayer-script-list" style="width: 80%; float: left;">
+        <option value="0"> None </option>
+        {{#each scripts}}
+            <option value="{{_id}}" {{{compareStrings _id ../selectedScript}}}> {{name}}</option>
+        {{/each}}
+    </select>
+    <button class="btn-small" onclick="submitSelection()">
+        <span class="fa fa-save"></span>
+    </button>
 </aside>
 
 <section class="padded section-full-size profile-section">
-    Statistics
+    <h3>Statistics</h3>
     <hr />
-    <ul>
-        <li> Games played: 0 </li>
-        <li> Games won: 0 (0%)</li>
+    <ul style="list-style-type: none">
+        <li> <span class="fas fa fa-play" style="padding: 10px;"></span> Games played: 15 </li>
+        <li> <span class="fas fa fa-trophy" style="padding: 10px;"></span>Games won: 11 (73%)</li>
     </ul>
 
-    Achievements
+    <h3>Achievements</h3>
     <hr />
-    <!-- Grid --->
-    <div>
-    
+
+    <!-- One -->
+    <div class="achievement-item">
+        <span class="fa fa-question" style="float: left; display: inline; padding: 15px;
+                                        height: 46px;
+                                            width: 46px;
+                                        text-align: center;
+                                        margin: -15px;
+                                        font-size: 45px;
+                                        background-color: #96abff;    color: #4c4c4c;">
+
+        </span>
+        <div style="float: left;     margin: 0;
+                    margin-left: 60px;">
+            <h4 style="margin: 0">What is this? </h4>
+            <p style="margin: 0"> Play one multiplayer match </p>
+        </div>
+        <div style="float:right;"> 2018/12/20</div>
+        <div style="clear: left;"></div>
     </div>
+
+    <!-- two -->
+    <div class="achievement-item">
+        <span class="fa fa-robot" style="float: left; display: inline; padding: 15px;
+                                        height: 46px;
+                                            width: 46px;
+                                        text-align: center;
+                                        margin: -15px;
+                                        font-size: 37px;
+                                        background-color: #b80431;    color: #e2e2e2;">
+
+        </span>
+        <div style="float: left;     margin: 0;
+                    margin-left: 60px;">
+            <h4 style="margin: 0"> Sharpshooter </h4>
+            <p style="margin: 0"> Win 10 multiplayer games </p>
+        </div>
+        <div style="float:right;"> 2018/12/21</div>
+        <div style="clear: left;"></div>
+    </div>
+
+    <p> </p>
+    <a style="margin-top: 10px; color: #313131; text-decoration: none;" href="#"> View all achievements </a>
 </section>
+
+<script src="./public/js/ui/notifier.js"></script>
+<script src="./public/js/ui/selectMultiplayerScript.js"></script>

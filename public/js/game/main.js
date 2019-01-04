@@ -46,8 +46,6 @@ gameInfo[1] = {
 // Setup PixiJS renderer
 let gameMap = document.getElementById('game-map');
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
-//PIXI.settings.RENDER_OPTIONS.antialias = true;
-//PIXI.settings.RENDER_OPTIONS.forceFXAA = true;
 
 let app = new PIXI.Application({
     autoResize: true,
@@ -140,7 +138,7 @@ loader.onComplete.add(() => {
     app.stage.addChild(map);
     loadMapCoordinates();
 
-    app.ticker.add(delta => gameLoop(delta))
+    //app.ticker.add(delta => gameLoop(delta))
 
     // Finally, hide loading window and start game loop
     setTimeout(() => {
@@ -362,7 +360,7 @@ socket.onmessage = (event) => {
 
             // Update positions
             playerObjectKeys.forEach((key, index) => {
-                gameObjectsServer[key].position = { x: payload[key].x, y: payload[key].y }
+                gameObjects[key].position = { x: payload[key].x, y: payload[key].y }
                 gameObjects[key].rotation = payload[key].rotation
                 gameObjects[key].getChildAt(1).rotation = payload[key].turretRotation
                 updateProjectiles(payload[key].bulletPool, key)
@@ -382,6 +380,7 @@ socket.onmessage = (event) => {
     }
 }
 
+/*
 function startGameLoop() {
     var lastTime = 0
     var deltaTime = 0
@@ -396,14 +395,17 @@ function startGameLoop() {
         requestAnimationFrame(update);
     }
 }
+*/
 
 /* GAME LOOP */
+/*
 function gameLoop(delta) {
-    //console.log(app.ticker.FPS)
-    /*playerObjectKeys.forEach((key, index)=> {
+    console.log(app.ticker.FPS)
+    playerObjectKeys.forEach((key, index)=> {
         gameObjects[key].position.x += delta * MOVEMENT_SPEED
-    })*/    
+    })    
 }
+*/
 
 socket.onclose = (_event) => {
     displayMessage('warning', 'Disconnected')

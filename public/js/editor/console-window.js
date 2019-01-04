@@ -47,17 +47,27 @@ function toggleConsole(idToSelect, idToRemove, visibility){
     consoleWindow.style.visibility = visibility
 }
 
+function flushMessages() {
+    if(consoleWindow.childNodes.length > 500) {
+        clearConsole()
+        appendMessage("Output has beeen cleared due to reached message limit", 3)
+    }
+}
+
 function appendMessage(messageString, type) {
+
+    flushMessages()
+    
     let outputLine = document.createElement('p');
     
     switch(type) {
-        case 1: 
+        case 1: // Normal
             outputLine.style.color = '#C5C5C5'
             break
-        case 2: 
+        case 2: // Warning
             outputLine.style.color = '#FF8D14'
             break
-        case 3: 
+        case 3: // Error
             outputLine.style.color = '#FF7B7B'
             break
         default: {

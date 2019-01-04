@@ -4,7 +4,8 @@ editor.setOptions({
     fontSize: '12pt',
     printMargin: false,
     theme: 'ace/theme/tomorrow_night',
-    mode: 'ace/mode/javascript'
+    mode: 'ace/mode/javascript',
+    minLines: 100
 });
 
 let isResizing = false;
@@ -84,6 +85,7 @@ function setInitialEditorHeight() {
 function onLoadHandler() {
     loadScriptsContainer();
     setInitialEditorHeight();
+    editor.resize()
 }
 
 function loadScriptsContainer() {
@@ -238,7 +240,6 @@ function saveScript() {
     }));
 
     request.onreadystatechange = (event) => {
-        console.log(event)
         if (request.readyState === 4 && request.status === 200) {
             displayMessage('success', `Script <b> ${filename} </b> saved successfully`);
         }

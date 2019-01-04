@@ -140,7 +140,7 @@ const CONSTANTS = {
         X: 642,
         Y: 432
     },
-    PLAYER_BOX_SIZE: 25,
+    PLAYER_BOX_SIZE: 28,
 
     // Player info
     HP_FULL: 100,

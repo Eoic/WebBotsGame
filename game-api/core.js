@@ -12,7 +12,7 @@ const User = require('../models/User');
 const express = require('express');
 const router = express.Router();
 
-const TICK_RATE = 60
+const TICK_RATE = 5
 const playerKeys = ['playerOne', 'playerTwo']
 
 const context = {
@@ -21,7 +21,8 @@ const context = {
 };
 
 const nodeVM = new NodeVM({
-    sandbox: { context }
+    sandbox: { context },
+    console: 'inherit'
 }); 
 
 const time = () => {
@@ -29,8 +30,6 @@ const time = () => {
     return time[0] * 1000 + time[1] / 1000000;
 }
 
-let tickCount = 0;
-let gameUpdateStep = TICK_RATE; 
 let previous = time();
 let tickLength = 1000 / TICK_RATE;
 let gameStates = {};
@@ -193,13 +192,15 @@ const logger = {
             message,
             type: messageType
         })
+
+        console.log("Calling logger with content: " + message)
     }
 }
 
 nodeVM.freeze(player, 'player');                // Game API calls
 nodeVM.freeze(CONSTANTS, 'GAME');               // Constants
 nodeVM.freeze(logger, 'logger')                 // Info output
-nodeVM.freeze(MESSAGE_TYPE, 'MESSAGE_TYPE')
+nodeVM.freeze(MESSAGE_TYPE, 'MESSAGE_TYPE')     // Logger message type
 
 /**
  * Updates pair of players and returns their updated state
@@ -210,7 +211,7 @@ function update(delta) {
     // Iterate throug player pairs
     for (let clientID in gameStates) {
         context.delta = delta
-    
+
         // Run code for each player
         playerKeys.forEach((key, index) => {
             utilities.resetCallMap(callMap)    
@@ -218,6 +219,7 @@ function update(delta) {
             context.robot.messages = []
 
             try {
+                let a = 1000
                 gameStates[clientID].code[key].update()
             } catch (err) {
                 console.log(err)
@@ -233,7 +235,7 @@ function update(delta) {
 }
 
 function sendUpdate(gameStates, cliendId) {
-    if (gameStates[cliendId].socket.readyState === 1 && tickCount % gameUpdateStep === 0) {
+    if (gameStates[cliendId].socket.readyState) {
         gameStates[cliendId].socket.send(JSON.stringify({
             type: 'GAME_TICK_UPDATE',
             playerOne: gameStates[cliendId].playerOne.getObjectState(),
@@ -242,11 +244,14 @@ function sendUpdate(gameStates, cliendId) {
     }
 }
 
+/**
+ * Calls game loop and calculates 
+ * time between frames
+ */
 const loop = () => {
     setTimeout(loop, tickLength);
     let now = time();
     let delta = (now - previous) / 1000;
-    tickCount++
     update(delta);
     previous = now;
 }
@@ -258,7 +263,6 @@ const loop = () => {
 const wsServerCallback = (ws) => {
 
     ws.id = uuidv4();
-    console.log("Conected: " + ws.id)
 
     ws.on('message', (data) => {
 

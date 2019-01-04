@@ -9,8 +9,19 @@ const multiplayer = require('./multiplayer')
 const lobby = require('./lobby')
 const leaderboards = require('./leaderboards')
 const docs = require('./docs')
-const robots = require('./robots')
+const seo = require('./seo')
 const { router } = require('../game-api/core');
+
+// Sitemap generator
+const sitemap = require('express-sitemap')({
+    url: 'web-bots.herokuapp.com',
+    http: 'https',
+    route: {
+        'ALL': {
+            lastmod: new Date(Date.now()).toLocaleDateString('LT')
+        }
+    }
+})
 
 module.exports = function (app) {
     // Clear cookies from browser if user is not set
@@ -18,8 +29,8 @@ module.exports = function (app) {
     app.use((req, res, next) => {
         if (req.cookies.connect_sid && !req.session.user)
             res.clearCookie('connect_sid')
-        
-        if(req.session.user && req.cookies.connect_sid){
+
+        if (req.session.user && req.cookies.connect_sid) {
             res.locals.authenticated = true
             res.locals.user = {
                 identiconHash: req.session.user.identiconHash,
@@ -30,7 +41,7 @@ module.exports = function (app) {
         next()
     });
     app.use(index);
-    app.use('/robots.txt', robots);
+    app.use(seo);
     app.use('/login', login);
     app.use('/register', register);
     app.use('/documentation', docs)
@@ -41,5 +52,9 @@ module.exports = function (app) {
     app.use('/multiplayer', multiplayer);
     app.use('/lobby', lobby);
     app.use('/leaderboards', leaderboards)
-    app.use(router); // Starting point for running scripts 
+    app.use(router);
+
+    // Generate sitemap
+    sitemap.generate4(app, ['/login', '/register', '/documentation', '/leaderboards'])
+    sitemap.XMLtoFile()
 }

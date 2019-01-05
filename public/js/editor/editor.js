@@ -189,7 +189,8 @@ function createScript(event) {
 
         request.onreadystatechange = (event) => {
             if (request.readyState === 4) {
-                if (request.status === 200) {
+                if (request.status === 201) {
+                    console.log(request.response)
                     displayMessage('success', `Created <b>${request.response.filename}</b>`);
                     appendButton(request.response.filename, selectScript);
                     let option = document.createElement('option');
@@ -201,8 +202,8 @@ function createScript(event) {
                     // Update game info panel
                     if(scriptsSelect.childElementCount == 1)
                         document.getElementById('player-two-name').innerText = request.response.filename
-                } else if(request.status === 304) {
-                    displayMessage('error', "Script with this name is already created")
+                } else if(request.status === 200) { 
+                    displayMessage('error', request.response.message)
                 }
             }
         }

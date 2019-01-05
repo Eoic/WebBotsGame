@@ -18,9 +18,6 @@ const turretAnchor = { x: 0.3, y: 0.5 }
 
 let mouseCoordinates = document.getElementById('game-coordinates')
 
-/** DATA SYNCHRONIZATION PRECISION */
-let positionDelta = 4       // Difference between calculated position of client and server coordinates
-
 /** GAME INFO CONTAINER */
 let gameInfo = [];
 
@@ -53,12 +50,7 @@ let app = new PIXI.Application({
     autoResize: true,
     width: window.innerWidth - 270,
     height: window.innerHeight - 40,
-    backgroundColor: 0x2a2a2a,
-    /*
-    // High res
-    resolution: 2,
-    antialias: true
-    */
+    backgroundColor: 0x2a2a2a
 });
 
 gameMap.appendChild(app.view);
@@ -66,26 +58,9 @@ gameMap.appendChild(app.view);
 const loader = PIXI.loader;         // Resources loader
 const map = new PIXI.Container();   // Map container
 const sprites = {}                  // Loaded sprites
-let gameObjectsServer = {}          // Game object states received from server
 let gameObjects = {}                // Created game objects displayed on client side
 let bulletTexture = {}              // Robot bullet textures
 let bulletSprite = {}               // Robot bullet sprites
-
-/**
- * Defines fields
- */
-function initServerGameObjects() {
-    playerObjectKeys.forEach((key, index) => {
-        gameObjectsServer[key] = {
-            position: {
-                x: initPositions[index].x,
-                y: initPositions[index].y
-            },
-            turretRotation: 0,
-            rotation: 0,
-        }
-    })
-}
 
 /**
  * Add resources to load from public folder
@@ -114,8 +89,6 @@ loader.load((_loader, resources) => {
  * Called once game resources are loaded
  */
 loader.onComplete.add(() => {
-    initServerGameObjects()
-
     playerObjectKeys.forEach((key, index) => {
 
         // Set graphics anchor points
@@ -382,33 +355,6 @@ socket.onmessage = (event) => {
     }
 }
 
-/*
-function startGameLoop() {
-    var lastTime = 0
-    var deltaTime = 0
-
-    requestAnimationFrame(update);
-    
-    function update(time) {
-        deltaTime = (time - lastTime) / 1000;
-        console.log(deltaTime)
-        lastTime = time;
-        //app.render(app.stage);
-        requestAnimationFrame(update);
-    }
-}
-*/
-
-/* GAME LOOP */
-/*
-function gameLoop(delta) {
-    console.log(app.ticker.FPS)
-    playerObjectKeys.forEach((key, index)=> {
-        gameObjects[key].position.x += delta * MOVEMENT_SPEED
-    })    
-}
-*/
-
 socket.onclose = (_event) => {
     displayMessage('warning', 'Disconnected')
 }
@@ -434,7 +380,7 @@ function runScript() {
 
         let request = new XMLHttpRequest();
 
-        request.open('POST', `${window.location.origin}/run-code`, true);
+        request.open('POST', `${window.location.origin}/scripts/run-code`, true);
         request.responseType = 'json';
         request.setRequestHeader('Content-Type', 'application/json');
         request.send(JSON.stringify({

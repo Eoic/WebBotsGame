@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const mongoose = require('mongoose')
 const scriptTemplate = require('../utils/playerScriptTemplate')
-
+const USER_SCRIPTS_LIMIT = 5;
 /**
  * Gets all scripts of specific user
  */
@@ -54,33 +54,45 @@ router.post('/', (req, res) => {
 
     let filename = req.body.filename.trim();
 
-    User.updateOne({
-        username: req.session.user.username,
-        scripts: {
-            $not: {
-                $elemMatch: {
-                    name: {
-                        $eq: filename
-                    }
-                }
-            }
+    User.aggregate([{
+        $match: {
+            username: req.session.user.username
         }
     }, {
-            $push: {
+        $project: {
+            totalScripts: { $size: "$scripts" }
+        }
+    }]).then(response => {
+        if (response[0].totalScripts >= USER_SCRIPTS_LIMIT) {
+            res.status(200).json({ message: 'Max file limit reached' })
+        } else {
+            User.updateOne({
+                username: req.session.user.username,
                 scripts: {
-                    name: req.body.filename,
-                    code: scriptTemplate
+                    $not: {
+                        $elemMatch: {
+                            name: {
+                                $eq: filename
+                            }
+                        }
+                    }
                 }
-            }
-        }).then(response => {
-            if (response.nModified === 0)
-                res.sendStatus(304)
-            else res.status(200).json({
-                filename
-            });
-        }).catch(err => {
-            res.status(500).send(err.message);
-        });
+            }, {
+                    $push: {
+                        scripts: {
+                            name: req.body.filename,
+                            code: scriptTemplate
+                        }
+                    }
+                }).then(response => {
+                    if (response.nModified === 0)
+                        res.status(200).json({ message: 'Script with this name is already created' })
+                    else res.status(201).json({ filename });
+                }).catch(err => {
+                    res.status(500).send(err.message);
+                });
+        }
+    })
 });
 
 /**
@@ -136,5 +148,23 @@ router.post('/select-mp-script', (req, res) => {
         res.sendStatus(200)
     }).catch(err => res.sendStatus(400))
 })
+
+/** RUN CODE ROUTE (SIMULATION) */
+router.post('/run-code', (req, res) => {
+    let enemyScript = req.body.enemy;
+
+    // Fetch code from db
+    User.findOne({
+        username: req.session.user.username
+    }).select({
+        scripts: {
+            $elemMatch: {
+                name: enemyScript
+            }
+        }
+    }).lean().then(response => {
+        return res.json({ enemyCode: response.scripts[0].code });
+    });
+});
 
 module.exports = router;

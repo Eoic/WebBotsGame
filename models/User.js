@@ -16,6 +16,11 @@ const UserSchema = new Schema({
         type: mongoose.Schema.Types.String,
         required: true
     },
+    isAdmin: {
+        type: mongoose.Schema.Types.Boolean,
+        default: false,
+        required: false
+    },  
     identiconHash: {
         type: mongoose.Schema.Types.String,
         required: true
@@ -24,6 +29,24 @@ const UserSchema = new Schema({
         name: mongoose.Schema.Types.String,
         code: mongoose.Schema.Types.String
     }],
+    statistic: {
+        gamesWon: {
+            type: mongoose.Schema.Types.Number,
+            default: 0
+        },
+        gamesLost: {
+            type: mongoose.Schema.Types.Number,
+            default: 0
+        },
+        experience: {
+            type: mongoose.Schema.Types.Number,
+            default: 4
+        },
+        achievements: [{
+            achievementId: mongoose.Schema.Types.ObjectId,
+            unlockedAt: mongoose.Schema.Types.Date
+        }]
+    },
     multiplayerScript: {
         type: mongoose.Schema.Types.ObjectId,
         required: false

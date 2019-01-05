@@ -16,7 +16,7 @@ const initPositions = [
 const baseAnchor = { x: 0.5, y: 0.5 }
 const turretAnchor = { x: 0.3, y: 0.5 }
 
-let coordinates = document.getElementById('game-coordinates')
+let mouseCoordinates = document.getElementById('game-coordinates')
 
 /** DATA SYNCHRONIZATION PRECISION */
 let positionDelta = 4       // Difference between calculated position of client and server coordinates
@@ -231,6 +231,8 @@ function onDragMove(event) {
         this.x = (newPosition.x + map.pivot.x * map.scale.x) - (this.startPosition.x * map.scale.x);
         this.y = (newPosition.y + map.pivot.y * map.scale.y) - (this.startPosition.y * map.scale.y);
     }
+
+    trackMouseCoordinates(event.data.getLocalPosition(this))
 }
 
 /**
@@ -264,7 +266,7 @@ map.on('pointerdown', onDragStart)
     .on('pointerup', onDragEnd)
     .on('pointerupoutside', onDragEnd)
     .on('pointermove', onDragMove)
-    .on('mouseover', (event) => { canZoom = true; console.log(event.data) })
+    .on('mouseover', (event) => { canZoom = true; }) // getLocalPosition()
     .on('mouseout', () => canZoom = false)
 
 /**
@@ -452,12 +454,16 @@ function runScript() {
 }
 
 /**
- * End conket connection
+ * End socket connection
  */
 function endSession() {
     socket.close();
 }
 
+/**
+ * Updates mouse coordinates in game info sidebar
+ * @param {Object} coordinates Local mouse coordinates on game map
+ */
 function trackMouseCoordinates(coordinates) {
-    console.log(coordinates)
+    mouseCoordinates.innerText = `X: ${Math.round(coordinates.x)}  Y: ${Math.round(coordinates.y)}`
 }

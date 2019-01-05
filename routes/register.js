@@ -32,10 +32,10 @@ router.post('/', validateRegistration, (req, res) => {
     }
 
     const salt = "ef89esf288sefsef28sef8seg5sf5s5f9es9fs";
-    const base64Hash = Buffer.from(req.body.username.trim() + salt).toString('base64')
+    const base64Hash = Buffer.from(req.body.username.trim().toLowerCase() + salt).toString('base64')
 
     const user = {
-        username: req.body.username.trim(),
+        username: req.body.username.trim().toLowerCase(),
         password: req.body.password,
         email: req.body.email,
         identiconHash: base64Hash
@@ -43,7 +43,8 @@ router.post('/', validateRegistration, (req, res) => {
 
     User.create(user).then(newUser => {
         req.session.user = {
-            username: newUser.username
+            username: newUser.username,
+            identiconHash: newUser.identiconHash
         }
         res.redirect('/profile')
     }).catch(err => {

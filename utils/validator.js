@@ -3,10 +3,14 @@ const User = require('../models/User');
 
 const validateRegistration = [
     check('username').trim().not().isEmpty()
-    .isLength({
-        min: 4,
-        max: 20
-    }).withMessage('Username must be between 4 and 20 characters long'),
+        .isLength({
+            min: 4,
+            max: 20
+        }).withMessage('Username must be between 4 and 20 characters long'),
+
+    // Check for spaces in string
+    check('username').custom(username =>
+        !/\s/.test(username)).withMessage('Username shouldn\'t contain spaces'),
 
     body('username').custom(value => {
         return User.findOne({
@@ -18,7 +22,7 @@ const validateRegistration = [
     }),
 
     check('email').trim().not().isEmpty()
-    .isEmail().withMessage('Incorrect email format'),
+        .isEmail().withMessage('Incorrect email format'),
 
     body('email').custom(value => {
         return User.findOne({
@@ -34,30 +38,9 @@ const validateRegistration = [
     }).withMessage('Password must be at least 6 characters long'),
 
     check('passwordRepeat', 'Passwords doesn\'t match')
-    .custom((value, {
-        req
-    }) => value === req.body.password)
+        .custom((value, {
+            req
+        }) => value === req.body.password)
 ];
 
-const authStrategyCallback = function (username, password, done) {
-    User.findOne({
-        username
-    }).then(user => {
-
-        if (!user)
-            return done(null, false);
-
-        user.comparePasswords(password, (err, match) => {
-            if (!match)
-                return done(null, false);
-
-            return done(null, user);
-        });
-
-    }).catch(err => done(err));
-}
-
-module.exports = {
-    validateRegistration,
-    authStrategyCallback
-}
+module.exports = { validateRegistration }

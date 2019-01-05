@@ -31,6 +31,7 @@ const hbs = expressHbs.create({
 
             return 0
         },
+        increment: (number) => ++number,
         getValueOrEmpty: (data) => (typeof data !== 'undefined') ? data : '',
         isTrue: (value) => (value === true),
         isDefined: (value) => (typeof value !== 'undefined') ? true : false,

@@ -34,9 +34,14 @@ header {
     background-image: url('../../public/img/ui/nodes.png');
 }
 
+@media only screen and (max-width: 500px) {
+    .smaller-header {
+        font-size: 1.6em;
+    }
+}
+
 article {
     padding: 20px;
-    text-align: justify;
 }
 
 article h3 {
@@ -47,6 +52,7 @@ article h3 {
 article p {
     color: #2f2f2f;
     line-height: 28px;
+    text-align: justify;
 }
 
 .article-img {

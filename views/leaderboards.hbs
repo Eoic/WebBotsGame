@@ -12,24 +12,17 @@
             </tr>
         </thead>
         <tbody>
+            {{#each users}}
             <tr>
-                <td> 1 </td>
-                <td> 8 </td>
-                <td> other_user </td>
+                <td> {{increment @index}} </td>
+                <td> {{level}} </td>
+                <td> {{username}} </td>
                 <td style="text-align: center">
-                    <progress max="100" value="57"> </progress>
-                    (57%)
+                    <progress max="{{gamesPlayed}}" value="{{gamesWon}}"> </progress>
+                    ({{winRate}} %)
                 </td>
             </tr>
-            <tr>
-                <td> 2 </td>
-                <td> 1 </td>
-                <td> eoiic </td>
-                <td style="text-align: center">
-                    <progress max="100" value="49"> </progress>
-                    (49%)
-                </td>
-            </tr>
+            {{/each}}
         </tbody>
     </table>
 </section>

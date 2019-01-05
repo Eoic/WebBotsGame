@@ -16,6 +16,8 @@ const initPositions = [
 const baseAnchor = { x: 0.5, y: 0.5 }
 const turretAnchor = { x: 0.3, y: 0.5 }
 
+let coordinates = document.getElementById('game-coordinates')
+
 /** DATA SYNCHRONIZATION PRECISION */
 let positionDelta = 4       // Difference between calculated position of client and server coordinates
 
@@ -64,7 +66,7 @@ gameMap.appendChild(app.view);
 const loader = PIXI.loader;         // Resources loader
 const map = new PIXI.Container();   // Map container
 const sprites = {}                  // Loaded sprites
-let gameObjectsServer = {}        // Game object states received from server
+let gameObjectsServer = {}          // Game object states received from server
 let gameObjects = {}                // Created game objects displayed on client side
 let bulletTexture = {}              // Robot bullet textures
 let bulletSprite = {}               // Robot bullet sprites
@@ -217,13 +219,13 @@ function setInteractionEvents(playerContainer) {
 function onDragStart(event) {
     this.data = event.data;
     this.dragging = true;
-    this.startPosition = this.data.getLocalPosition(this);
+    this.startPosition = this.data.getLocalPosition(this)
 }
 
 /**
  * Called while map is being dragged.
  */
-function onDragMove(_event) {
+function onDragMove(event) {
     if (this.dragging) {
         let newPosition = this.data.getLocalPosition(this.parent);
         this.x = (newPosition.x + map.pivot.x * map.scale.x) - (this.startPosition.x * map.scale.x);
@@ -262,7 +264,7 @@ map.on('pointerdown', onDragStart)
     .on('pointerup', onDragEnd)
     .on('pointerupoutside', onDragEnd)
     .on('pointermove', onDragMove)
-    .on('mouseover', () => canZoom = true)
+    .on('mouseover', (event) => { canZoom = true; console.log(event.data) })
     .on('mouseout', () => canZoom = false)
 
 /**
@@ -454,4 +456,8 @@ function runScript() {
  */
 function endSession() {
     socket.close();
+}
+
+function trackMouseCoordinates(coordinates) {
+    console.log(coordinates)
 }

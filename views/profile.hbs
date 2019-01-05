@@ -8,7 +8,7 @@
     <progress max="148" value="68"> </progress>
     <hr />
     <label for="multiplayer-script" style="margin-bottom: 5px; display: block;"> Multiplayer script </label>
-    <select id="multiplayer-script-list" style="width: 80%; float: left;">
+    <select name="multiplayer-script" id="multiplayer-script-list" style="width: 80%; float: left;">
         <option value="0"> None </option>
         {{#each scripts}}
             <option value="{{_id}}" {{{compareStrings _id ../selectedScript}}}> {{name}}</option>
@@ -32,41 +32,22 @@
 
     <!-- One -->
     <div class="achievement-item">
-        <span class="fa fa-question" style="float: left; display: inline; padding: 15px;
-                                        height: 46px;
-                                            width: 46px;
-                                        text-align: center;
-                                        margin: -15px;
-                                        font-size: 45px;
-                                        background-color: #96abff;    color: #4c4c4c;">
-
-        </span>
-        <div style="float: left;     margin: 0;
-                    margin-left: 60px;">
-            <h4 style="margin: 0">What is this? </h4>
-            <p style="margin: 0"> Play one multiplayer match </p>
+        <span class="fa fa-question achievement-icon icon-bg-blue"></span>
+        <div class="achievement-text">
+            <h4>What is this? </h4>
+            <p> Play one multiplayer match </p>
         </div>
-        <div style="float:right;"> 2018/12/20</div>
+        <div class="achievement-date"> 2018/12/20</div>
         <div style="clear: left;"></div>
     </div>
 
-    <!-- two -->
     <div class="achievement-item">
-        <span class="fa fa-robot" style="float: left; display: inline; padding: 15px;
-                                        height: 46px;
-                                            width: 46px;
-                                        text-align: center;
-                                        margin: -15px;
-                                        font-size: 37px;
-                                        background-color: #b80431;    color: #e2e2e2;">
-
-        </span>
-        <div style="float: left;     margin: 0;
-                    margin-left: 60px;">
-            <h4 style="margin: 0"> Sharpshooter </h4>
-            <p style="margin: 0"> Win 10 multiplayer games </p>
+        <span class="fa fa-robot achievement-icon icon-bg-crimson"></span>
+        <div class="achievement-text">
+            <h4> Sharpshooter </h4>
+            <p> Win 10 multiplayer games </p>
         </div>
-        <div style="float:right;"> 2018/12/21</div>
+        <div class="achievement-date"> 2018/12/20</div>
         <div style="clear: left;"></div>
     </div>
 

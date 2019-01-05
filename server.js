@@ -53,8 +53,9 @@ app.set('view engine', '.hbs');
 app.engine('.hbs', hbs.engine);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-//app.use('/public', express.static(path.join(__dirname, '/public')));
-app.use(express.static(path.join(__dirname + "/public")));
+//app.use(express.static(path.join(__dirname + "/public")));
+//app.use('/static', express.static('public'))
+app.use('/static', express.static(path.join(__dirname, 'public')))
 
 app.use(session({
     resave: false,

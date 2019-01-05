@@ -37,4 +37,8 @@ router.get('/', (req, res, next) => {
     });
 })
 
+router.get('/achievements', (req, res) => {
+    
+})
+
 module.exports = router;

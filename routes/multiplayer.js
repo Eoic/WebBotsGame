@@ -10,4 +10,14 @@ router.get('/', (_req, res) => {
     });
 })
 
+router.get('/:id', (req, res) => {
+    console.log("reqq")
+    res.render('multiplayer', {
+        title: 'Multiplayer',
+        active: {
+            multiplayer: true
+        }
+    });
+})
+
 module.exports = router;

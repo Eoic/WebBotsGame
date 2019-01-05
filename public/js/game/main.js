@@ -465,5 +465,5 @@ function endSession() {
  * @param {Object} coordinates Local mouse coordinates on game map
  */
 function trackMouseCoordinates(coordinates) {
-    mouseCoordinates.innerText = `X: ${coordinates.x}  Y: ${coordinates.y}`
+    mouseCoordinates.innerText = `X: ${Math.round(coordinates.x)}  Y: ${Math.round(coordinates.y)}`
 }

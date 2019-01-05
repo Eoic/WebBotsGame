@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const mongoose = require('mongoose')
+const scriptTemplate = require('../utils/playerScriptTemplate')
 
 /**
  * Gets all scripts of specific user
@@ -68,7 +69,7 @@ router.post('/', (req, res) => {
             $push: {
                 scripts: {
                     name: req.body.filename,
-                    code: "console.log('New script...')"
+                    code: scriptTemplate
                 }
             }
         }).then(response => {

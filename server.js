@@ -25,6 +25,12 @@ const hbs = expressHbs.create({
     extname: '.hbs',
     partialsDir: 'views/partials',
     helpers: {
+        getPercent: (numerator, denominator) => {
+            if(denominator !== 0 && numerator <= denominator) 
+                return Math.round((numerator / denominator) * 100)
+
+            return 0
+        },
         getValueOrEmpty: (data) => (typeof data !== 'undefined') ? data : '',
         isTrue: (value) => (value === true),
         isDefined: (value) => (typeof value !== 'undefined') ? true : false,

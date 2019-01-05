@@ -1,5 +1,4 @@
-html,
-body {
+html, body {
     height: 100%;
     margin: 0px;
     font-family: 'Open Sans', sans-serif;
@@ -56,7 +55,7 @@ article p {
 }
 
 @media only screen and (min-width: 900px) {
-    article:nth-child(even) > h3 {
+    article:nth-child(even)>h3 {
         text-align: right;
     }
 }
@@ -114,6 +113,7 @@ footer {
 }
 
 /* Flex box */
+
 .container {
     display: flex;
     height: calc(100% - 60px);
@@ -126,6 +126,7 @@ footer {
 }
 
 /* Headers */
+
 .form-legend {
     font-size: 18px;
     font-weight: normal;
@@ -153,6 +154,7 @@ footer {
 }
 
 /* Navigation */
+
 .navbar {
     display: grid;
     position: fixed;
@@ -188,47 +190,73 @@ footer {
 }
 
 .navlink-active {
-    color:#f2f7f2;
+    color: #f2f7f2;
     border-radius: 3px;
     border: 2px solid #8091ca;
 }
 
+/* Should be checkbox */
+
 .menu-button {
     float: right;
-    margin: 8px 12px 8px 8px;
+    margin-top: 5px;
+    margin-right: 10px;
+    padding: 8px 10px 5px 10px;
+    color: #bdccda;
+    font-size: 28px;
+    border-radius: 3px;
+    border: 0;
+    background: none;
+}
+
+.menu-button:hover {
+    background-color: #515d86;
 }
 
 .navlink-right {
-  float: right;
+    float: right;
 }
 
 .navbar-items-none {
-  display: none;
+    display: none;
 }
 
+
+/* Section */
+
+.section-full-size {
+    padding-top: 85px;
+    background-color: rgb(220, 223, 228);
+    height: 100%;
+}
+    
 @media only screen and (max-width: 999px) {
-
-    .navbar-list > li {
-      display: block;
-      padding: 10px;
+    .navbar-list>li {
+        display: block;
+        padding: 10px;
     }
-
     .navlink-right {
-      float: none;
+        float: none;
     }
-
     .navbar {
-      position: inherit;
+        position: inherit;
+    }
+    .section-full-size {
+        padding-top: 33px;
     }
 }
 
 @media only screen and (min-width: 1000px) {
     .nav-dropdown {
-      display: none;
+        display: none;
+    }
+    .navbar-items-none {
+        display: initial;
     }
 }
 
 /* Coding */
+
 #editor {
     position: absolute;
     right: 0;
@@ -270,7 +298,9 @@ footer {
 }
 
 /* BUTTONS */
+
 /* MUTUAL RULES */
+
 .btn {
     border-style: none;
     transition: all 0.2s;
@@ -280,7 +310,9 @@ footer {
 }
 
 /* COLOR STYLES */
+
 /* PRIMARY */
+
 .btn-primary {
     background-color: #3f51b5;
     color: #ebebee;
@@ -304,6 +336,7 @@ footer {
 }
 
 /* PURPLE */
+
 .btn-purple {
     background-color: #654f7e;
     color: #ebebee;
@@ -320,11 +353,13 @@ footer {
 }
 
 /* BUTTON SIZES */
+
 .btn-fluid {
     width: 100%;
 }
 
 /* SPECIFIC BUTTONS */
+
 .btn-adder {
     border-radius: 3px;
     padding: 3px;
@@ -349,7 +384,7 @@ footer {
     color: #ffffff;
 }
 
-.btn-small:hover{
+.btn-small:hover {
     filter: brightness(110%);
 }
 
@@ -358,7 +393,9 @@ footer {
 }
 
 /* ---------- */
+
 /* Notifier   */
+
 /* ---------- */
 
 .notify {
@@ -388,7 +425,6 @@ footer {
     from {
         opacity: 0;
     }
-
     to {
         opacity: 1;
     }
@@ -398,7 +434,6 @@ footer {
     from {
         opacity: 1;
     }
-
     to {
         opacity: 0;
     }
@@ -443,6 +478,7 @@ footer {
 }
 
 /* Image */
+
 .img-right {
     max-width: 440px;
     border-radius: 5px;
@@ -463,6 +499,7 @@ footer {
 }
 
 /* Table */
+
 table {
     width: 60%;
     margin: 0 auto;
@@ -479,6 +516,7 @@ table {
 }
 
 /* TABLE */
+
 table {
     border-radius: 3px;
     border-collapse: collapse;
@@ -494,11 +532,11 @@ tr {
     border-top: 1px solid #cccccc;
 }
 
-thead > tr {
-    background-color: #2468ce; 
+thead>tr {
+    background-color: #2468ce;
 }
 
-tbody > tr {
+tbody>tr {
     background-color: rgb(243, 243, 243);
 }
 
@@ -512,15 +550,10 @@ td {
     padding: 10px;
 }
 
-/* Section */
-.section-full-size {
-    padding-top: 85px;
-    background-color: rgb(228, 227, 227);
-    height: 100%;
-}
-
 /* ( Statistics page ) */
+
 /* Additional paddign to container elements */
+
 .padded {
     padding-left: 125px;
     padding-right: 125px;
@@ -550,10 +583,10 @@ td {
     box-sizing: border-box;
 }
 
-
 /* ACHIEVEMENTS */
+
 .achievement-icon {
-    float: left; 
+    float: left;
     padding: 15px;
     height: 46px;
     width: 55px;
@@ -564,7 +597,8 @@ td {
 
 .achievement-item {
     width: 100%;
-    background-color:rgb(239, 236, 255);
+    min-width: 351px;
+    background-color: rgb(239, 236, 255);
     padding: 15px;
     box-sizing: border-box;
     box-shadow: 0px 1px 3px 0px #2f2f2f;
@@ -587,12 +621,12 @@ td {
 }
 
 .achievement-text {
-    float: left;     
+    float: left;
     margin: 0;
     margin-left: 60px;
 }
 
-.achievement-text > p, h4 {
+.achievement-text>p, h4 {
     margin: 0;
 }
 
@@ -601,13 +635,14 @@ td {
 }
 
 /* Icon colors */
+
 .icon-bg-blue {
-    background-color: #96abff;    
+    background-color: #96abff;
     color: #4c4c4c;
 }
 
 .icon-bg-crimson {
-    background-color: rgb(211, 7, 48); 
+    background-color: rgb(211, 7, 48);
     color: #dfdfdf;
 }
 
@@ -636,18 +671,20 @@ h2.section-header {
     border: 1px;
     padding: 10px;
     margin-top: 10px;
-    border-radius: 3px; width: 70%;
+    border-radius: 3px;
+    width: 70%;
     box-shadow: 0px 0px 3px 0px #2f2f2f;
 }
 
-.docs-code-block > h3 {
+.docs-code-block>h3 {
     font-size: 22px;
     border-radius: 3px;
     width: 100px;
-    color:rgb(6, 131, 89);
+    color: rgb(6, 131, 89);
 }
 
 /* EDITOR OUTPUT */
+
 p.output-line {
     margin: 0;
     padding: 3px;
@@ -672,11 +709,12 @@ button.clear-button:hover {
     background-color: crimson;
 }
 
-button.clear-button:hover > span {
+button.clear-button:hover>span {
     color: rgb(243, 243, 243);
 }
 
 /* LOADING WINDOW */
+
 section.loading-window {
     position: fixed;
     width: 100%;
@@ -718,6 +756,7 @@ progress {
 }
 
 /** PROGRESS BARS */
+
 progress::-moz-progress-bar {
     background-color: rgb(65, 162, 253);
 }
@@ -731,6 +770,7 @@ progress::-webkit-progress-bar {
 }
 
 /* MODAL */
+
 /*
 .modal {
     position: fixed;

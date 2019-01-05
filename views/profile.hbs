@@ -3,9 +3,9 @@
 <aside class="profile-sidebar">
     {{generateImageFromSource user.identiconHash}}
     <h3> @{{user.username}} </h3>
-    <p> Level 1</p>
-    <p style="margin: 0; text-align: left; margin-left: 29px;"> Exp. (68 / 148) </p>
-    <progress max="148" value="68"> </progress>
+    <p> Level {{level}} </p>
+    <p style="margin: 0; text-align: left; margin-left: 29px;"> Exp. ({{experience}} / {{experienceNext}}) </p>
+    <progress max="{{experienceNext}}" value="{{experience}}"> </progress>
     <hr />
     <label for="multiplayer-script" style="margin-bottom: 5px; display: block;"> Multiplayer script </label>
     <select name="multiplayer-script" id="multiplayer-script-list" style="width: 80%; float: left;">
@@ -23,8 +23,8 @@
     <h3>Statistics</h3>
     <hr />
     <ul style="list-style-type: none">
-        <li> <span class="fas fa fa-play" style="padding: 10px;"></span> Games played: 15 </li>
-        <li> <span class="fas fa fa-trophy" style="padding: 10px;"></span>Games won: 11 (73%)</li>
+        <li> <span class="fas fa fa-play" style="padding: 10px;"></span> Games played: {{gamesPlayed}} </li>
+        <li> <span class="fas fa fa-trophy" style="padding: 10px;"></span>Games won: {{gamesWon}} ({{{getPercent gamesWon gamesPlayed}}} %)</li>
     </ul>
 
     <h3>Achievements</h3>

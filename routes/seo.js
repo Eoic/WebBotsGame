@@ -3,7 +3,7 @@ const router = express.Router()
 const path = require('path')
 
 function getFile(filename) {
-    return path.join(__dirname, '../public', filename)
+    return path.join(__dirname, '..', filename)
 }
 
 router.get('/robots.txt', (_req, res) => {

@@ -7,33 +7,23 @@
             <tr>
                 <th></th>
                 <th> Username </th>
-                <th> Level </th>
                 <th> </th>
             </tr>
         </thead>
         <tbody>
+            {{#each users}}
             <tr>
-                <td> 1 </td>
-                <td> eoic </td>
-                <td> 1 </td>
-                <td style="width: 60px">
-                    <button onclick="createGame('eoic')" title="Select opponent">
-                        <span class="fa fa-play"> </span>
-                    </button>
-                </td>
-            </tr>
-            <tr>
-                <td> 2 </td>
-                <td> other_user </td>
-                <td> 8 </td>
+                <td>{{increment @index}}</td>
+                <td>{{username}}</td>
                 <td>
-                    <button>
+                    <a href="/multiplayer/{{username}}" onclick="createGame(this)" class="btn-link" title="Select opponent">
                         <span class="fa fa-play"> </span>
                     </button>
                 </td>
             </tr>
+            {{/each}}
         </tbody>
     </table>
 </section>
 
-<script src="./public/js/game/lobby.js"></script>
+<script src="./js/game/lobby.js"></script>

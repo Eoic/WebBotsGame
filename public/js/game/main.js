@@ -7,7 +7,7 @@ const MAX_ZOOM = 2.4
 const ROBOT_SCALE = 0.15
 const PROJECTILE_POOL_SIZE = 20
 const MOVEMENT_SPEED = 75
-const spritesDir = './public/img/sprites'
+const spritesDir = './img/sprites'
 const playerObjectKeys = ['playerOne', 'playerTwo']
 const initPositions = [
     { x: 32, y: 32 },

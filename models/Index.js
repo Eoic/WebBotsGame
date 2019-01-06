@@ -16,7 +16,7 @@ const connect = (uri) => {
     });
 
     mongoose.connection.on('error', (err) => {
-        chalk(`Failed to connect: ${err}`);
+        console.log(`Failed to connect: ${err}`);
     });
 };
 

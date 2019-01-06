@@ -4,6 +4,7 @@ const User = require('../models/User');
 const mongoose = require('mongoose')
 const scriptTemplate = require('../utils/playerScriptTemplate')
 const USER_SCRIPTS_LIMIT = 5;
+
 /**
  * Gets all scripts of specific user
  */
@@ -22,6 +23,9 @@ router.get('/', (req, res) => {
     });
 });
 
+/**
+ * Get script by objectId
+ */
 router.get('/:id', (req, res) => {
 
     if (typeof req.session.user.username === 'undefined')

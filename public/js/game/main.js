@@ -10,8 +10,8 @@ const MOVEMENT_SPEED = 75
 const spritesDir = '/static/img/sprites'
 const playerObjectKeys = ['playerOne', 'playerTwo']
 const initPositions = [
-    { x: 32, y: 32 },
-    { x: 642, y: 432 }
+    { x: 32, y: 32, rotation: 0 },
+    { x: 642, y: 432, rotation: Math.PI }
 ]
 const baseAnchor = { x: 0.5, y: 0.5 }
 const turretAnchor = { x: 0.3, y: 0.5 }
@@ -50,7 +50,8 @@ let app = new PIXI.Application({
     autoResize: true,
     width: window.innerWidth - 270,
     height: window.innerHeight - 40,
-    backgroundColor: 0x2a2a2a
+    backgroundColor: 0x2a2a2a,
+    antialias: true
 });
 
 gameMap.appendChild(app.view);
@@ -142,6 +143,7 @@ function createPlayerInstance(spriteBase, spriteTurret, initialPosition) {
     player.addChild(spriteTurret)
     player.scale.set(ROBOT_SCALE, ROBOT_SCALE)
     player.position.set(initialPosition.x, initialPosition.y)
+    player.rotation = initialPosition.rotation
     return player
 }
 
@@ -239,7 +241,7 @@ map.on('pointerdown', onDragStart)
     .on('pointerup', onDragEnd)
     .on('pointerupoutside', onDragEnd)
     .on('pointermove', onDragMove)
-    .on('mouseover', (event) => { canZoom = true; }) // getLocalPosition()
+    .on('mouseover', () => { canZoom = true; })
     .on('mouseout', () => canZoom = false)
 
 /**
@@ -340,10 +342,11 @@ socket.onmessage = (event) => {
                 gameObjects[key].getChildAt(1).rotation = payload[key].turretRotation
                 updateProjectiles(payload[key].bulletPool, key)
 
-                // TODO: exclude from MP
-                payload[key].messages.forEach(item => {
-                    appendMessage(item.message, item.type)
-                });
+                if (payload[key].gameType === 'S') {
+                    payload[key].messages.forEach(item => {
+                        appendMessage(item.message, item.type)
+                    });
+                }
             })
 
             updateGameInfoPanel(0, payload.playerOne.health, payload.playerOne.energy)
@@ -363,7 +366,7 @@ socket.onclose = (_event) => {
  * If enemy is selected, gets enemy code from db and send
  * received value through web socket initialize new game session
  */
-function runScript() {
+function runScript(type) {
 
     resetProjectilePool()
 
@@ -392,7 +395,7 @@ function runScript() {
                 socket.send(JSON.stringify({
                     enemyCode: request.response.enemyCode,
                     playerCode: editor.getValue(),
-                    type: 'SIMULATION'
+                    type
                 }))
             }
         }

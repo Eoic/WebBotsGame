@@ -431,6 +431,17 @@ footer {
     margin-top: 55px;
 }
 
+.error-message {
+    margin: 10px auto;
+    text-align: center;
+    padding: 20px 10px;
+    background-color: crimson;
+    color: azure;
+    /* width: 18%; */
+    max-width: 385px;
+    border-radius: 3px;
+}
+
 .notify.visible {
     visibility: visible;
     animation: fade-in 0.7s, fade-out 0.7s 2.5s;
@@ -554,6 +565,12 @@ thead>tr {
 tbody>tr {
     background-color: rgb(243, 243, 243);
 }
+
+@media only screen and (max-width: 600px) {
+    td>progress {
+        display: none;
+    }
+} 
 
 tr:hover {
     filter: brightness(105%);

@@ -208,6 +208,9 @@ function update(delta) {
     for (let clientID in gameStates) {
         context.delta = delta
 
+        // Updates multiplayer game info (if exists)
+        updateMultiplayerInfo(gameStates[clientID])
+
         // Run code for each player
         playerKeys.forEach((key, index) => {
             utilities.resetCallMap(callMap)
@@ -229,13 +232,30 @@ function update(delta) {
     }
 }
 
-function sendUpdate(gameStates, cliendId) {
-    if (gameStates[cliendId].socket.readyState === 1) {
-        gameStates[cliendId].socket.send(JSON.stringify({
+function sendUpdate(gameStates, clientId) {
+    if (gameStates[clientId].socket.readyState === 1) {
+        gameStates[clientId].socket.send(JSON.stringify({
             type: 'GAME_TICK_UPDATE',
-            playerOne: gameStates[cliendId].playerOne.getObjectState(),
-            playerTwo: gameStates[cliendId].playerTwo.getObjectState()
+            playerOne: gameStates[clientId].playerOne.getObjectState(),
+            playerTwo: gameStates[clientId].playerTwo.getObjectState(),
+            gameSession: (typeof gameStates[clientId].multiplayerData !== 'undefined') ? gameStates[clientId].multiplayerData : null
         }))
+    }
+}
+
+/**
+ * Updates info about multiplayer game session
+ * @param {Object} gameState 
+ */
+function updateMultiplayerInfo(gameState) {
+    if(typeof gameState.multiplayerData === 'undefined')
+        return;
+
+    gameState.multiplayerData.elapsedTicks++
+
+    if(gameState.multiplayerData.elapsedTicks >= CONSTANTS.ROUND_TICKS_LENGTH) {
+        gameState.multiplayerData.elapsedRounds++
+        gameState.multiplayerData.elapsedTicks = 0
     }
 }
 
@@ -279,11 +299,19 @@ function compileScripts(scripts, keys) {
  */
 function createGameObjects(scripts, playerKeys, ws, gameType) {
     let code = compileScripts(scripts, playerKeys)
+
     gameStates[ws.id] = {
         playerOne: new Player(CONSTANTS.P_ONE_START_POS.X, CONSTANTS.P_ONE_START_POS.Y, 0, gameType),
         playerTwo: new Player(CONSTANTS.P_TWO_START_POS.X, CONSTANTS.P_TWO_START_POS.Y, Math.PI, gameType),
         socket: ws,
         code
+    }
+
+    if(gameType === 'M') {
+        gameStates[ws.id]['multiplayerData'] = {
+            elapsedTicks: 0,     
+            elapsedRounds: 1
+        }
     }
 }
 
@@ -326,34 +354,3 @@ module.exports = {
     loop,
     wsServerCallback
 };
-
-/**
- * Queue gameStates only in multiplayer.
- * When game is being created, dequeue 2 players and create pair with their
- * socket gameStates and required objects(Player, etc.)
- */
-
-/**
- * Multiplayer
- * 1. New game is being created.
- * 2. Get 2 sockets from queue.
- * 3. Append these as pair.
- * 4. Send to each player.
- */
-
-/**
- * Running code
- * 1.  Get module functions with NodeVM (update, start, etc..)
- * 2.  Run extracted functions in VM using vm.run(<function>)
- * 3.  Update function modifies global vm object
- * 4.  After code execution, get values of global object and assign
- *     them to player object.
- * 5. Send updated data through web socket
- */
-
-/**
- * CODE EXECUTION
- * 1. Create context object inside sandbox
- * 2. Extract module functions through NodeVM
- * 3. Run extracted functions by stringifying them into VM run()
- */

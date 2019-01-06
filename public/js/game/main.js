@@ -17,6 +17,13 @@ const baseAnchor = { x: 0.5, y: 0.5 }
 const turretAnchor = { x: 0.3, y: 0.5 }
 
 let mouseCoordinates = document.getElementById('game-coordinates')
+let timerText = new PIXI.Text('0:00', {
+    fontFamily: 'Arial',
+    fill: '#FFFFFF',
+    fontSize: 32,
+    align: 'center'
+})
+timerText.visible = false
 
 /** GAME INFO CONTAINER */
 let gameInfo = [];
@@ -27,6 +34,7 @@ let canZoom = false
 /** LOADING BLANKET */
 let loadingWindow = document.getElementById('loader-section')
 let loadingProgress = document.getElementById('progress-foreground')
+let roundCounter = document.getElementById('round-counter')
 
 gameInfo[0] = {
     playerHP: document.getElementById('player-one-hp'),
@@ -114,10 +122,9 @@ loader.onComplete.add(() => {
     app.stage.addChild(map);
     loadMapCoordinates();
 
-    //app.ticker.add(delta => gameLoop(delta))
-
     // Finally, hide loading window and start game loop
     setTimeout(() => {
+        createTimer()
         loadingWindow.style.visibility = 'hidden'
     }, 1000)
 })
@@ -341,7 +348,9 @@ socket.onmessage = (event) => {
                 gameObjects[key].rotation = payload[key].rotation
                 gameObjects[key].getChildAt(1).rotation = payload[key].turretRotation
                 updateProjectiles(payload[key].bulletPool, key)
+                updateMultiplayerInfo(payload.gameSession)
 
+                // Log messages to output window (Simulation onlu)
                 if (payload[key].gameType === 'S') {
                     payload[key].messages.forEach(item => {
                         appendMessage(item.message, item.type)
@@ -415,4 +424,28 @@ function endSession() {
  */
 function trackMouseCoordinates(coordinates) {
     mouseCoordinates.innerText = `X: ${Math.round(coordinates.x)}  Y: ${Math.round(coordinates.y)}`
+}
+
+function createTimer() {
+    timerText.x = (window.innerWidth - 260) / 2
+    timerText.y = 70
+    app.stage.addChild(timerText)
+    //app.stage.swapChildren(app.stage.children[0], app.stage.children[1])
+}
+
+function updateTimer(seconds) {
+    let s = seconds % 60
+    timerText.text = `${Math.floor(seconds / 60)}:${(s < 10) ? '0' + s : s}`
+}
+
+function updateMultiplayerInfo(gameInfo) {
+    if(gameInfo === null)
+        return
+    
+    updateTimer(Math.round(gameInfo.elapsedTicks / 30))
+    roundCounter.innerText = gameInfo.elapsedRounds
+}
+
+function clearTimer() {
+    timerText.text = '0:00'
 }

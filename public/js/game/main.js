@@ -50,7 +50,8 @@ let app = new PIXI.Application({
     autoResize: true,
     width: window.innerWidth - 270,
     height: window.innerHeight - 40,
-    backgroundColor: 0x2a2a2a
+    backgroundColor: 0x2a2a2a,
+    antialias: true
 });
 
 gameMap.appendChild(app.view);
@@ -341,10 +342,11 @@ socket.onmessage = (event) => {
                 gameObjects[key].getChildAt(1).rotation = payload[key].turretRotation
                 updateProjectiles(payload[key].bulletPool, key)
 
-                // TODO: exclude from MP
-                payload[key].messages.forEach(item => {
-                    appendMessage(item.message, item.type)
-                });
+                if (payload[key].gameType === 'S') {
+                    payload[key].messages.forEach(item => {
+                        appendMessage(item.message, item.type)
+                    });
+                }
             })
 
             updateGameInfoPanel(0, payload.playerOne.health, payload.playerOne.energy)

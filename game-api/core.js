@@ -2,9 +2,7 @@
  * For running game logic (i.e. game loop(s))
  */
 
-const {
-    NodeVM
-} = require('vm2');
+const { NodeVM } = require('vm2');
 const uuidv4 = require('uuid/v4');
 const { Player, CONSTANTS, MESSAGE_TYPE, utilities } = require('./api')
 const TICK_RATE = 30
@@ -183,12 +181,15 @@ const scanner = {
 // For logging messaget so output window
 const logger = {
     log: (message, messageType) => {
+
+        // In multiplayer no output window is available
+        if(context.robot.gameType === 'M')
+            return;
+
         context.robot.messages.push({
             message,
             type: messageType
         })
-
-        console.log("Calling logger with content: " + message)
     }
 }
 
@@ -251,8 +252,44 @@ const loop = () => {
 }
 
 /**
+ * Runs robot scripts once and
+ * returns script methods
+ * @param {Array} scripts 
+ * @param {Array} keys 
+ */
+function compileScripts(scripts, keys) {
+    let code = {}
+
+    try {
+        keys.forEach((key, index) => {
+            code[key] = nodeVM.run(scripts[index])
+        })
+    } catch (err) {
+        console.log(err)
+    }
+
+    return code
+}
+
+/**
+ * Creates game objects used in game loop
+ * @param {Array} scripts 
+ * @param {Array} playerKeys 
+ * @param {Object} ws 
+ */
+function createGameObjects(scripts, playerKeys, ws, gameType) {
+    let code = compileScripts(scripts, playerKeys)
+    gameStates[ws.id] = {
+        playerOne: new Player(CONSTANTS.P_ONE_START_POS.X, CONSTANTS.P_ONE_START_POS.Y, 0, gameType),
+        playerTwo: new Player(CONSTANTS.P_TWO_START_POS.X, CONSTANTS.P_TWO_START_POS.Y, Math.PI, gameType),
+        socket: ws,
+        code
+    }
+}
+
+/**
  * Client connection event handler
- * @param { Object } ws 
+ * @param { Object } ws Web socket object
  */
 const wsServerCallback = (ws) => {
 
@@ -264,25 +301,12 @@ const wsServerCallback = (ws) => {
 
         switch (payload.type) {
             case 'SIMULATION':
+                createGameObjects([payload.playerCode, payload.enemyCode], ['playerOne', 'playerTwo'], ws, 'S')
+                break;
             case 'MULTIPLAYER':
-                let code = {
-                    playerOne: {},
-                    playerTwo: {}
-                };
-
-                try {
-                    code.playerOne = nodeVM.run(payload.playerCode),
-                        code.playerTwo = nodeVM.run(payload.enemyCode)
-                } catch (err) {
-                    console.log(err)
-                }
-
-                gameStates[ws.id] = {
-                    playerOne: new Player(CONSTANTS.P_ONE_START_POS.X, CONSTANTS.P_ONE_START_POS.Y, 0),
-                    playerTwo: new Player(CONSTANTS.P_TWO_START_POS.X, CONSTANTS.P_TWO_START_POS.Y, Math.PI),
-                    code,
-                    socket: ws
-                }
+                createGameObjects([payload.multiplayerData.playerOne.scripts[0].code,
+                                   payload.multiplayerData.playerOne.scripts[0].code],
+                                   ['playerOne', 'playerTwo'], ws, 'M')
                 break;
             default:
                 return 0;

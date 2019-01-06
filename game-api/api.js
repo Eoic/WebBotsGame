@@ -9,7 +9,7 @@ const MESSAGE_TYPE = {
 }
 
 class Player {
-    constructor(x, y, rotation) {
+    constructor(x, y, rotation, gameType) {
         this.x = x;
         this.y = y;
         this.health = CONSTANTS.HP_FULL
@@ -19,6 +19,7 @@ class Player {
         this.bulletPool = []
         this.messages = []
         this.initBulletPool()
+        this.gameType = gameType
     }
 
     refreshEnergy() {
@@ -197,7 +198,7 @@ const utilities = {
                     enemyInstance.applyDamage(CONSTANTS.BULLET_DAMAGE)
 
                     // Pass info event of enemy being hit
-                    // Should be wrappet inside try / catch
+                    // Should be wrapped inside try / catch
                     if (typeof onBulletHitCallback !== 'undefined') {
                         onBulletHitCallback({
                             getHealth: () => enemyInstance.health,

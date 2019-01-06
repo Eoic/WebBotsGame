@@ -9,12 +9,12 @@ const MESSAGE_TYPE = {
 }
 
 class Player {
-    constructor(x, y) {
+    constructor(x, y, rotation) {
         this.x = x;
         this.y = y;
         this.health = CONSTANTS.HP_FULL
         this.energy = CONSTANTS.EN_FULL
-        this.rotation = 0
+        this.rotation = rotation
         this.turretRotation = 0
         this.bulletPool = []
         this.messages = []

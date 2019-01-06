@@ -555,6 +555,12 @@ tbody>tr {
     background-color: rgb(243, 243, 243);
 }
 
+@media only screen and (max-width: 600px) {
+    td>progress {
+        display: none;
+    }
+} 
+
 tr:hover {
     filter: brightness(105%);
 }

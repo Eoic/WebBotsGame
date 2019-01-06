@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express();
 
-router.get('/', (req, res) => {
+router.get('/', (_req, res) => {
     res.render('index', {
         title: 'NETBOTS - multiplayer robot programming game',
         metaDescription: {

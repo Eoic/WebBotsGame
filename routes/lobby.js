@@ -16,12 +16,4 @@ router.get('/', (req, res) => {
     })
 })
 
-
-router.get('/so', (req, res) => {
-    res.render('dummy', {
-        title: 'Dummy'
-    });
-})
-
-
 module.exports = router;

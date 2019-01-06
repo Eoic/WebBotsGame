@@ -1,30 +1,8 @@
-<script src='/static/js/editor/src-min/ace.js'></script>
-<script src='/static/js/game/client-connect.js'></script>
-<script src='/static/js/ui/notifier.js'></script>
-
 {{>loading}}
 
 <div id='messages-container'></div>
 
-<div id='game-info' class="info-sidebar">
-    <h4 id='player-one-name'> _ </h4>
-    <p>
-        HP (<span id='player-one-hp'>100</span> / 100) 
-        <progress id='player-one-hp-val' value="100" max="100" style="width: 100%" ></progress>
-        ENERGY (<span id='player-one-en'>100</span> / 100) 
-        <progress id='player-one-en-val' value="100" max="100" style="width: 100%"></progress>
-    </p>
-
-    <h4 id='player-two-name'> _ </h4> 
-    <p>
-        HP (<span id='player-two-hp'>100</span> / 100) 
-        <progress id='player-two-hp-val' value="100" max="100" style="width: 100%" ></progress>
-        ENERGY (<span id='player-two-en'>100</span> / 100) 
-        <progress id='player-two-en-val' value="100" max="100" style="width: 100%"></progress>
-    </p>
-    <hr/>
-    <p id='game-coordinates'>X: 0 &nbsp; Y: 0 </p>
-</div>
+{{>game-info-sidebar}}
 
 <div id='game-map'></div>
 <div id='splitter'>
@@ -51,6 +29,8 @@
     <div style="height: 100px"></div>
 </div>
 
+<script src='/static/js/ui/notifier.js'></script>
+<script src='/static/js/editor/src-min/ace.js'></script>
 <script src='/static/js/editor/editor.js'></script>
 <script src='/static/js/pixijs/pixi.min.js'></script>
 <script src='/static/js/game/main.js'></script>

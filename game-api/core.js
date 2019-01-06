@@ -304,28 +304,9 @@ const wsServerCallback = (ws) => {
     });
 }
 
-/** RUN CODE ROUTE (SIMULATION) */
-router.post('/run-code', (req, res) => {
-    let enemyScript = req.body.enemy;
-
-    // Fetch code from db
-    User.findOne({
-        username: req.session.user.username
-    }).select({
-        scripts: {
-            $elemMatch: {
-                name: enemyScript
-            }
-        }
-    }).lean().then(response => {
-        return res.json({ enemyCode: response.scripts[0].code });
-    });
-});
-
 module.exports = {
     loop,
-    wsServerCallback,
-    router
+    wsServerCallback
 };
 
 /**

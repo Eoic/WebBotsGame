@@ -10,7 +10,6 @@ const lobby = require('./lobby')
 const leaderboards = require('./leaderboards')
 const docs = require('./docs')
 const seo = require('./seo')
-const { router } = require('../game-api/core');
 
 // Sitemap generator
 const sitemap = require('express-sitemap')({
@@ -52,7 +51,6 @@ module.exports = function (app) {
     app.use('/multiplayer', multiplayer);
     app.use('/lobby', lobby);
     app.use('/leaderboards', leaderboards)
-    app.use(router);
 
     // Generate sitemap
     sitemap.generate4(app, ['/login', '/register', '/documentation', '/leaderboards'])

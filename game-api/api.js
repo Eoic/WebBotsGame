@@ -156,7 +156,9 @@ const CONSTANTS = {
     // Misc
     ENERGY_REFRESH_STEP: 10,
     PRECISION: 0.1,
-    VISIBLE_MAP_OFFSET: 100
+    VISIBLE_MAP_OFFSET: 100,
+    ROUND_COUNT: 5,            
+    ROUND_TICKS_LENGTH: 2700    // ~1:30 min
 }
 
 const utilities = {

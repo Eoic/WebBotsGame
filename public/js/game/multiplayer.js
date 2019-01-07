@@ -2,6 +2,7 @@ let intervalHandle;
 let counter = 5;
 
 window.addEventListener('load', () => {
+    timerText.visible = true
     intervalHandle = setInterval(updateCountdown, 1000)
     setTimeout(runMultiplayerScripts, 5000)
 })
@@ -29,7 +30,7 @@ function runMultiplayerScripts() {
 }
 
 function updateCountdown() {
-    console.log(`Waiting ${--counter} s.`)
+    updateTimer(--counter)
 }
 
 /**

@@ -16,13 +16,14 @@ router.get('/', (req, res, next) => {
 })
 
 router.post('/', (req, res) => {
-    User.findOne({ username: req.body.username }, 'username password identiconHash').then(user => {
+    User.findOne({ username: req.body.username }, 'username password isAdmin identiconHash').then(user => {
         if (user) {
             user.comparePasswords(req.body.password, (_err, success) => {
                 if (success) {
                     req.session.user = {
                         username: user.username,
-                        identiconHash: user.identiconHash
+                        identiconHash: user.identiconHash,
+                        isAdmin: user.isAdmin
                     }
                     res.redirect('/profile')
                 } else

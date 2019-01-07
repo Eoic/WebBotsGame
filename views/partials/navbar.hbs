@@ -18,6 +18,9 @@
             <li> <a class="{{#if active.multiplayer}}navlink-active{{/if}}" href='/lobby'> Multiplayer </a> </li>
             <li class="navlink-right"> <a href="/logout"> Logout </a></li>
             <li class="navlink-right"> <a class="{{#if active.profile}}navlink-active{{/if}}" href="/profile"> My Profile </a></li>
+            {{#if user.isAdmin}}
+                <li class="navlink-right"><a class="{{#if active.users}}navlink-active{{/if}}" href="/users/manage-users"> Users </a></li>
+            {{/if}}
         {{else}}
             <li class="navlink-right"> <a class="{{#if active.login}}navlink-active{{/if}}" href="/login"> Login </a> </li>
             <li class="navlink-right"> <a class="{{#if active.register}}navlink-active{{/if}}" href="/register"> Register</a> </li>

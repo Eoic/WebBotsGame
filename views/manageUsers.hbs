@@ -1,0 +1,38 @@
+<section class="section-full-size">
+    <h2 class="section-header">
+        Manage users
+    </h2>
+    <table>
+        <thead>
+            <tr>
+                <th> ID </th>
+                <th> Username </th>
+                <th> Email </th>
+                <th> Is admin </th>
+                <th> Created at</th>
+                <th> Updated at </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each users}}
+            <tr>
+                <td>{{_id}}</td>
+                <td>{{username}}</td>
+                <td>{{email}}</td>
+                <td>{{isAdmin}}</td>
+                <td>{{toLocaleString createdAt}}</td>
+                <td>{{toLocaleString updatedAt}}</td>
+                <td>
+                    <button class="btn btn-danger" onclick="deleteUser('{{_id}}', '{{username}}')">
+                        <span class="fa fa-trash"></span>
+                    </button>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</section>
+
+<script src="/static/js/ui/confirm-action.js"></script>
+<script src="/static/js/ui/notifier.js"></script>

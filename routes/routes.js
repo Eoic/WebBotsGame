@@ -10,6 +10,7 @@ const lobby = require('./lobby')
 const leaderboards = require('./leaderboards')
 const docs = require('./docs')
 const seo = require('./seo')
+const users = require('./users')
 
 // Sitemap generator
 const sitemap = require('express-sitemap')({
@@ -34,6 +35,7 @@ module.exports = function (app) {
             res.locals.user = {
                 identiconHash: req.session.user.identiconHash,
                 username: req.session.user.username,
+                isAdmin: req.session.user.isAdmin
             }
         }
 
@@ -51,6 +53,7 @@ module.exports = function (app) {
     app.use('/multiplayer', multiplayer);
     app.use('/lobby', lobby);
     app.use('/leaderboards', leaderboards)
+    app.use('/users', users)
 
     // Generate sitemap
     sitemap.generate4(app, ['/login', '/register', '/documentation', '/leaderboards'])

@@ -2,7 +2,11 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User')
 
-router.get('/', (_req, res) => {
+router.get('/', (req, res, next) => {
+    if (req.session.user && req.cookies.connect_sid)
+        next();
+    else res.redirect('/');
+}, (_req, res) => {
     res.render('multiplayer', {
         title: 'Multiplayer',
         active: {

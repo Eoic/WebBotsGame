@@ -8,12 +8,20 @@ const { Player, CONSTANTS, MESSAGE_TYPE, utilities } = require('./api')
 const TICK_RATE = 30
 const playerKeys = ['playerOne', 'playerTwo']
 const cookie = require('cookie')
+const User = require('../models/User')
+
 // TODO: 
 // Import User model for statistic updating
 // Round reset and statistics collection
 // End round after one of the robots reach 0 HP
 // Enemy scanning API function
 // Identify multiplayer game ending(reached round count)
+// Save isAdmin in session
+// Allow "Manage users" page for admin
+
+// FIX
+// Currently wrong order of names in game info panel
+// Wrong order of starting robots in mp
 
 const context = {
     delta: 0,
@@ -346,18 +354,17 @@ const wsServerCallback = (ws, req, store) => {
                         break;
                     case 'MULTIPLAYER':
                         createGameObjects([payload.multiplayerData.playerOne.scripts[0].code,
-                        payload.multiplayerData.playerOne.scripts[0].code],
-                            ['playerOne', 'playerTwo'], ws, 'M')
+                                           payload.multiplayerData.playerTwo.scripts[0].code],
+                                           ['playerOne', 'playerTwo'], ws, 'M')
                         break;
                     default:
                         return 0;
                 }
             });
 
-            // Delete player from gameStates array
+            // Delete player connection from gameStates array
             ws.on('close', () => {
-                delete gameStates[ws.id] // :(
-                console.log(gameStates)
+                delete gameStates[ws.id]
             });
         }
     })

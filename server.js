@@ -15,6 +15,8 @@ const port = process.env.PORT || config.devPort;
 const WebSocket = require('ws');
 const Handlebars = require('handlebars')
 const Identicon = require('identicon.js');
+const MemoryStore = require('memorystore')(session)
+const store = new MemoryStore()
 
 // Game logic
 const { loop, wsServerCallback } = require('./game-api/core');
@@ -26,7 +28,7 @@ const hbs = expressHbs.create({
     partialsDir: 'views/partials',
     helpers: {
         getPercent: (numerator, denominator) => {
-            if(denominator !== 0 && numerator <= denominator) 
+            if (denominator !== 0 && numerator <= denominator)
                 return Math.round((numerator / denominator) * 100)
 
             return 0
@@ -42,7 +44,7 @@ const hbs = expressHbs.create({
             return new Handlebars.SafeString(result);
         },
         compareStrings: (left, right) => {
-            if(left.equals(right))
+            if (left.equals(right))
                 return "selected"
         }
     }
@@ -63,7 +65,8 @@ app.use(session({
     key: 'connect_sid',
     cookie: {
         maxAge: config.cookieAge || process.env.COOKIE_AGE
-    }
+    },
+    store
 }));
 
 app.use(morgan('tiny'));
@@ -74,5 +77,8 @@ const server = app.listen(port);
 
 // Start game web socket server and game loop
 const wsServer = new WebSocket.Server({ server });
-wsServer.on('connection', wsServerCallback);
+wsServer.on('connection', (ws, req) => {
+    wsServerCallback(ws, req, store)
+});
+
 loop();

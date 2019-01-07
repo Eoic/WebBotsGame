@@ -7,6 +7,13 @@ const uuidv4 = require('uuid/v4');
 const { Player, CONSTANTS, MESSAGE_TYPE, utilities } = require('./api')
 const TICK_RATE = 30
 const playerKeys = ['playerOne', 'playerTwo']
+const cookie = require('cookie')
+// TODO: 
+// Import User model for statistic updating
+// Round reset and statistics collection
+// End round after one of the robots reach 0 HP
+// Enemy scanning API function
+// Identify multiplayer game ending(reached round count)
 
 const context = {
     delta: 0,
@@ -183,7 +190,7 @@ const logger = {
     log: (message, messageType) => {
 
         // In multiplayer no output window is available
-        if(context.robot.gameType === 'M')
+        if (context.robot.gameType === 'M')
             return;
 
         context.robot.messages.push({
@@ -248,12 +255,12 @@ function sendUpdate(gameStates, clientId) {
  * @param {Object} gameState 
  */
 function updateMultiplayerInfo(gameState) {
-    if(typeof gameState.multiplayerData === 'undefined')
+    if (typeof gameState.multiplayerData === 'undefined')
         return;
 
     gameState.multiplayerData.elapsedTicks++
 
-    if(gameState.multiplayerData.elapsedTicks >= CONSTANTS.ROUND_TICKS_LENGTH) {
+    if (gameState.multiplayerData.elapsedTicks >= CONSTANTS.ROUND_TICKS_LENGTH) {
         gameState.multiplayerData.elapsedRounds++
         gameState.multiplayerData.elapsedTicks = 0
     }
@@ -307,9 +314,9 @@ function createGameObjects(scripts, playerKeys, ws, gameType) {
         code
     }
 
-    if(gameType === 'M') {
+    if (gameType === 'M') {
         gameStates[ws.id]['multiplayerData'] = {
-            elapsedTicks: 0,     
+            elapsedTicks: 0,
             elapsedRounds: 1
         }
     }
@@ -319,35 +326,41 @@ function createGameObjects(scripts, playerKeys, ws, gameType) {
  * Client connection event handler
  * @param { Object } ws Web socket object
  */
-const wsServerCallback = (ws) => {
+const wsServerCallback = (ws, req, store) => {
+    const cookieObject = cookie.parse(req.headers.cookie)
+    const sessionId = cookieObject['connect_sid'].slice(2, 38) // !!!
 
-    ws.id = uuidv4();
+    store.get(sessionId, (err, data) => {
 
-    ws.on('message', (data) => {
+        // User autenticated
+        if (!err) {
+            ws.id = uuidv4();
 
-        let payload = JSON.parse(data);
+            ws.on('message', (data) => {
 
-        switch (payload.type) {
-            case 'SIMULATION':
-                createGameObjects([payload.playerCode, payload.enemyCode], ['playerOne', 'playerTwo'], ws, 'S')
-                break;
-            case 'MULTIPLAYER':
-                createGameObjects([payload.multiplayerData.playerOne.scripts[0].code,
-                                   payload.multiplayerData.playerOne.scripts[0].code],
-                                   ['playerOne', 'playerTwo'], ws, 'M')
-                break;
-            default:
-                return 0;
+                let payload = JSON.parse(data);
+
+                switch (payload.type) {
+                    case 'SIMULATION':
+                        createGameObjects([payload.playerCode, payload.enemyCode], ['playerOne', 'playerTwo'], ws, 'S')
+                        break;
+                    case 'MULTIPLAYER':
+                        createGameObjects([payload.multiplayerData.playerOne.scripts[0].code,
+                        payload.multiplayerData.playerOne.scripts[0].code],
+                            ['playerOne', 'playerTwo'], ws, 'M')
+                        break;
+                    default:
+                        return 0;
+                }
+            });
+
+            // Delete player from gameStates array
+            ws.on('close', () => {
+                delete gameStates[ws.id] // :(
+                console.log(gameStates)
+            });
         }
-    });
-
-    ws.send(JSON.stringify({ message: 'Reply from server', type: 'INFO' }))
-
-    // Delete player from gameStates array
-    ws.on('close', () => {
-        delete gameStates[ws.id] // :(
-        console.log(gameStates)
-    });
+    })
 }
 
 module.exports = {

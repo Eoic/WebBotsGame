@@ -350,8 +350,8 @@ socket.onmessage = (event) => {
                 updateProjectiles(payload[key].bulletPool, key)
                 updateMultiplayerInfo(payload.gameSession)
 
-                // Log messages to output window (Simulation onlu)
-                if (payload[key].gameType === 'S') {
+                // Log messages to output window (Simulation only)
+                if (payload.gameType === 'S') {
                     payload[key].messages.forEach(item => {
                         appendMessage(item.message, item.type)
                     });

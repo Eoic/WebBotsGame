@@ -12,12 +12,13 @@ const User = require('../models/User')
 
 // TODO: 
 // Import User model for statistic updating
-// Round reset and statistics collection
+// Round reset and statistics collection update
 // End round after one of the robots reach 0 HP
 // Enemy scanning API function
 // Identify multiplayer game ending(reached round count)
-// Save isAdmin in session
-// Allow "Manage users" page for admin
+// + Save isAdmin in session
+// + Allow "Manage users" page for admin
+// + Add user password reset
 
 // FIX
 // Currently wrong order of names in game info panel
@@ -185,22 +186,17 @@ const player = {
 // For detecting enemy position
 const scanner = {
     /**
-     * Traces a line from where turret is pointing
-     * to map border
+     * Field of view of limited length from turret rotation
+     * If enemy appears inside it, return its data(coordinates, etc)
      */
     scan: () => {
-
+        
     }
 }
 
 // For logging messaget so output window
 const logger = {
     log: (message, messageType) => {
-
-        // In multiplayer no output window is available
-        if (context.robot.gameType === 'M')
-            return;
-
         context.robot.messages.push({
             message,
             type: messageType
@@ -222,7 +218,7 @@ function update(delta) {
     // Iterate throug player pairs
     for (let clientID in gameStates) {
         context.delta = delta
-
+        
         // Updates multiplayer game info (if exists)
         updateMultiplayerInfo(gameStates[clientID])
 
@@ -238,11 +234,13 @@ function update(delta) {
                 console.log(err)
             }
 
+            utilities.wallCollision(context.robot.getPosition(), utilities.getExportedFunction(gameStates[clientID].code[key], 'onWallHit'))
             utilities.checkForHits(gameStates[clientID][playerKeys[1 ^ index]].bulletPool, context.robot, utilities.getExportedFunction(gameStates[clientID].code[key], 'onBulletHit'))
             context.robot.updateBulletPositions(context.delta, utilities.getExportedFunction(gameStates[clientID].code[key], 'onBulletMiss'))
         });
 
-        // Send game state update
+            
+        // Send game update after game state were updated
         sendUpdate(gameStates, clientID)
     }
 }
@@ -253,7 +251,8 @@ function sendUpdate(gameStates, clientId) {
             type: 'GAME_TICK_UPDATE',
             playerOne: gameStates[clientId].playerOne.getObjectState(),
             playerTwo: gameStates[clientId].playerTwo.getObjectState(),
-            gameSession: (typeof gameStates[clientId].multiplayerData !== 'undefined') ? gameStates[clientId].multiplayerData : null
+            gameSession: (typeof gameStates[clientId].multiplayerData !== 'undefined') ? gameStates[clientId].multiplayerData : null,
+            gameType: gameStates[clientId].gameType
         }))
     }
 }
@@ -316,9 +315,10 @@ function createGameObjects(scripts, playerKeys, ws, gameType) {
     let code = compileScripts(scripts, playerKeys)
 
     gameStates[ws.id] = {
-        playerOne: new Player(CONSTANTS.P_ONE_START_POS.X, CONSTANTS.P_ONE_START_POS.Y, 0, gameType),
-        playerTwo: new Player(CONSTANTS.P_TWO_START_POS.X, CONSTANTS.P_TWO_START_POS.Y, Math.PI, gameType),
+        playerOne: new Player(CONSTANTS.P_ONE_START_POS.X, CONSTANTS.P_ONE_START_POS.Y, 0),
+        playerTwo: new Player(CONSTANTS.P_TWO_START_POS.X, CONSTANTS.P_TWO_START_POS.Y, Math.PI),
         socket: ws,
+        gameType,
         code
     }
 

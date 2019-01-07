@@ -51,7 +51,6 @@ router.delete('/manage-users/:id', (req, res, next) => {
 })
 
 router.get('/restore-password', (req, res) => {
-    console.log(req.protocol)
     res.render('restorePassword', {
         title: 'Reset password'
     })
@@ -109,6 +108,7 @@ router.get('/change-password/:id', (req, res) => {
     })
 })
 
+// Todo: add password validation
 router.post('/change-password/:id', (req, res) => {
     if (req.body.password === req.body.newPassword) {
         bcryptjs.hash(req.body.password, SALT_ROUNDS).then(hash => {
@@ -120,7 +120,7 @@ router.post('/change-password/:id', (req, res) => {
                     const currentDate = Date.now()
                     const tokenDate = new Date(user.resetPasswordTokenExpires)
 
-                    // Id password reset token is still not expired
+                    // If password reset token is still not expired
                     if (tokenDate > currentDate) {
                         User.updateOne({
                             resetPasswordToken: req.params.id

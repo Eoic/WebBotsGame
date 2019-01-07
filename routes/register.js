@@ -44,7 +44,8 @@ router.post('/', validateRegistration, (req, res) => {
     User.create(user).then(newUser => {
         req.session.user = {
             username: newUser.username,
-            identiconHash: newUser.identiconHash
+            identiconHash: newUser.identiconHash,
+            isAdmin: newUser.isAdmin
         }
         res.redirect('/profile')
     }).catch(err => {

@@ -33,6 +33,10 @@ const hbs = expressHbs.create({
 
             return 0
         },
+        toLocaleString: (dateString) => { 
+            return new Date(dateString).toLocaleString()
+        },  
+        isArrayEmpty: (array) => (array.length === 0),
         increment: (number) => ++number,
         getValueOrEmpty: (data) => (typeof data !== 'undefined') ? data : '',
         isTrue: (value) => (value === true),

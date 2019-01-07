@@ -21,6 +21,7 @@ function runMultiplayerScripts() {
 
     request.onreadystatechange = (_event) => {
         if(request.readyState === 4 && request.status === 200) {
+            setPlayerNames(request.response.playerOne.username, request.response.playerTwo.username)
             socket.send(JSON.stringify({
                 multiplayerData: request.response,
                 type: 'MULTIPLAYER'
@@ -29,6 +30,19 @@ function runMultiplayerScripts() {
     }
 }
 
+/**
+ * Sets player names in game info panel
+ * @param {String} playerOne 
+ * @param {String} playerTwo 
+ */
+function setPlayerNames(playerOne, playerTwo) {
+    document.getElementById('player-one-name').innerText = playerOne
+    document.getElementById('player-two-name').innerText = playerTwo
+}
+
+/**
+ * Timeout before game start
+ */
 function updateCountdown() {
     updateTimer(--counter)
 }

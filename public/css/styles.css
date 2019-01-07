@@ -367,6 +367,21 @@ footer {
     background-color: #523f66;
 }
 
+/* Crimson */
+.btn-danger {
+    background-color: #f30049;
+    color: #ebebee;
+    border: 1px solid #c20443
+}
+
+.btn-danger:hover {
+    background-color: #c51c41;
+}
+
+.btn-danger:active {
+    background-color: #99151c;
+}
+
 /* BUTTON SIZES */
 
 .btn-fluid {

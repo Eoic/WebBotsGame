@@ -51,7 +51,8 @@ let callMap = {
     moveBack: false,
     shoot: false,
     rotate: false,
-    rotateTurret: false
+    rotateTurret: false,
+    scan: false
 }
 
 // API
@@ -190,7 +191,15 @@ const scanner = {
      * If enemy appears inside it, return its data(coordinates, etc)
      */
     scan: () => {
-        
+        context.robot.scanEnabled = true
+        return context.robot.enemyVisible
+    },
+
+    /**
+     * Returns last scanned position of enemy robot
+     */
+    getTarget: () => {
+        return context.robot.enemyTarget
     }
 }
 
@@ -208,6 +217,7 @@ nodeVM.freeze(player, 'player');                // Game API calls
 nodeVM.freeze(CONSTANTS, 'GAME');               // Constants
 nodeVM.freeze(logger, 'logger')                 // Info output
 nodeVM.freeze(MESSAGE_TYPE, 'MESSAGE_TYPE')     // Logger message type
+nodeVM.freeze(scanner, 'scanner')               // Scanner api for locating enemy robot
 
 /**
  * Updates pair of players and returns their updated state
@@ -234,6 +244,7 @@ function update(delta) {
                 console.log(err)
             }
 
+            utilities.insideFOV(context.robot, gameStates[clientID][playerKeys[1 ^ index]])
             utilities.wallCollision(context.robot.getPosition(), utilities.getExportedFunction(gameStates[clientID].code[key], 'onWallHit'))
             utilities.checkForHits(gameStates[clientID][playerKeys[1 ^ index]].bulletPool, context.robot, utilities.getExportedFunction(gameStates[clientID].code[key], 'onBulletHit'))
             context.robot.updateBulletPositions(context.delta, utilities.getExportedFunction(gameStates[clientID].code[key], 'onBulletMiss'))

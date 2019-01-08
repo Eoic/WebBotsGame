@@ -12,6 +12,9 @@ const validateRegistration = [
     check('username').custom(username =>
         !/\s/.test(username)).withMessage('Username shouldn\'t contain spaces'),
 
+    check('username').matches(/^[a-z0-9_]+$/i)
+        .withMessage('Username should consist of alphanumeric characters and underscores only'),
+
     body('username').custom(value => {
         return User.findOne({
             username: value

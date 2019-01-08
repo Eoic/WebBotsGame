@@ -119,6 +119,8 @@ loader.onComplete.add(() => {
         gameObjects[key].bullets = createProjectilePool()
     })
 
+    createFovMarkers()
+
     app.stage.addChild(map);
     loadMapCoordinates();
 
@@ -350,8 +352,8 @@ socket.onmessage = (event) => {
                 updateProjectiles(payload[key].bulletPool, key)
                 updateMultiplayerInfo(payload.gameSession)
 
-                // Log messages to output window (Simulation onlu)
-                if (payload[key].gameType === 'S') {
+                // Log messages to output window (Simulation only)
+                if (payload.gameType === 'S') {
                     payload[key].messages.forEach(item => {
                         appendMessage(item.message, item.type)
                     });
@@ -439,13 +441,43 @@ function updateTimer(seconds) {
 }
 
 function updateMultiplayerInfo(gameInfo) {
-    if(gameInfo === null)
+    if (gameInfo === null)
         return
-    
+
     updateTimer(Math.round(gameInfo.elapsedTicks / 30))
     roundCounter.innerText = gameInfo.elapsedRounds
 }
 
 function clearTimer() {
     timerText.text = '0:00'
+}
+
+// Additional graphics (for fov, etc)
+function createFovMarkers() {
+    playerObjectKeys.forEach(key => {
+        const triangle = createTriangle()
+        triangle.visible = false
+        gameObjects[key].getChildAt(1).addChild(triangle)
+    })
+}
+
+function createTriangle() {
+    const triangle = new PIXI.Graphics()
+
+    triangle.beginFill(0x445aff, 0.2);
+
+    triangle.moveTo(0, 0);
+    triangle.lineTo(4500, -400);
+    triangle.lineTo(4500, 400);
+    triangle.lineTo(0, 0);
+    triangle.endFill();
+
+    return triangle
+}
+
+function toggleFov() {
+    playerObjectKeys.forEach(key => {
+        const visible = gameObjects[key].getChildAt(1).getChildAt(0).visible
+        gameObjects[key].getChildAt(1).getChildAt(0).visible = !visible
+    })
 }

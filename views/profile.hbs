@@ -11,7 +11,7 @@
     <select name="multiplayer-script" id="multiplayer-script-list" style="width: 80%; float: left;">
         <option value="0"> None </option>
         {{#each scripts}}
-            <option value="{{_id}}" {{{compareStrings _id ../selectedScript}}}> {{name}}</option>
+        <option value="{{_id}}" {{{compareStrings _id ../selectedScript}}}> {{name}}</option>
         {{/each}}
     </select>
     <button class="btn-small" onclick="submitSelection()">
@@ -24,7 +24,8 @@
     <hr />
     <ul style="list-style-type: none">
         <li> <span class="fas fa fa-play" style="padding: 10px;"></span> Games played: {{gamesPlayed}} </li>
-        <li> <span class="fas fa fa-trophy" style="padding: 10px;"></span>Games won: {{gamesWon}} ({{{getPercent gamesWon gamesPlayed}}} %)</li>
+        <li> <span class="fas fa fa-trophy" style="padding: 10px;"></span>Games won: {{gamesWon}} ({{{getPercent
+            gamesWon gamesPlayed}}} %)</li>
     </ul>
 
     <h3>Achievements</h3>

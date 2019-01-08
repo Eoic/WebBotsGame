@@ -12,6 +12,14 @@ const UserSchema = new Schema({
         type: mongoose.Schema.Types.String,
         required: true
     },
+    resetPasswordToken: {
+        type: mongoose.Schema.Types.String,
+        required: false
+    },
+    resetPasswordTokenExpires: {
+        type: mongoose.Schema.Types.Date,
+        required: false
+    },
     email: {
         type: mongoose.Schema.Types.String,
         required: true

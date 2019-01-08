@@ -9,7 +9,7 @@ const MESSAGE_TYPE = {
 }
 
 class Player {
-    constructor(x, y, rotation, gameType) {
+    constructor(x, y, rotation) {
         this.x = x;
         this.y = y;
         this.health = CONSTANTS.HP_FULL
@@ -19,7 +19,6 @@ class Player {
         this.bulletPool = []
         this.messages = []
         this.initBulletPool()
-        this.gameType = gameType
     }
 
     refreshEnergy() {
@@ -49,6 +48,13 @@ class Player {
         else {
             this.rotation = Math.atan2(x, y)
             return true;
+        }
+    }
+
+    getPosition() {
+        return {
+            x: this.x,
+            y: this.y
         }
     }
 
@@ -181,6 +187,16 @@ const utilities = {
     checkMapBounds: (x, y) => {
         return (utilities.checkBoundsLowerX(x) && utilities.checkBoundsLowerY(y) &&
                 utilities.checkBoundsUpperX(x) && utilities.checkBoundsUpperY(y))
+    },
+
+    /**
+     * Checks if player colliding with map border and 
+     * calls callback function
+     */
+    wallCollision: (position, onWallHitCallback) => {
+        if(!utilities.checkMapBounds(position.x, position.y)) {
+            onWallHitCallback()
+        }
     },
 
     /**

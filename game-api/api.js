@@ -8,6 +8,26 @@ const MESSAGE_TYPE = {
     DANGER: 3
 }
 
+class Vector {
+    constructor(x, y) {
+        this.x = x
+        this.y = y
+    }
+
+    dot(vector) {
+        return this.x * vector.x + this.y * vector.y
+    }
+
+    normalize() {
+        return new Vector(this.x / Math.sqrt(this.dot(this)),
+            this.y / Math.sqrt(this.dot(this)))
+    }
+
+    subtract(vector) {
+        return new Vector(this.x - vector.x, this.y - vector.y)
+    }
+}
+
 class Player {
     constructor(x, y, rotation) {
         this.x = x;
@@ -77,7 +97,7 @@ class Player {
                 bullet.isAlive = false
 
                 // Bullet is outside map. Call bullet miss
-                if(typeof onBulletMissCallback !== 'undefined')
+                if (typeof onBulletMissCallback !== 'undefined')
                     onBulletMissCallback()
             } else {
                 bullet.x += delta * Math.cos(bullet.rotation) * CONSTANTS.BULLET_TRAVEL_SPEED
@@ -119,6 +139,11 @@ class Player {
         }
     }
 
+    setEnemyTarget(enemyData) {
+        this.enemyTarget = enemyData
+        this.enemyVisible = true
+    }
+
     getObjectState() {
         return {
             x: this.x,
@@ -128,7 +153,9 @@ class Player {
             rotation: this.rotation,
             turretRotation: this.turretRotation,
             bulletPool: this.bulletPool,
-            messages: this.messages
+            messages: this.messages,
+            enemyTarget: {},
+            enemyVisible: false
         }
     }
 }
@@ -138,7 +165,7 @@ const CONSTANTS = {
     // Game info
     MAP_WIDTH: 674,
     MAP_HEIGHT: 464,
-    MOVEMENT_SPEED: 75,
+    MOVEMENT_SPEED: 130,
     P_ONE_START_POS: {
         X: 32,
         Y: 32
@@ -154,16 +181,17 @@ const CONSTANTS = {
     EN_FULL: 100,
     BULLET_COST: 6,
     BULLET_POOL_SIZE: 20,
-    BULLET_TRAVEL_SPEED: 250,
+    BULLET_TRAVEL_SPEED: 350,
     BULLET_DAMAGE: 15,
     PLAYER_HALF_WIDTH: 28,
     PLAYER_HALF_HEIGHT: 21.3,
+    FOV: 8, // Approximate half angle size
 
     // Misc
     ENERGY_REFRESH_STEP: 10,
     PRECISION: 0.1,
     VISIBLE_MAP_OFFSET: 100,
-    ROUND_COUNT: 5,            
+    ROUND_COUNT: 5,
     ROUND_TICKS_LENGTH: 2700    // ~1:30 min
 }
 
@@ -186,7 +214,7 @@ const utilities = {
      */
     checkMapBounds: (x, y) => {
         return (utilities.checkBoundsLowerX(x) && utilities.checkBoundsLowerY(y) &&
-                utilities.checkBoundsUpperX(x) && utilities.checkBoundsUpperY(y))
+            utilities.checkBoundsUpperX(x) && utilities.checkBoundsUpperY(y))
     },
 
     /**
@@ -194,7 +222,7 @@ const utilities = {
      * calls callback function
      */
     wallCollision: (position, onWallHitCallback) => {
-        if(!utilities.checkMapBounds(position.x, position.y)) {
+        if (!utilities.checkMapBounds(position.x, position.y)) {
             onWallHitCallback()
         }
     },
@@ -218,6 +246,7 @@ const utilities = {
                     // Pass info event of enemy being hit
                     // Should be wrapped inside try / catch
                     if (typeof onBulletHitCallback !== 'undefined') {
+                        // Unsafe call
                         onBulletHitCallback({
                             getHealth: () => enemyInstance.health,
                             getEnergy: () => enemyInstance.energy,
@@ -263,10 +292,39 @@ const utilities = {
      * @param {String} functionName 
      */
     getExportedFunction(apiFunctions, functionName) {
-        if (apiFunctions.hasOwnProperty(functionName))
-            return apiFunctions[functionName]
+        try {
+            if (apiFunctions.hasOwnProperty(functionName))
+                return apiFunctions[functionName]
 
-        return undefined
+            return undefined
+        } catch (err) {
+            console.log(err)
+        }
+    },
+
+    /**
+     * Checks if enemy is visible in robot's field of view
+     * @param {Object} player 
+     * @param {Object} enemy 
+     */
+    insideFOV(player, enemy) {
+        if(!player.scanEnabled)
+            return;
+        
+        let turretDirection = new Vector(Math.cos(player.turretRotation + player.rotation), Math.sin(player.turretRotation + player.rotation))
+        let targetPosition = new Vector(enemy.x, enemy.y)
+        let turretDirectionNormalized = turretDirection.normalize()
+        let turretToTarget = targetPosition.subtract(new Vector(player.x, player.y)).normalize()
+        let angleDeg = Math.acos(turretDirectionNormalized.dot(turretToTarget)) * (180 / Math.PI)
+        player.scanEnabled = false
+        
+        // Update target data if it's in robot's FOV range
+        if(angleDeg <= CONSTANTS.FOV) {
+            player.setEnemyTarget(enemy.getObjectState())
+        } else {
+            // Update target visibility so scanner could return that target is not in range
+            player.enemyVisible = false
+        }
     }
 }
 
@@ -274,6 +332,7 @@ const utilities = {
 module.exports = {
     CONSTANTS,
     MESSAGE_TYPE,
+    Vector,
     Player,
     utilities
 }

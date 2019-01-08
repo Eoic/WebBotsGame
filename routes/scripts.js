@@ -60,7 +60,11 @@ router.post('/', (req, res) => {
     if (typeof req.body.filename === 'undefined')
         return res.sendStatus(400);
 
-    let filename = req.body.filename.trim();
+    const regExp = /^[a-z0-9_]+$/i
+    const filename = req.body.filename.trim();
+
+    if(!filename.match(regExp))
+        return res.status(200).json({ message: 'Script name should contain only alphanumeric characters and underscores' })
 
     User.aggregate([{
         $match: {

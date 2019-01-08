@@ -10,7 +10,7 @@ hr {
 }
 
 body {
-    background-color: #5c6bc0;
+    background: linear-gradient(90deg, rgba(100,139,222,1) 0%, rgba(54,108,172,1) 100%);
 }
 
 main {

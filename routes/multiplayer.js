@@ -16,13 +16,6 @@ router.get('/', (req, res, next) => {
 })
 
 /**
- * Send code for multiplayer
- */
-router.get('/start-game', (req, res) => {
-    res.status(200).json(req.session.user.multiplayer)
-})
-
-/**
  * Fetch code of both players
  */
 router.get('/:id', (req, res) => {

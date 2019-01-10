@@ -19,6 +19,7 @@ window.onload = onLoadHandler;
 splitter.addEventListener('mousedown', onMouseDown);
 scriptsSelect.onchange = function(event) {
     document.getElementById('player-two-name').innerText = event.target.value
+    updateRobotName('playerTwo', event.target.value)
 }
 window.addEventListener('mouseup', onMouseUp);
 window.addEventListener('mousemove', onMouseMove);
@@ -140,6 +141,7 @@ function fetchScripts() {
 
             if(typeof(scriptsSelect.children[0]) !== 'undefined') {
                 document.getElementById('player-two-name').innerText = scriptsSelect.children[0].innerText
+                updateRobotName('playerTwo', scriptsSelect.children[0].innerText)       
             }
         }
     }
@@ -157,6 +159,7 @@ function selectScript(_event) {
 
     this.classList.add('btn-active');
     document.getElementById('player-one-name').innerText = this.innerText
+    updateRobotName('playerOne', this.innerText)
 
     let request = new XMLHttpRequest();
     request.responseType = 'json';
@@ -188,7 +191,7 @@ function createScript(event) {
             filename: this.value
         }));
 
-        request.onreadystatechange = (event) => {
+        request.onreadystatechange = () => {
             if (request.readyState === 4) {
                 if (request.status === 201) {
                     console.log(request.response)

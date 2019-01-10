@@ -9,6 +9,7 @@ const TICK_RATE = 30
 const playerKeys = ['playerOne', 'playerTwo']
 const cookie = require('cookie')
 const User = require('../models/User')
+const path = require('path')
 
 // TODO: 
 // + Import User model for statistic updating
@@ -36,11 +37,10 @@ const nodeVM = new NodeVM({
     require: {
         external: ['node-neural-network'],
         context: 'sandbox'
+        // Only working path: /Users/Karolis/Desktop/web-bots-it/node_modules/node-neural-network
     },
     sandbox: { context }
 });
-
-nodeVM.run("require('node-neural-network')", 'node_modules/node-neural-network')
 
 const time = () => {
     let time = process.hrtime();
@@ -253,6 +253,7 @@ function update(delta) {
 
             utilities.insideFOV(context.robot, gameStates[clientID][playerKeys[1 ^ index]])
             utilities.wallCollision(context.robot.getPosition(), utilities.getExportedFunction(gameStates[clientID].code[key], 'onWallHit'))
+            utilities.checkPlayerCollisions(context.robot.getPosition(), gameStates[clientID][playerKeys[1 ^ index]].getPosition(), utilities.getExportedFunction(gameStates[clientID].code[key], 'onCollision'))
             utilities.checkForHits(gameStates[clientID][playerKeys[1 ^ index]].bulletPool, context.robot, utilities.getExportedFunction(gameStates[clientID].code[key], 'onBulletHit'))
             context.robot.updateBulletPositions(context.delta, utilities.getExportedFunction(gameStates[clientID].code[key], 'onBulletMiss'))
         });
@@ -356,7 +357,7 @@ const wsServerCallback = (ws, req, store) => {
     const cookieObject = cookie.parse(req.headers.cookie)
     const sessionId = cookieObject['connect_sid'].slice(2, 38) // !!!
 
-    store.get(sessionId, (err, data) => {
+    store.get(sessionId, (err, sessionData) => {
 
         // User autenticated
         if (!err) {
@@ -368,12 +369,22 @@ const wsServerCallback = (ws, req, store) => {
 
                 switch (payload.type) {
                     case 'SIMULATION':
-                        createGameObjects([payload.playerCode, payload.enemyCode], ['playerOne', 'playerTwo'], ws, 'S')
+                        createGameObjects([payload.playerCode, payload.enemyCode], playerKeys, ws, 'S')
                         break;
                     case 'MULTIPLAYER':
-                        createGameObjects([payload.multiplayerData.playerOne.scripts[0].code,
-                        payload.multiplayerData.playerTwo.scripts[0].code],
-                            ['playerOne', 'playerTwo'], ws, 'M')
+                        if (typeof sessionData.user.multiplayer !== 'undefined') {
+                            const gameData = sessionData.user.multiplayer
+                            createGameObjects([gameData.playerOne.scripts[0].code, gameData.playerTwo.scripts[0].code], playerKeys, ws, 'M')
+
+                            // To update game info panel
+                            ws.send(JSON.stringify({
+                                type: 'PLAYER_NAMES',
+                                names: {
+                                    playerOne: gameData.playerOne.username,
+                                    playerTwo: gameData.playerTwo.username
+                                }
+                            }))
+                        }
                         break;
                     default:
                         return 0;

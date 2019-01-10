@@ -63,7 +63,7 @@ router.post('/', (req, res) => {
     const regExp = /^[a-z0-9_]+$/i
     const filename = req.body.filename.trim();
 
-    if(!filename.match(regExp))
+    if (!filename.match(regExp))
         return res.status(200).json({ message: 'Script name should contain only alphanumeric characters and underscores' })
 
     User.aggregate([{
@@ -162,7 +162,11 @@ router.post('/select-mp-script', (req, res) => {
 })
 
 /** RUN CODE ROUTE (SIMULATION) */
-router.post('/run-code', (req, res) => {
+router.post('/run-code', (req, res, next) => {
+    if (req.session.user && req.cookies.connect_sid)
+        next();
+    else res.redirect('/');
+}, (req, res) => {
     let enemyScript = req.body.enemy;
 
     // Fetch code from db

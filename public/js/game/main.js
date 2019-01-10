@@ -119,6 +119,7 @@ loader.onComplete.add(() => {
         gameObjects[key].bullets = createProjectilePool()
     })
 
+    createRobotNames()
     createFovMarkers()
 
     app.stage.addChild(map);
@@ -356,8 +357,9 @@ socket.onmessage = (event) => {
             updateGameInfoPanel(0, payload.playerOne.health, payload.playerOne.energy)
             updateGameInfoPanel(1, payload.playerTwo.health, payload.playerTwo.energy)
             break;
-        case 'INFO':
-            // Misc events 
+        case 'PLAYER_NAMES':
+            setPlayerNames(payload.names.playerOne, payload.names.playerTwo)
+            playerObjectKeys.forEach(key => updateRobotName(key, payload.names[key]))
             break;
     }
 }
@@ -473,4 +475,32 @@ function toggleFov() {
         const visible = gameObjects[key].getChildAt(1).getChildAt(0).visible
         gameObjects[key].getChildAt(1).getChildAt(0).visible = !visible
     })
+}
+
+function createRobotNames() {
+    playerObjectKeys.forEach(key => {
+        let nameText = new PIXI.Text("<placeholder>", {
+            fontFamily: 'Arial',
+            fill: '#FFFFFF',
+            fontSize: 85,
+            align: 'center'
+        })
+        nameText.visible = false
+        nameText.position.set(-170, -250)
+        gameObjects[key].addChild(nameText)
+    })
+}
+
+function toggleRobotNames() {
+    playerObjectKeys.forEach(key => {
+        const visible = gameObjects[key].getChildAt(2).visible
+        gameObjects[key].getChildAt(2).visible = !visible
+    })
+}
+
+function updateRobotName(playerKey, name) {
+    if(typeof gameObjects[playerKey] === 'undefined')
+        return;
+        
+    gameObjects[playerKey].getChildAt(2).text = name
 }

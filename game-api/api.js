@@ -36,8 +36,8 @@ class Player {
         this.energy = CONSTANTS.EN_FULL
         this.rotation = rotation
         this.turretRotation = 0
+        this.enemyDistance = -1
         this.bulletPool = []
-        this.messages = []
         this.initBulletPool()
     }
 
@@ -139,8 +139,8 @@ class Player {
         }
     }
 
-    setEnemyTarget(enemyData) {
-        this.enemyTarget = enemyData
+    setEnemyDistance(targetPosition) {
+        this.enemyDistance = Math.sqrt(Math.pow(targetPosition.x - this.x, 2) + Math.pow(targetPosition.y - this.y, 2))
         this.enemyVisible = true
     }
 
@@ -153,8 +153,7 @@ class Player {
             rotation: this.rotation,
             turretRotation: this.turretRotation,
             bulletPool: this.bulletPool,
-            messages: this.messages,
-            enemyTarget: {},
+            enemyDistance: this.enemyDistance,
             enemyVisible: false
         }
     }
@@ -298,7 +297,7 @@ const utilities = {
 
             return undefined
         } catch (err) {
-            console.log(err)
+            //console.log(err)
         }
     },
 
@@ -320,7 +319,7 @@ const utilities = {
         
         // Update target data if it's in robot's FOV range
         if(angleDeg <= CONSTANTS.FOV) {
-            player.setEnemyTarget(enemy.getObjectState())
+            player.setEnemyDistance(enemy.getPosition())
         } else {
             // Update target visibility so scanner could return that target is not in range
             player.enemyVisible = false

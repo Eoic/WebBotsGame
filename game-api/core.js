@@ -11,10 +11,10 @@ const cookie = require('cookie')
 const User = require('../models/User')
 
 // TODO: 
-// Import User model for statistic updating
+// + Import User model for statistic updating
 // Round reset and statistics collection update
 // End round after one of the robots reach 0 HP
-// Enemy scanning API function
+// + Enemy scanning API function
 // Identify multiplayer game ending(reached round count)
 // + Save isAdmin in session
 // + Allow "Manage users" page for admin
@@ -26,13 +26,21 @@ const User = require('../models/User')
 
 const context = {
     delta: 0,
-    robot: {}
+    robot: {},
+    messages: []
 };
 
+
 const nodeVM = new NodeVM({
-    sandbox: { context },
-    console: 'inherit'
+    wrapper: "commonjs",
+    require: {
+        external: ['node-neural-network'],
+        context: 'sandbox'
+    },
+    sandbox: { context }
 });
+
+nodeVM.run("require('node-neural-network')", 'node_modules/node-neural-network')
 
 const time = () => {
     let time = process.hrtime();
@@ -190,25 +198,25 @@ const scanner = {
      * Field of view of limited length from turret rotation
      * If enemy appears inside it, return its data(coordinates, etc)
      */
-    scan: () => {
+    pulse: () => {
         context.robot.scanEnabled = true
         return context.robot.enemyVisible
     },
 
     /**
-     * Returns last scanned position of enemy robot
+     * Returns last scanned distance from scanned enemy
      */
-    getTarget: () => {
-        return context.robot.enemyTarget
+    getTargetDistance: () => {
+        return context.robot.enemyDistance
     }
 }
 
 // For logging messaget so output window
 const logger = {
-    log: (message, messageType) => {
-        context.robot.messages.push({
-            message,
-            type: messageType
+    log: (content, messageType) => {
+        context.messages.push({
+            content,
+            type: (typeof messageType !== 'undefined') ? messageType : MESSAGE_TYPE.INFO
         })
     }
 }
@@ -228,7 +236,7 @@ function update(delta) {
     // Iterate throug player pairs
     for (let clientID in gameStates) {
         context.delta = delta
-        
+
         // Updates multiplayer game info (if exists)
         updateMultiplayerInfo(gameStates[clientID])
 
@@ -236,7 +244,6 @@ function update(delta) {
         playerKeys.forEach((key, index) => {
             utilities.resetCallMap(callMap)
             context.robot = gameStates[clientID][key]
-            context.robot.messages = []
 
             try {
                 gameStates[clientID].code[key].update()
@@ -250,9 +257,8 @@ function update(delta) {
             context.robot.updateBulletPositions(context.delta, utilities.getExportedFunction(gameStates[clientID].code[key], 'onBulletMiss'))
         });
 
-            
-        // Send game update after game state were updated
-        sendUpdate(gameStates, clientID)
+        sendUpdate(gameStates, clientID)    // Send game update after game state were updated
+        context.messages = []               // Flush output buffer
     }
 }
 
@@ -263,7 +269,8 @@ function sendUpdate(gameStates, clientId) {
             playerOne: gameStates[clientId].playerOne.getObjectState(),
             playerTwo: gameStates[clientId].playerTwo.getObjectState(),
             gameSession: (typeof gameStates[clientId].multiplayerData !== 'undefined') ? gameStates[clientId].multiplayerData : null,
-            gameType: gameStates[clientId].gameType
+            gameType: gameStates[clientId].gameType,
+            messages: context.messages
         }))
     }
 }
@@ -365,8 +372,8 @@ const wsServerCallback = (ws, req, store) => {
                         break;
                     case 'MULTIPLAYER':
                         createGameObjects([payload.multiplayerData.playerOne.scripts[0].code,
-                                           payload.multiplayerData.playerTwo.scripts[0].code],
-                                           ['playerOne', 'playerTwo'], ws, 'M')
+                        payload.multiplayerData.playerTwo.scripts[0].code],
+                            ['playerOne', 'playerTwo'], ws, 'M')
                         break;
                     default:
                         return 0;
@@ -377,6 +384,8 @@ const wsServerCallback = (ws, req, store) => {
             ws.on('close', () => {
                 delete gameStates[ws.id]
             });
+        } else {
+            console.log(err)
         }
     })
 }

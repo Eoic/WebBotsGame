@@ -188,16 +188,6 @@ function resetProjectilePool() {
 }
 
 /**
- * Binds events on player container 
- */
-function setInteractionEvents(playerContainer) {
-    playerContainer.interactive = true;
-    playerContainer.mouseover = () => {
-        console.log(`X: ${playerContainer.position.x} Y: ${playerContainer.position.y}`)
-    }
-}
-
-/**
  * Called on map drag start
  */
 function onDragStart(event) {
@@ -263,7 +253,7 @@ window.onresize = () =>
  * Add event listener for map zooming
  * using mouse wheel
  */
-window.onwheel = (event) => {
+window.addEventListener('wheel', (event) => {
     if (canZoom) {
         if (event.deltaY < 0) {
             map.scale.x = clampNumber(map.scale.x * ZOOM_SCALE, MIN_ZOOM, MAX_ZOOM)
@@ -273,7 +263,10 @@ window.onwheel = (event) => {
             map.scale.y = clampNumber(map.scale.x / ZOOM_SCALE, MIN_ZOOM, MAX_ZOOM)
         }
     }
-}
+}, {
+        passive: true,
+        capture: true
+    })
 
 /**
  * Limits number value to defined min and max bounds
@@ -351,14 +344,14 @@ socket.onmessage = (event) => {
                 gameObjects[key].getChildAt(1).rotation = payload[key].turretRotation
                 updateProjectiles(payload[key].bulletPool, key)
                 updateMultiplayerInfo(payload.gameSession)
-
-                // Log messages to output window (Simulation only)
-                if (payload.gameType === 'S') {
-                    payload[key].messages.forEach(item => {
-                        appendMessage(item.message, item.type)
-                    });
-                }
             })
+
+            // Update output
+            if (payload.gameType === 'S') {
+                payload.messages.forEach(item => {
+                    appendMessage(item.content, item.type)
+                });
+            }
 
             updateGameInfoPanel(0, payload.playerOne.health, payload.playerOne.energy)
             updateGameInfoPanel(1, payload.playerTwo.health, payload.playerTwo.energy)

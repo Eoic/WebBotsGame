@@ -834,24 +834,6 @@ progress::-webkit-progress-bar {
     margin: 0;
 }
 
-/* MODAL */
-
-/*
-.modal {
-    position: fixed;
-    top: 15%;
-    left: calc(50% - 250px);
-    width: 500px;
-    height: 300px;;
-    background-color: #f3f3f3;
-    z-index: 5;
-    border-radius: 2px;
-    border: 1px solid #4d4d4d;
-    box-shadow: 0px 0px 6px 0px #464646;
-    padding: 15px;
-}
-*/
-
 .styled-link {
     text-align: center;
     color: #2f2f2f;
@@ -881,3 +863,36 @@ progress::-webkit-progress-bar {
     color: crimson;
     background-color: thistle;
 }  
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 15%;
+    left: calc(50% - 250px);
+    width: 500px;
+    height: 145px;
+    background-color: #f3f3f3;
+    z-index: 5;
+    border-radius: 3px;
+    border: 1px solid #4d4d4d;
+    box-shadow: 0px 0px 6px 0px #464646;
+    padding: 8px 15px 15px 15px;
+}
+
+.modal-blanket {
+    visibility: hidden;
+    z-index: 1000;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(55, 57, 63, 0.829);
+}
+
+.modal-footer {
+    position: absolute;
+    box-sizing: border-box;
+    width: 95%;
+    display: block;
+    bottom: 0;
+    margin-bottom: 15px;
+}

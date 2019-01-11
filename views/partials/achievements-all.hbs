@@ -1,0 +1,16 @@
+<section class="padded section-full-size profile-section">
+    <h2 class="section-header">
+        ACHIEVEMENTS
+    </h2>
+
+    {{#each achievements}}
+    <div class="achievement-item">
+        <span class="fa fa-{{iconName}} achievement-icon"></span>
+        <div class="achievement-text">
+            <h4>{{title}}</h4>
+            <p>{{description}}</p>
+        </div>
+        <div style="clear: left;"></div>
+    </div>
+    {{/each}}
+</section>

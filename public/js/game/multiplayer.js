@@ -9,25 +9,11 @@ window.addEventListener('load', () => {
 
 window.addEventListener('beforeunload', beforeUnloadHandler)
 
+// Starts game after countdown
 function runMultiplayerScripts() {
-    let request = new XMLHttpRequest()
-    request.open('GET', `${window.location.origin}/multiplayer/start-game`, true)
-    request.responseType = 'json';
-    request.setRequestHeader('Content-Type', 'application/json');
-    request.send()
-
     // Stop countdown
     clearInterval(intervalHandle)
-
-    request.onreadystatechange = (_event) => {
-        if(request.readyState === 4 && request.status === 200) {
-            setPlayerNames(request.response.playerOne.username, request.response.playerTwo.username)
-            socket.send(JSON.stringify({
-                multiplayerData: request.response,
-                type: 'MULTIPLAYER'
-            }))
-        }
-    }
+    socket.send(JSON.stringify({ type: 'MULTIPLAYER' }))
 }
 
 /**

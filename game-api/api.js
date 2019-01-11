@@ -36,9 +36,11 @@ class Player {
         this.energy = CONSTANTS.EN_FULL
         this.rotation = rotation
         this.turretRotation = 0
+        this.enemyDistance = -1
         this.bulletPool = []
-        this.messages = []
         this.initBulletPool()
+        this.targetX = 0
+        this.targetY = 0
     }
 
     refreshEnergy() {
@@ -139,8 +141,8 @@ class Player {
         }
     }
 
-    setEnemyTarget(enemyData) {
-        this.enemyTarget = enemyData
+    setEnemyDistance(targetPosition) {
+        this.enemyDistance = Math.sqrt(Math.pow(targetPosition.x - this.x, 2) + Math.pow(targetPosition.y - this.y, 2))
         this.enemyVisible = true
     }
 
@@ -153,8 +155,7 @@ class Player {
             rotation: this.rotation,
             turretRotation: this.turretRotation,
             bulletPool: this.bulletPool,
-            messages: this.messages,
-            enemyTarget: {},
+            enemyDistance: this.enemyDistance,
             enemyVisible: false
         }
     }
@@ -227,6 +228,16 @@ const utilities = {
         }
     },
 
+    // (Called once per frame, not per robot update)
+    checkPlayerCollisions: (playerOnePos, playerTwoPos, onRobotHitCallback) => {
+        if (playerOnePos.x >= playerTwoPos.x - CONSTANTS.PLAYER_HALF_WIDTH &&
+            playerOnePos.y >= playerTwoPos.y - CONSTANTS.PLAYER_HALF_HEIGHT &&
+            playerOnePos.x <= playerTwoPos.x + CONSTANTS.PLAYER_HALF_WIDTH &&
+            playerOnePos.y <= playerTwoPos.y + CONSTANTS.PLAYER_HALF_HEIGHT) {
+            onRobotHitCallback()
+        }
+    },
+
     /**
      * Checks if any of fired bullet hit enemy player.
      * If hit was detected, dispose bullet and apply damage
@@ -286,8 +297,8 @@ const utilities = {
     },
 
     /**
-     * Checks if player exported function with name of 
-     * functionName and returns it
+     * Checks if player exported function of given name
+     * exists and returns it
      * @param {Object} apiFunctions 
      * @param {String} functionName 
      */
@@ -308,19 +319,19 @@ const utilities = {
      * @param {Object} enemy 
      */
     insideFOV(player, enemy) {
-        if(!player.scanEnabled)
+        if (!player.scanEnabled)
             return;
-        
+
         let turretDirection = new Vector(Math.cos(player.turretRotation + player.rotation), Math.sin(player.turretRotation + player.rotation))
         let targetPosition = new Vector(enemy.x, enemy.y)
         let turretDirectionNormalized = turretDirection.normalize()
         let turretToTarget = targetPosition.subtract(new Vector(player.x, player.y)).normalize()
         let angleDeg = Math.acos(turretDirectionNormalized.dot(turretToTarget)) * (180 / Math.PI)
         player.scanEnabled = false
-        
+
         // Update target data if it's in robot's FOV range
-        if(angleDeg <= CONSTANTS.FOV) {
-            player.setEnemyTarget(enemy.getObjectState())
+        if (angleDeg <= CONSTANTS.FOV) {
+            player.setEnemyDistance(enemy.getPosition())
         } else {
             // Update target visibility so scanner could return that target is not in range
             player.enemyVisible = false

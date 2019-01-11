@@ -1,4 +1,5 @@
 {{>loading}}
+{{>modal}}
 
 <div id='messages-container'></div>
 
@@ -21,7 +22,7 @@
     <button class="btn btn-primary unselectable" onclick="saveScript()" title="Save">
         <span class="fa fa-save"></span> SAVE
     </button>
-    <button class="btn btn-primary unselectable" onclick="deleteScript()" title="Delete">
+    <button class="btn btn-primary unselectable" onclick="openModal(isScriptSelected()); setDeletionMessage()" title="Delete">
         <span class="fa fa-trash"></span> DELETE
     </button>
 </div>
@@ -29,9 +30,10 @@
     <div style="height: 100px"></div>
 </div>
 
+<script src='/static/js/ui/modal-toggle.js'></script>
 <script src='/static/js/ui/notifier.js'></script>
 <script src='/static/js/editor/src-min/ace.js'></script>
-<script src='/static/js/editor/editor.js'></script>
 <script src='/static/js/pixijs/pixi.min.js'></script>
 <script src='/static/js/game/main.js'></script>
+<script src='/static/js/editor/editor.js'></script>
 <script src='/static/js/editor/console-window.js'></script>

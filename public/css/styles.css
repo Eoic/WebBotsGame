@@ -10,7 +10,7 @@ hr {
 }
 
 body {
-    background: linear-gradient(90deg, rgba(100,139,222,1) 0%, rgba(54,108,172,1) 100%);
+    background: linear-gradient(90deg, rgba(100, 139, 222, 1) 0%, rgba(54, 108, 172, 1) 100%);
 }
 
 main {
@@ -227,7 +227,6 @@ footer {
     display: none;
 }
 
-
 /* Section */
 
 .section-full-size {
@@ -235,7 +234,7 @@ footer {
     background-color: rgb(220, 223, 228);
     height: 100%;
 }
-    
+
 @media only screen and (max-width: 999px) {
     .navbar-list>li {
         display: block;
@@ -304,6 +303,7 @@ footer {
 }
 
 /* BUTTONS */
+
 .btn-link {
     color: #333333;
     padding: 5px 10px;
@@ -368,6 +368,7 @@ footer {
 }
 
 /* Crimson */
+
 .btn-danger {
     background-color: #f30049;
     color: #ebebee;
@@ -380,6 +381,35 @@ footer {
 
 .btn-danger:active {
     background-color: #99151c;
+}
+
+/* Green */
+.btn-success {
+    background-color: #10a353;
+    color: #ebebee;
+    border: 1px solid #40c204
+}
+
+.btn-success:hover {
+    background-color: rgb(28, 197, 79);
+}
+
+.btn-success:active {
+    background-color: #10b642;
+}
+
+.btn-block {
+    display: block;
+}
+
+.btn-center {
+    margin: 0 auto;
+}
+
+.btn-link {
+    text-decoration: none;
+    max-width: 90px;
+    text-align: center
 }
 
 /* BUTTON SIZES */
@@ -585,7 +615,7 @@ tbody>tr {
     td>progress {
         display: none;
     }
-} 
+}
 
 tr:hover {
     filter: brightness(105%);
@@ -628,6 +658,16 @@ td {
     float: right;
     width: calc(100% - 250px);
     box-sizing: border-box;
+}
+
+@media only screen and (max-width: 755px) {
+    .profile-sidebar {
+        display: none;
+    }
+    .profile-section {
+        float: none;
+        width: 100%;
+    }
 }
 
 /* ACHIEVEMENTS */
@@ -696,11 +736,14 @@ td {
 /* Headers */
 
 h2.section-header {
-    padding-left: 150px;
     padding-bottom: 20px;
     margin-top: -13px;
     box-shadow: inset 0px -6px 9px -8px #2f2f2f;
     color: #333333;
+}
+
+.padded-header {
+    padding-left: 150px;
 }
 
 .section-paragraph {
@@ -817,6 +860,7 @@ progress::-webkit-progress-bar {
 }
 
 /** Multiplayer */
+
 #round-info {
     text-align: center;
     margin: 0;
@@ -834,24 +878,6 @@ progress::-webkit-progress-bar {
     margin: 0;
 }
 
-/* MODAL */
-
-/*
-.modal {
-    position: fixed;
-    top: 15%;
-    left: calc(50% - 250px);
-    width: 500px;
-    height: 300px;;
-    background-color: #f3f3f3;
-    z-index: 5;
-    border-radius: 2px;
-    border: 1px solid #4d4d4d;
-    box-shadow: 0px 0px 6px 0px #464646;
-    padding: 15px;
-}
-*/
-
 .styled-link {
     text-align: center;
     color: #2f2f2f;
@@ -862,7 +888,7 @@ progress::-webkit-progress-bar {
 }
 
 .styled-link:hover {
-    background-color: #e1e4ff;
+    background-color: #a8bfc9;
 }
 
 .message-box {
@@ -880,4 +906,56 @@ progress::-webkit-progress-bar {
 .error-box {
     color: crimson;
     background-color: thistle;
-}  
+}
+
+/* Modal */
+
+.modal {
+    position: fixed;
+    top: 15%;
+    left: calc(50% - 250px);
+    width: 500px;
+    height: 145px;
+    background-color: #f3f3f3;
+    z-index: 5;
+    border-radius: 3px;
+    border: 1px solid #4d4d4d;
+    box-shadow: 0px 0px 6px 0px #464646;
+    padding: 8px 15px 15px 15px;
+}
+
+.modal-blanket {
+    visibility: hidden;
+    z-index: 1000;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(55, 57, 63, 0.829);
+}
+
+.modal-footer {
+    position: absolute;
+    box-sizing: border-box;
+    width: 95%;
+    display: block;
+    bottom: 0;
+    margin-bottom: 15px;
+}
+
+/* Loader animation */
+
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 20px solid rgb(235, 239, 245);  
+    border-radius: 50%;
+    border-top: 20px solid #2F2F2F;
+    animation: load-animation 2s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes load-animation {
+    100% {
+        transform: rotate(360deg);
+    }
+}

@@ -1,0 +1,36 @@
+<section class="padded section-full-size profile-section">
+    <h3>Statistics</h3>
+    <hr />
+    <ul style="list-style-type: none">
+        <li> <span class="fas fa fa-play" style="padding: 10px;"></span> Games played: {{gamesPlayed}} </li>
+        <li> <span class="fas fa fa-trophy" style="padding: 10px;"></span>Games won: {{gamesWon}} ({{{getPercent
+            gamesWon gamesPlayed}}} %)</li>
+    </ul>
+
+    <h3>Achievements</h3>
+    <hr />
+
+    <!-- One -->
+    <div class="achievement-item">
+        <span class="fa fa-question achievement-icon icon-bg-blue"></span>
+        <div class="achievement-text">
+            <h4>What is this? </h4>
+            <p> Play one multiplayer match </p>
+        </div>
+        <div class="achievement-date"> 2018/12/20</div>
+        <div style="clear: left;"></div>
+    </div>
+
+    <div class="achievement-item">
+        <span class="fa fa-robot achievement-icon icon-bg-crimson"></span>
+        <div class="achievement-text">
+            <h4> Sharpshooter </h4>
+            <p> Win 10 multiplayer games </p>
+        </div>
+        <div class="achievement-date"> 2018/12/20</div>
+        <div style="clear: left;"></div>
+    </div>
+
+    <p> </p>
+    <a class="styled-link" href="/profile/achievements"> View all achievements </a>
+</section>

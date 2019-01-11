@@ -9,12 +9,13 @@ const TICK_RATE = 30
 const playerKeys = ['playerOne', 'playerTwo']
 const cookie = require('cookie')
 const User = require('../models/User')
+const { RULE_CONDITIONS, AchievementUnlocker, RuleSet } = require('./achievements')
 
 // TODO: 
-// Import User model for statistic updating
+// + Import User model for statistic updating
 // Round reset and statistics collection update
 // End round after one of the robots reach 0 HP
-// Enemy scanning API function
+// + Enemy scanning API function
 // Identify multiplayer game ending(reached round count)
 // + Save isAdmin in session
 // + Allow "Manage users" page for admin
@@ -26,12 +27,19 @@ const User = require('../models/User')
 
 const context = {
     delta: 0,
-    robot: {}
+    robot: {},
+    messages: []
 };
 
+
 const nodeVM = new NodeVM({
-    sandbox: { context },
-    console: 'inherit'
+    wrapper: "commonjs",
+    require: {
+        external: ['node-neural-network'],
+        context: 'sandbox'
+        // The only working path... /Users/Karolis/Desktop/web-bots-it/node_modules/node-neural-network
+    },
+    sandbox: { context }
 });
 
 const time = () => {
@@ -190,25 +198,25 @@ const scanner = {
      * Field of view of limited length from turret rotation
      * If enemy appears inside it, return its data(coordinates, etc)
      */
-    scan: () => {
+    pulse: () => {
         context.robot.scanEnabled = true
         return context.robot.enemyVisible
     },
 
     /**
-     * Returns last scanned position of enemy robot
+     * Returns last scanned distance from scanned enemy
      */
-    getTarget: () => {
-        return context.robot.enemyTarget
+    getTargetDistance: () => {
+        return context.robot.enemyDistance
     }
 }
 
 // For logging messaget so output window
 const logger = {
-    log: (message, messageType) => {
-        context.robot.messages.push({
-            message,
-            type: messageType
+    log: (content, messageType) => {
+        context.messages.push({
+            content,
+            type: (typeof messageType !== 'undefined') ? messageType : MESSAGE_TYPE.INFO
         })
     }
 }
@@ -228,7 +236,7 @@ function update(delta) {
     // Iterate throug player pairs
     for (let clientID in gameStates) {
         context.delta = delta
-        
+
         // Updates multiplayer game info (if exists)
         updateMultiplayerInfo(gameStates[clientID])
 
@@ -236,7 +244,6 @@ function update(delta) {
         playerKeys.forEach((key, index) => {
             utilities.resetCallMap(callMap)
             context.robot = gameStates[clientID][key]
-            context.robot.messages = []
 
             try {
                 gameStates[clientID].code[key].update()
@@ -246,13 +253,13 @@ function update(delta) {
 
             utilities.insideFOV(context.robot, gameStates[clientID][playerKeys[1 ^ index]])
             utilities.wallCollision(context.robot.getPosition(), utilities.getExportedFunction(gameStates[clientID].code[key], 'onWallHit'))
+            utilities.checkPlayerCollisions(context.robot.getPosition(), gameStates[clientID][playerKeys[1 ^ index]].getPosition(), utilities.getExportedFunction(gameStates[clientID].code[key], 'onCollision'))
             utilities.checkForHits(gameStates[clientID][playerKeys[1 ^ index]].bulletPool, context.robot, utilities.getExportedFunction(gameStates[clientID].code[key], 'onBulletHit'))
             context.robot.updateBulletPositions(context.delta, utilities.getExportedFunction(gameStates[clientID].code[key], 'onBulletMiss'))
         });
 
-            
-        // Send game update after game state were updated
-        sendUpdate(gameStates, clientID)
+        sendUpdate(gameStates, clientID)    // Send game update after game state were updated
+        context.messages = []               // Flush output buffer
     }
 }
 
@@ -263,7 +270,8 @@ function sendUpdate(gameStates, clientId) {
             playerOne: gameStates[clientId].playerOne.getObjectState(),
             playerTwo: gameStates[clientId].playerTwo.getObjectState(),
             gameSession: (typeof gameStates[clientId].multiplayerData !== 'undefined') ? gameStates[clientId].multiplayerData : null,
-            gameType: gameStates[clientId].gameType
+            gameType: gameStates[clientId].gameType,
+            messages: context.messages
         }))
     }
 }
@@ -349,7 +357,7 @@ const wsServerCallback = (ws, req, store) => {
     const cookieObject = cookie.parse(req.headers.cookie)
     const sessionId = cookieObject['connect_sid'].slice(2, 38) // !!!
 
-    store.get(sessionId, (err, data) => {
+    store.get(sessionId, (err, sessionData) => {
 
         // User autenticated
         if (!err) {
@@ -361,12 +369,22 @@ const wsServerCallback = (ws, req, store) => {
 
                 switch (payload.type) {
                     case 'SIMULATION':
-                        createGameObjects([payload.playerCode, payload.enemyCode], ['playerOne', 'playerTwo'], ws, 'S')
+                        createGameObjects([payload.playerCode, payload.enemyCode], playerKeys, ws, 'S')
                         break;
                     case 'MULTIPLAYER':
-                        createGameObjects([payload.multiplayerData.playerOne.scripts[0].code,
-                                           payload.multiplayerData.playerTwo.scripts[0].code],
-                                           ['playerOne', 'playerTwo'], ws, 'M')
+                        if (typeof sessionData.user.multiplayer !== 'undefined') {
+                            const gameData = sessionData.user.multiplayer
+                            createGameObjects([gameData.playerOne.scripts[0].code, gameData.playerTwo.scripts[0].code], playerKeys, ws, 'M')
+
+                            // To update game info panel
+                            ws.send(JSON.stringify({
+                                type: 'PLAYER_NAMES',
+                                names: {
+                                    playerOne: gameData.playerOne.username,
+                                    playerTwo: gameData.playerTwo.username
+                                }
+                            }))
+                        }
                         break;
                     default:
                         return 0;
@@ -377,6 +395,8 @@ const wsServerCallback = (ws, req, store) => {
             ws.on('close', () => {
                 delete gameStates[ws.id]
             });
+        } else {
+            console.log(err)
         }
     })
 }

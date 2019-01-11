@@ -119,6 +119,7 @@ loader.onComplete.add(() => {
         gameObjects[key].bullets = createProjectilePool()
     })
 
+    createRobotNames()
     createFovMarkers()
 
     app.stage.addChild(map);
@@ -188,16 +189,6 @@ function resetProjectilePool() {
 }
 
 /**
- * Binds events on player container 
- */
-function setInteractionEvents(playerContainer) {
-    playerContainer.interactive = true;
-    playerContainer.mouseover = () => {
-        console.log(`X: ${playerContainer.position.x} Y: ${playerContainer.position.y}`)
-    }
-}
-
-/**
  * Called on map drag start
  */
 function onDragStart(event) {
@@ -263,7 +254,7 @@ window.onresize = () =>
  * Add event listener for map zooming
  * using mouse wheel
  */
-window.onwheel = (event) => {
+window.addEventListener('wheel', (event) => {
     if (canZoom) {
         if (event.deltaY < 0) {
             map.scale.x = clampNumber(map.scale.x * ZOOM_SCALE, MIN_ZOOM, MAX_ZOOM)
@@ -273,7 +264,10 @@ window.onwheel = (event) => {
             map.scale.y = clampNumber(map.scale.x / ZOOM_SCALE, MIN_ZOOM, MAX_ZOOM)
         }
     }
-}
+}, {
+        passive: true,
+        capture: true
+    })
 
 /**
  * Limits number value to defined min and max bounds
@@ -351,20 +345,21 @@ socket.onmessage = (event) => {
                 gameObjects[key].getChildAt(1).rotation = payload[key].turretRotation
                 updateProjectiles(payload[key].bulletPool, key)
                 updateMultiplayerInfo(payload.gameSession)
-
-                // Log messages to output window (Simulation only)
-                if (payload.gameType === 'S') {
-                    payload[key].messages.forEach(item => {
-                        appendMessage(item.message, item.type)
-                    });
-                }
             })
+
+            // Update output
+            if (payload.gameType === 'S') {
+                payload.messages.forEach(item => {
+                    appendMessage(item.content, item.type)
+                });
+            }
 
             updateGameInfoPanel(0, payload.playerOne.health, payload.playerOne.energy)
             updateGameInfoPanel(1, payload.playerTwo.health, payload.playerTwo.energy)
             break;
-        case 'INFO':
-            // Misc events 
+        case 'PLAYER_NAMES':
+            setPlayerNames(payload.names.playerOne, payload.names.playerTwo)
+            playerObjectKeys.forEach(key => updateRobotName(key, payload.names[key]))
             break;
     }
 }
@@ -480,4 +475,32 @@ function toggleFov() {
         const visible = gameObjects[key].getChildAt(1).getChildAt(0).visible
         gameObjects[key].getChildAt(1).getChildAt(0).visible = !visible
     })
+}
+
+function createRobotNames() {
+    playerObjectKeys.forEach(key => {
+        let nameText = new PIXI.Text("<placeholder>", {
+            fontFamily: 'Arial',
+            fill: '#FFFFFF',
+            fontSize: 85,
+            align: 'center'
+        })
+        nameText.visible = false
+        nameText.position.set(-170, -250)
+        gameObjects[key].addChild(nameText)
+    })
+}
+
+function toggleRobotNames() {
+    playerObjectKeys.forEach(key => {
+        const visible = gameObjects[key].getChildAt(2).visible
+        gameObjects[key].getChildAt(2).visible = !visible
+    })
+}
+
+function updateRobotName(playerKey, name) {
+    if(typeof gameObjects[playerKey] === 'undefined')
+        return;
+        
+    gameObjects[playerKey].getChildAt(2).text = name
 }

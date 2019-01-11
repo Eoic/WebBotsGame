@@ -1,35 +1,13 @@
 <section class="section-full-size">
-    <h2 class="section-header">
+    <h2 class="section-header padded-header">
         MULTIPLAYER
     </h2>
-    {{#if error}}
-        <p class="error-message"> {{error}} </p>
-    {{/if}}
-    <table>
-        <thead>
-            <tr>
-                <th></th>
-                <th> Username </th>
-                <th> </th>
-            </tr>
-        </thead>
-        <tbody>
-            {{#each users}}
-            <tr>
-                <td>{{increment @index}}</td>
-                <td>{{username}}</td>
-                <td>
-                    <a href="/multiplayer/{{username}}" class="btn-link" title="Select opponent">
-                        <span class="fa fa-play"> </span>
-                    </button>
-                </td>
-            </tr>
-            {{/each}}
-            {{#if (isArrayEmpty users)}}
-                <tr>
-                    <td colspan="3"> No players available </td>
-                </tr>
-            {{/if}}
-        </tbody>
-    </table>
+    <div class="message-box error-box" style="visibility:hidden" id='error-container'>
+    </div>
+    <div id='loading-status'>
+        <p style="text-align: center;"> Searching for opponent... </p>
+        <div class="spinner" id='loading-indicator'> </div>
+    </div>
 </section>
+
+<script src="/static/js/game/matchmaking.js"></script>

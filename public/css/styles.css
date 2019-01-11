@@ -22,7 +22,7 @@ main {
 
 select {
     padding: 5px;
-    border-radius: 2px;
+    border-radius: 5px;
 }
 
 header {
@@ -384,6 +384,7 @@ footer {
 }
 
 /* Green */
+
 .btn-success {
     background-color: #10a353;
     color: #ebebee;
@@ -947,7 +948,7 @@ progress::-webkit-progress-bar {
 .spinner {
     width: 60px;
     height: 60px;
-    border: 20px solid rgb(235, 239, 245);  
+    border: 20px solid rgb(235, 239, 245);
     border-radius: 50%;
     border-top: 20px solid #2F2F2F;
     animation: load-animation 2s linear infinite;
@@ -958,4 +959,24 @@ progress::-webkit-progress-bar {
     100% {
         transform: rotate(360deg);
     }
+}
+
+/* Multiplayer statistics table */
+
+.stats-table {
+    border-collapse: unset;
+    border-spacing: 2px;
+}
+
+.stats-thead>tr {
+    background-color: #6c88b152;
+}
+
+.stats-tbody>tr {
+    font-size: xx-large;
+    background-color: rgba(80, 74, 74, 0.63);
+}
+
+.stats-tbody>tr>td {
+    color: #d3d7e6;
 }

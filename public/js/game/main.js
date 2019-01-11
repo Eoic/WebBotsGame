@@ -361,6 +361,9 @@ socket.onmessage = (event) => {
             setPlayerNames(payload.names.playerOne, payload.names.playerTwo)
             playerObjectKeys.forEach(key => updateRobotName(key, payload.names[key]))
             break;
+        case 'GAME_END':
+            showMatchEndStatistics()
+            break;
     }
 }
 
@@ -503,4 +506,9 @@ function updateRobotName(playerKey, name) {
         return;
         
     gameObjects[playerKey].getChildAt(2).text = name
+}
+
+// Show overlay with data
+function showMatchEndStatistics() {
+    document.getElementById('overlay').style.visibility = 'visible'
 }

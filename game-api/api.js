@@ -28,8 +28,36 @@ class Vector {
     }
 }
 
+class GameTracker {
+    constructor(playerKeys) {
+        this.player = {}
+
+        playerKeys.forEach(key => {
+            this.player[key] = {
+                damageDone: 0,
+                roundsWon: 0,
+                shotsFired: 0
+            }
+        })
+    }
+
+    registerDamageDone(key, value) {
+        this.player[key].damageDone += value
+    }
+
+    registerRoundWon(key) {
+        this.player[key].roundsWon++
+    }
+
+    registerShotFired(key) {
+        this.player[key].shotsFired++
+    }
+}
+
 class Player {
     constructor(x, y, rotation) {
+        this.startPosX = x;
+        this.startPosY = y;
         this.x = x;
         this.y = y;
         this.health = CONSTANTS.HP_FULL
@@ -48,9 +76,14 @@ class Player {
             this.energy += CONSTANTS.ENERGY_REFRESH_STEP
     }
 
-    reset() {
+    resetVitals() {
         this.health = CONSTANTS.HP_FULL
         this.energy = CONSTANTS.EN_FULL
+    }
+
+    resetPosition() {
+        this.x = this.startPosX
+        this.y = this.startPosY
     }
 
     applyDamage(damage) {
@@ -98,7 +131,7 @@ class Player {
                 bullet.y > CONSTANTS.MAP_HEIGHT + CONSTANTS.VISIBLE_MAP_OFFSET) {
                 bullet.isAlive = false
 
-                // Bullet is outside map. Call bullet miss
+                // Bullet is outside of map. Call bullet miss
                 if (typeof onBulletMissCallback !== 'undefined')
                     onBulletMissCallback()
             } else {
@@ -192,8 +225,8 @@ const CONSTANTS = {
     ENERGY_REFRESH_STEP: 10,
     PRECISION: 0.1,
     VISIBLE_MAP_OFFSET: 100,
-    ROUND_COUNT: 5,
-    ROUND_TICKS_LENGTH: 2700    // ~1:30 min
+    ROUND_COUNT: 5,             // One multiplayer match length
+    ROUND_TICKS_LENGTH: 60    // 1800 -> ~1 min
 }
 
 const utilities = {
@@ -234,12 +267,14 @@ const utilities = {
             playerOnePos.y >= playerTwoPos.y - CONSTANTS.PLAYER_HALF_HEIGHT &&
             playerOnePos.x <= playerTwoPos.x + CONSTANTS.PLAYER_HALF_WIDTH &&
             playerOnePos.y <= playerTwoPos.y + CONSTANTS.PLAYER_HALF_HEIGHT) {
-            onRobotHitCallback()
+
+            if(typeof onRobotHitCallback !== 'undefined')
+                onRobotHitCallback()
         }
     },
 
     /**
-     * Checks if any of fired bullet hit enemy player.
+     * Checks if any of fired bullets damaged enemy player.
      * If hit was detected, dispose bullet and apply damage
      * @param {Array} playerBulletPool 
      * @param {Object} enemyInstance 
@@ -287,7 +322,7 @@ const utilities = {
     },
 
     /**
-     * Sets all game API function as uncalled before each game update
+     * Sets all game API function as uncalled before running code of selected user
      * @param {Object} callMap Function calls lookup object
      */
     resetCallMap(callMap) {
@@ -345,5 +380,6 @@ module.exports = {
     MESSAGE_TYPE,
     Vector,
     Player,
+    GameTracker,
     utilities
 }

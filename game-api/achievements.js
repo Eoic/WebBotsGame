@@ -43,6 +43,13 @@ class AchievementUnlocker {
         this.ruleSet = ruleSet
     }
 
+    /**
+     * Returns true if given value meets rule conditions
+     * (if such rule is found)
+     * @param {String} key 
+     * @param {Number} statisticsValue 
+     * @param {Number} condition 
+     */
     unlock(key, statisticsValue, condition) {
         const rule = this.ruleSet.find(rule => rule.key === key && rule.condition === condition)
         
@@ -52,6 +59,13 @@ class AchievementUnlocker {
         return this.compare(rule.value, statisticsValue, condition)
     }
 
+    /**
+     * Compares two given values by 
+     * given condition
+     * @param {Number} leftValue
+     * @param {Number} rightValue 
+     * @param {Number} condition 
+     */
     compare(leftValue, rightValue, condition) {
         switch(condition) {
             case RULE_CONDITIONS.EQUAL:

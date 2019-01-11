@@ -4,7 +4,7 @@
 
 const { NodeVM } = require('vm2');
 const uuidv4 = require('uuid/v4');
-const { Player, CONSTANTS, MESSAGE_TYPE, utilities } = require('./api')
+const { Player, GameTracker, CONSTANTS, MESSAGE_TYPE, utilities } = require('./api')
 const TICK_RATE = 30
 const playerKeys = ['playerOne', 'playerTwo']
 const cookie = require('cookie')
@@ -20,10 +20,11 @@ const { RULE_CONDITIONS, AchievementUnlocker, RuleSet } = require('./achievement
 // + Save isAdmin in session
 // + Allow "Manage users" page for admin
 // + Add user password reset
+// User redis memory storage instead of session for saving temporary multiplayer data
 
 // FIX
-// Currently wrong order of names in game info panel
-// Wrong order of starting robots in mp
+// + Currently wrong order of names in game info panel
+// + Wrong order of starting robots in mp
 
 const context = {
     delta: 0,
@@ -31,6 +32,10 @@ const context = {
     messages: []
 };
 
+const GAME_TYPE = {
+    SIMULATION: 'S',
+    MULTIPLAYER: 'M'
+}
 
 const nodeVM = new NodeVM({
     wrapper: "commonjs",
@@ -233,14 +238,17 @@ nodeVM.freeze(scanner, 'scanner')               // Scanner api for locating enem
  * @param {double} delta Time since last frame
  */
 function update(delta) {
-    // Iterate throug player pairs
-    for (let clientID in gameStates) {
+
+    // Iterate through connected clients
+    for(clientID in gameStates) {
         context.delta = delta
 
-        // Updates multiplayer game info (if exists)
-        updateMultiplayerInfo(gameStates[clientID])
+        // Updates multiplayer game info for client
+        // If multiplayerGame ended - stop updating
+        if(updateMultiplayerInfo(gameStates[clientID]) < 0)
+            break;
 
-        // Run code for each player
+        // Run code for each robot
         playerKeys.forEach((key, index) => {
             utilities.resetCallMap(callMap)
             context.robot = gameStates[clientID][key]
@@ -256,7 +264,7 @@ function update(delta) {
             utilities.checkPlayerCollisions(context.robot.getPosition(), gameStates[clientID][playerKeys[1 ^ index]].getPosition(), utilities.getExportedFunction(gameStates[clientID].code[key], 'onCollision'))
             utilities.checkForHits(gameStates[clientID][playerKeys[1 ^ index]].bulletPool, context.robot, utilities.getExportedFunction(gameStates[clientID].code[key], 'onBulletHit'))
             context.robot.updateBulletPositions(context.delta, utilities.getExportedFunction(gameStates[clientID].code[key], 'onBulletMiss'))
-        });
+        })
 
         sendUpdate(gameStates, clientID)    // Send game update after game state were updated
         context.messages = []               // Flush output buffer
@@ -282,14 +290,35 @@ function sendUpdate(gameStates, clientId) {
  */
 function updateMultiplayerInfo(gameState) {
     if (typeof gameState.multiplayerData === 'undefined')
-        return;
+        return 0;
 
     gameState.multiplayerData.elapsedTicks++
 
     if (gameState.multiplayerData.elapsedTicks >= CONSTANTS.ROUND_TICKS_LENGTH) {
-        gameState.multiplayerData.elapsedRounds++
-        gameState.multiplayerData.elapsedTicks = 0
+        if (gameState.multiplayerData.elapsedRounds === 5) {
+            // Last round ended. Notify client about game end 
+            // and delete client data from game states
+            endMultiplayerMatch(gameState.socket)
+            Reflect.deleteProperty(gameStates, gameState.socket.id)
+            return -1
+        } else {
+            // On round change, reset robots state
+            playerKeys.forEach(key => {
+                gameState[key].resetVitals()
+                gameState[key].resetPosition()
+            })
+            
+            gameState.multiplayerData.elapsedRounds++
+            gameState.multiplayerData.elapsedTicks = 0
+            return 1
+        }
     }
+}
+
+function endMultiplayerMatch(socket) {
+    socket.send(JSON.stringify({
+        type: 'GAME_END'
+    }))
 }
 
 /**
@@ -341,7 +370,7 @@ function createGameObjects(scripts, playerKeys, ws, gameType) {
         code
     }
 
-    if (gameType === 'M') {
+    if (gameType === GAME_TYPE.MULTIPLAYER) {
         gameStates[ws.id]['multiplayerData'] = {
             elapsedTicks: 0,
             elapsedRounds: 1
@@ -369,12 +398,12 @@ const wsServerCallback = (ws, req, store) => {
 
                 switch (payload.type) {
                     case 'SIMULATION':
-                        createGameObjects([payload.playerCode, payload.enemyCode], playerKeys, ws, 'S')
+                        createGameObjects([payload.playerCode, payload.enemyCode], playerKeys, ws, GAME_TYPE.SIMULATION)
                         break;
                     case 'MULTIPLAYER':
                         if (typeof sessionData.user.multiplayer !== 'undefined') {
                             const gameData = sessionData.user.multiplayer
-                            createGameObjects([gameData.playerOne.scripts[0].code, gameData.playerTwo.scripts[0].code], playerKeys, ws, 'M')
+                            createGameObjects([gameData.playerOne.scripts[0].code, gameData.playerTwo.scripts[0].code], playerKeys, ws, GAME_TYPE.MULTIPLAYER)
 
                             // To update game info panel
                             ws.send(JSON.stringify({
@@ -393,6 +422,7 @@ const wsServerCallback = (ws, req, store) => {
 
             // Delete player connection from gameStates array
             ws.on('close', () => {
+                // if mp game was interrupted, notify client
                 delete gameStates[ws.id]
             });
         } else {

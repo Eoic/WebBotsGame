@@ -5,8 +5,7 @@ const AchievementSchema = new Schema({
     key: {
         type: mongoose.Schema.Types.String,
         required: true,
-        maxlength: 5,
-        minlength: 3
+        maxlength: 25,
     },
     title: {
         type: mongoose.Schema.Types.String,
@@ -20,6 +19,10 @@ const AchievementSchema = new Schema({
         type: mongoose.Schema.Types.Number,
         default: 0,
         min: 0
+    },
+    iconName: {
+        type: mongoose.Schema.Types.String,
+        required: true
     }
 })
 

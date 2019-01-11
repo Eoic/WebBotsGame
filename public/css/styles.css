@@ -227,7 +227,6 @@ footer {
     display: none;
 }
 
-
 /* Section */
 
 .section-full-size {
@@ -630,6 +629,17 @@ td {
     box-sizing: border-box;
 }
 
+@media only screen and (max-width: 755px) {
+    .profile-sidebar {
+        display: none;
+    }
+
+    .profile-section {
+        float: none;
+        width: 100% ;
+    }
+}
+
 /* ACHIEVEMENTS */
 
 .achievement-icon {
@@ -696,11 +706,14 @@ td {
 /* Headers */
 
 h2.section-header {
-    padding-left: 150px;
     padding-bottom: 20px;
     margin-top: -13px;
     box-shadow: inset 0px -6px 9px -8px #2f2f2f;
     color: #333333;
+}
+
+.padded-header {
+    padding-left: 150px;
 }
 
 .section-paragraph {
@@ -844,7 +857,7 @@ progress::-webkit-progress-bar {
 }
 
 .styled-link:hover {
-    background-color: #e1e4ff;
+    background-color: #a8bfc9;
 }
 
 .message-box {

@@ -9,7 +9,7 @@ const TICK_RATE = 30
 const playerKeys = ['playerOne', 'playerTwo']
 const cookie = require('cookie')
 const User = require('../models/User')
-const { RULE_CONDITIONS, AchievementUnlocker } = require('./achievements')
+const { RULE_CONDITIONS, AchievementUnlocker, RuleSet } = require('./achievements')
 
 // TODO: 
 // + Import User model for statistic updating

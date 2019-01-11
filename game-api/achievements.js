@@ -72,5 +72,6 @@ class AchievementUnlocker {
 
 module.exports = { 
     AchievementUnlocker,
-    RULE_CONDITIONS
+    RULE_CONDITIONS,
+    RuleSet
 }

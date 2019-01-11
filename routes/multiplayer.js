@@ -6,7 +6,10 @@ router.get('/', (req, res, next) => {
     if (req.session.user && req.cookies.connect_sid)
         next();
     else res.redirect('/');
-}, (_req, res) => {
+}, (req, res) => {
+    if(typeof req.session.user.multiplayer === 'undefined')
+        return res.redirect('/')
+
     res.render('multiplayer', {
         title: 'Multiplayer',
         active: {
@@ -16,76 +19,86 @@ router.get('/', (req, res, next) => {
 })
 
 /**
- * Fetch code of both players
+ * Select random oponnent and gets code for both players
  */
-router.get('/:id', (req, res) => {
+router.get('/start-game', (req, res) => {
+
     const userOne = req.session.user.username
-    const userTwo = req.params.id
 
     User.find({
-        'username': {
-            $in: [
-                userOne,
-                userTwo
-            ]
-        }
-    }).select({ 'multiplayerScript': 1, 'username': 1 }) // oh...... 
-        .then(users => {
-            User.findOne({
-                'username': users[0].username
-            }).select({
-                scripts: {
-                    $elemMatch: {
-                        _id: users[0].multiplayerScript
-                    }
-                },
-                'username': 1,
-                '_id': 0
-            }).then(resultOne => {
+        'username': { $ne: userOne },
+        'multiplayerScript': { $ne: null }
+    }).select({
+        'username': 1
+    }).then(users => {
+        if (users.length === 0)
+            res.status(200).json({ error: 'No players available' })
+        else {
+            const userTwo = selectRandomUser(users)
 
-                if (resultOne.scripts.length === 0)
-                    displayMessage(req, res, 'You have not selected multiplayer script')
-                else {
-
+            User.find({
+                'username': {
+                    $in: [
+                        userOne,
+                        userTwo
+                    ]
+                }
+            }).select({ 'multiplayerScript': 1, 'username': 1 }) // oh...... 
+                .then(users => {
                     User.findOne({
-                        'username': users[1].username
+                        'username': users[0].username
                     }).select({
                         scripts: {
                             $elemMatch: {
-                                _id: users[1].multiplayerScript
+                                _id: users[0].multiplayerScript
                             }
                         },
                         'username': 1,
                         '_id': 0
-                    }).then(resultTwo => {
+                    }).then(resultOne => {
 
-                        if (resultTwo.scripts.length === 0) {
-                            displayMessage(req, res, 'An error occoured')
-                        } else {
-                            // Save data for multiplayer
-                            req.session.user.multiplayer = {
-                                playerOne: resultOne,
-                                playerTwo: resultTwo
-                            }
+                        if (resultOne.scripts.length === 0)
+                            res.status(201).json({ error: 'You have not selected multiplayer script' })
+                        else {
 
-                            res.render('multiplayer', {
-                                title: 'Multiplayer',
-                                active: { multiplayer: true }
-                            });
+                            User.findOne({
+                                'username': users[1].username
+                            }).select({
+                                scripts: {
+                                    $elemMatch: {
+                                        _id: users[1].multiplayerScript
+                                    }
+                                },
+                                'username': 1,
+                                '_id': 0
+                            }).then(resultTwo => {
+
+                                if (resultTwo.scripts.length === 0) {
+                                    displayMessage(req, res, 'An error occoured')
+                                } else {
+                                    // Save data for multiplayer
+                                    req.session.user.multiplayer = {
+                                        playerOne: resultOne,
+                                        playerTwo: resultTwo
+                                    }
+
+                                    // Successfull
+                                    res.sendStatus(200)
+                                }
+                            }).catch(err => {
+                                res.status(500).json({ error: 'An error occoured' })
+                            })
                         }
                     }).catch(err => {
-                        displayMessage(req, res, 'An error occoured')
+                        res.status(500).json({ error: 'An error occoured' })
                     })
-                }
-            }).catch(err => {
-                displayMessage(req, res, 'An error occoured')
-            })
-        })
+                })
+        }
+    })
 })
 
-function displayMessage(req, res, message) {
-    req.session.user.error = message
-    res.redirect('/lobby')
+function selectRandomUser(userList) {
+    return userList[Math.floor(Math.random() * userList.length)].username
 }
 
 module.exports = router;

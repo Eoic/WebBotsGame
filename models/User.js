@@ -52,6 +52,7 @@ const UserSchema = new Schema({
         },
         achievements: [{
             achievementId: mongoose.Schema.Types.ObjectId,
+            key: mongoose.Schema.Types.ObjectId,
             unlockedAt: mongoose.Schema.Types.Date
         }]
     },

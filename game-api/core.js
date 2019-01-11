@@ -9,7 +9,7 @@ const TICK_RATE = 30
 const playerKeys = ['playerOne', 'playerTwo']
 const cookie = require('cookie')
 const User = require('../models/User')
-const path = require('path')
+const { RULE_CONDITIONS, AchievementUnlocker } = require('./achievements')
 
 // TODO: 
 // + Import User model for statistic updating
@@ -37,7 +37,7 @@ const nodeVM = new NodeVM({
     require: {
         external: ['node-neural-network'],
         context: 'sandbox'
-        // Only working path: /Users/Karolis/Desktop/web-bots-it/node_modules/node-neural-network
+        // The only working path... /Users/Karolis/Desktop/web-bots-it/node_modules/node-neural-network
     },
     sandbox: { context }
 });

@@ -16,7 +16,8 @@ router.get('/', (req, res, next) => {
         'multiplayerScript': 1,
         'statistic.experience': 1,
         'statistic.gamesLost': 1,
-        'statistic.gamesWon': 1
+        'statistic.gamesWon': 1,
+        'statistics.achievements': 1
     }).lean().then(user => {
         if (!user)
             return res.sendStatus(404);

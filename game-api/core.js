@@ -330,10 +330,9 @@ function updateMultiplayerInfo(gameState) {
         gameState.multiplayerData.elapsedTotalTime += gameState.multiplayerData.elapsedTicks
 
         if (gameState.multiplayerData.elapsedRounds === 5) {
-            // Last round ended. Notify client about game end 
-            // and delete client data
-            endMultiplayerMatch(gameState)
+            // Game ended
             Reflect.deleteProperty(gameStates, gameState.socket.id)
+            endMultiplayerMatch(gameState)
             return -1
         } else
             nextRound(gameState)
@@ -380,14 +379,22 @@ function endMultiplayerMatch(gameState) {
     })
 }
 
-function updatePlayerStatistics(gameSessionData, gameState) {
+function updatePlayerStatistics(gameSessionData, gameState, winner) {
+    let gameWon = 0
+
+    if (winner === gameSessionData.createdBy)
+        gameWon = 1
+
     User.findOneAndUpdate({
         username: gameSessionData.createdBy
     }, {
-        'statistic.gamesPlayed': 1
-    }).then(response => {
-        console.log(response)
-    })
+            $inc: {
+                'statistic.gamesPlayed': 1,
+                'statistic.gamesWon': gameWon
+            }
+        }).then(response => {
+            console.log(response)
+        })
 }
 
 /**
@@ -499,7 +506,7 @@ const wsServerCallback = (ws, req, store) => {
                             }).then(session => {
                                 createGameObjects([session.data[0].code, session.data[1].code],
                                     playerKeys, ws, GAME_TYPE.MULTIPLAYER,
-                                    [session.data[0].username, session.data[1].username], 
+                                    [session.data[0].username, session.data[1].username],
                                     session.sessionId)
 
                                 ws.send(JSON.stringify({
@@ -521,14 +528,25 @@ const wsServerCallback = (ws, req, store) => {
 
             // Delete player connection from gameStates array
             ws.on('close', () => {
-                if(gameStates[ws.id].gameType === GAME_TYPE.MULTIPLAYER) {
-                    GameSession.findOneAndRemove({
-                        'sessionId': sessionData.user.multiplayer.sessionId,
-                        'createdBy': sessionData.user.username
-                    }).exec()
-                }
+                if (gameStates[ws.id] !== undefined) {
+                    if (gameStates[ws.id].gameType === GAME_TYPE.MULTIPLAYER) {
+                        
+                        // User left mid-game. 
+                        // Remove session data and count game as played 
+                        GameSession.findOneAndRemove({
+                            'sessionId': sessionData.user.multiplayer.sessionId,
+                            'createdBy': sessionData.user.username
+                        }).then(() => {
+                            User.findOneAndUpdate({
+                                'username': sessionData.user.username
+                            }, { $inc: { 'statistic.gamesPlayed': 1 } }).then(() => {
+                                console.log('User left mid-game')
+                            })
 
-                delete gameStates[ws.id]
+                            Reflect.deleteProperty(gameStates, ws.id)
+                        })
+                    }
+                } else Reflect.deleteProperty(gameStates, ws.id)
             });
         } else {
             console.log(err)

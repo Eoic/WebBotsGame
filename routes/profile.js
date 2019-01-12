@@ -15,7 +15,7 @@ router.get('/', (req, res, next) => {
         'scripts._id': 1,
         'multiplayerScript': 1,
         'statistic.experience': 1,
-        'statistic.gamesLost': 1,
+        'statistic.gamesPlayed': 1,
         'statistic.gamesWon': 1,
         'statistics.achievements': 1
     }).lean().then(user => {
@@ -33,8 +33,8 @@ router.get('/', (req, res, next) => {
             experience: user.statistic.experience,
             experienceNext: Math.pow(2 * (Math.floor(0.5 * Math.sqrt(user.statistic.experience)) + 1), 2),
             gamesWon: user.statistic.gamesWon,
-            gamesLost: user.statistic.gamesLost,
-            gamesPlayed: user.statistic.gamesWon + user.statistic.gamesLost
+            gamesLost: user.statistic.gamesPlayed - user.statistic.gamesWon,
+            gamesPlayed: user.statistic.gamesPlayed
         })
     }).catch(err => {
         res.status(500).send(err.message);

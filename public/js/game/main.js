@@ -149,6 +149,12 @@ function loadingProgressHandler(loader, _resource) {
  */
 function createPlayerInstance(spriteBase, spriteTurret, initialPosition) {
     let player = new PIXI.Container()
+    spriteBase.filters = [
+        new PIXI.filters.DropShadowFilter({
+            pixelSize: 2,
+            distance: 8
+        })
+    ]
     player.addChild(spriteBase)
     player.addChild(spriteTurret)
     player.scale.set(ROBOT_SCALE, ROBOT_SCALE)
@@ -164,7 +170,9 @@ function createProjectilePool() {
     let bullets = []
 
     for (let i = 0; i < PROJECTILE_POOL_SIZE; i++) {
-        bullets.push(new PIXI.Sprite(bulletTexture))
+        let bulletSprite = new PIXI.Sprite(bulletTexture)
+        bulletSprite.filters = [ new PIXI.filters.GlowFilter(15, 2, 1, 0x1138A8, 0.5) ]
+        bullets.push(bulletSprite)
         bullets[i].visible = false
         bullets[i].anchor.set(0.1, 0.5)
         map.addChild(bullets[i])
@@ -362,7 +370,7 @@ socket.onmessage = (event) => {
             playerObjectKeys.forEach(key => updateRobotName(key, payload.names[key]))
             break;
         case 'GAME_END':
-            showMatchEndStatistics()
+            showMatchEndStatistics(payload.gameData)
             break;
     }
 }
@@ -509,6 +517,24 @@ function updateRobotName(playerKey, name) {
 }
 
 // Show overlay with data
-function showMatchEndStatistics() {
+function showMatchEndStatistics(data) {
+
+    let statisticsTable = document.getElementById('statistics-body')
+
+    data.forEach(item => {
+        let tableRow = document.createElement('tr')
+        tableRow.appendChild(createTableCell(item.name))
+        tableRow.appendChild(createTableCell(item.statistics.damageDone))
+        tableRow.appendChild(createTableCell(item.statistics.shotsFired))
+        tableRow.appendChild(createTableCell(item.statistics.roundsWon))
+        statisticsTable.appendChild(tableRow)
+    })
+
     document.getElementById('overlay').style.visibility = 'visible'
+}
+
+function createTableCell(innerText) {
+    let tableCell = document.createElement('td')
+    tableCell.innerText = innerText
+    return tableCell
 }

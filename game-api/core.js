@@ -12,19 +12,27 @@ const User = require('../models/User')
 const { RULE_CONDITIONS, AchievementUnlocker, RuleSet } = require('./achievements')
 
 // TODO: 
+// + Reset bullet pool on next round start
 // + Import User model for statistic updating
-// Round reset and statistics collection update
-// End round after one of the robots reach 0 HP
+// +- Round reset and statistics collection update
+// + End round after one of the robots reach 0 HP
 // + Enemy scanning API function
-// Identify multiplayer game ending(reached round count)
+// + Identify multiplayer game ending(reached round count)
 // + Save isAdmin in session
 // + Allow "Manage users" page for admin
 // + Add user password reset
 // User redis memory storage instead of session for saving temporary multiplayer data
+// Send elapsed game ticks on multiplayer match ending
+// Send which one of the players won the game 
 
 // FIX
+// + Tracker shots fired counting is wrong
+// + Tracker damage done counting is (maybe) wrong
+// Round winner finder doesn't work
+// Game winner counter doesnt work
 // + Currently wrong order of names in game info panel
 // + Wrong order of starting robots in mp
+// Reset robot code on each but first round start
 
 const context = {
     delta: 0,
@@ -240,18 +248,19 @@ nodeVM.freeze(scanner, 'scanner')               // Scanner api for locating enem
 function update(delta) {
 
     // Iterate through connected clients
-    for(clientID in gameStates) {
+    for (clientID in gameStates) {
         context.delta = delta
 
         // Updates multiplayer game info for client
         // If multiplayerGame ended - stop updating
-        if(updateMultiplayerInfo(gameStates[clientID]) < 0)
+        if (updateMultiplayerInfo(gameStates[clientID]) < 0)
             break;
 
         // Run code for each robot
         playerKeys.forEach((key, index) => {
             utilities.resetCallMap(callMap)
             context.robot = gameStates[clientID][key]
+            context.robot.decrementGunCooldown()
 
             try {
                 gameStates[clientID].code[key].update()
@@ -262,7 +271,7 @@ function update(delta) {
             utilities.insideFOV(context.robot, gameStates[clientID][playerKeys[1 ^ index]])
             utilities.wallCollision(context.robot.getPosition(), utilities.getExportedFunction(gameStates[clientID].code[key], 'onWallHit'))
             utilities.checkPlayerCollisions(context.robot.getPosition(), gameStates[clientID][playerKeys[1 ^ index]].getPosition(), utilities.getExportedFunction(gameStates[clientID].code[key], 'onCollision'))
-            utilities.checkForHits(gameStates[clientID][playerKeys[1 ^ index]].bulletPool, context.robot, utilities.getExportedFunction(gameStates[clientID].code[key], 'onBulletHit'))
+            utilities.checkForHits(gameStates[clientID][playerKeys[1 ^ index]], context.robot, utilities.getExportedFunction(gameStates[clientID].code[key], 'onBulletHit'))
             context.robot.updateBulletPositions(context.delta, utilities.getExportedFunction(gameStates[clientID].code[key], 'onBulletMiss'))
         })
 
@@ -293,32 +302,68 @@ function updateMultiplayerInfo(gameState) {
         return 0;
 
     gameState.multiplayerData.elapsedTicks++
+    damagedToZero(gameState)
 
     if (gameState.multiplayerData.elapsedTicks >= CONSTANTS.ROUND_TICKS_LENGTH) {
         if (gameState.multiplayerData.elapsedRounds === 5) {
             // Last round ended. Notify client about game end 
             // and delete client data from game states
-            endMultiplayerMatch(gameState.socket)
+            // utilities.getGameWinner(...)
+            endMultiplayerMatch(gameState)
             Reflect.deleteProperty(gameStates, gameState.socket.id)
             return -1
-        } else {
-            // On round change, reset robots state
-            playerKeys.forEach(key => {
-                gameState[key].resetVitals()
-                gameState[key].resetPosition()
-            })
-            
-            gameState.multiplayerData.elapsedRounds++
-            gameState.multiplayerData.elapsedTicks = 0
-            return 1
-        }
+        } else
+            nextRound(gameState)
     }
 }
 
-function endMultiplayerMatch(socket) {
-    socket.send(JSON.stringify({
-        type: 'GAME_END'
+/**
+ * Checks if either of two robots was damaged to 0 HP
+ * If true, then call next round without waiting round time
+ * @param {Object} gameState 
+ */
+function damagedToZero(gameState) {
+    if(gameState[playerKeys[0]].health === 0 || gameState[playerKeys[1]].health === 0)
+        nextRound(gameState)
+}
+
+function endMultiplayerMatch(gameState) {
+
+    let data = []
+
+    playerKeys.forEach(key => {
+        data.push({
+            name: gameState[key].playerName,
+            statistics: gameState[key].tracker.getData()
+        })
+    })
+
+    // TODO: also send match length
+    gameState.socket.send(JSON.stringify({
+        type: 'GAME_END',
+        gameData: data
     }))
+}
+
+/**
+ * Sets next round on multiplayer match
+ * @param {Object} gameState Data about robots in the game 
+ */
+function nextRound(gameState) {
+    // On round change, reset robots state
+    // and determine, who won the round
+    utilities.registerRoundWin(gameState[playerKeys[0]], gameState[playerKeys[1]])
+
+    playerKeys.forEach(key => {
+        gameState[key].resetVitals()
+        gameState[key].resetPosition()
+        gameState[key].resetBulletPool()
+    })
+
+    // nodeVM.run(gameStates[gameState.socket.id] ........................
+    gameState.multiplayerData.elapsedRounds++
+    gameState.multiplayerData.elapsedTicks = 0
+    return 1
 }
 
 /**
@@ -359,12 +404,12 @@ function compileScripts(scripts, keys) {
  * @param {Array} playerKeys 
  * @param {Object} ws 
  */
-function createGameObjects(scripts, playerKeys, ws, gameType) {
+function createGameObjects(scripts, playerKeys, ws, gameType, names = ['placeholder', 'placeholder']) {
     let code = compileScripts(scripts, playerKeys)
 
     gameStates[ws.id] = {
-        playerOne: new Player(CONSTANTS.P_ONE_START_POS.X, CONSTANTS.P_ONE_START_POS.Y, 0),
-        playerTwo: new Player(CONSTANTS.P_TWO_START_POS.X, CONSTANTS.P_TWO_START_POS.Y, Math.PI),
+        playerOne: new Player(CONSTANTS.P_ONE_START_POS.X, CONSTANTS.P_ONE_START_POS.Y, 0, new GameTracker(), names[0]),
+        playerTwo: new Player(CONSTANTS.P_TWO_START_POS.X, CONSTANTS.P_TWO_START_POS.Y, Math.PI, new GameTracker(), names[1]),
         socket: ws,
         gameType,
         code
@@ -403,7 +448,10 @@ const wsServerCallback = (ws, req, store) => {
                     case 'MULTIPLAYER':
                         if (typeof sessionData.user.multiplayer !== 'undefined') {
                             const gameData = sessionData.user.multiplayer
-                            createGameObjects([gameData.playerOne.scripts[0].code, gameData.playerTwo.scripts[0].code], playerKeys, ws, GAME_TYPE.MULTIPLAYER)
+                            createGameObjects([gameData.playerOne.scripts[0].code,
+                            gameData.playerTwo.scripts[0].code],
+                                playerKeys, ws, GAME_TYPE.MULTIPLAYER,
+                                [gameData.playerOne.username, gameData.playerTwo.username])
 
                             // To update game info panel
                             ws.send(JSON.stringify({

@@ -29,35 +29,52 @@ class Vector {
 }
 
 class GameTracker {
-    constructor(playerKeys) {
-        this.player = {}
-
-        playerKeys.forEach(key => {
-            this.player[key] = {
-                damageDone: 0,
-                roundsWon: 0,
-                shotsFired: 0
-            }
-        })
+    constructor() {
+        this.damageDone = 0,
+            this.roundsWon = 0,
+            this.shotsFired = 0,
+            this.enemiesEliminated = 0
     }
 
-    registerDamageDone(key, value) {
-        this.player[key].damageDone += value
+    /**
+     * Update number of damage done by 
+     * successful bullet hit
+     * @param {Number} value Number of damage done to enemy player 
+     */
+    registerDamageDone(value) {
+        this.damageDone += value
     }
 
-    registerRoundWon(key) {
-        this.player[key].roundsWon++
+    registerRoundWon() {
+        this.roundsWon++
     }
 
-    registerShotFired(key) {
-        this.player[key].shotsFired++
+    registerShotFired() {
+        this.shotsFired++
+    }
+
+    /**
+     * Update number of times enemy was depleted
+     * to 0 HP per multiplayer match
+     */
+    registerEnemyEliminated() {
+        this.enemiesEliminated++
+    }
+
+    getData() {
+        return {
+            damageDone: this.damageDone,
+            roundsWon: this.roundsWon,
+            shotsFired: this.shotsFired
+        }
     }
 }
 
 class Player {
-    constructor(x, y, rotation) {
+    constructor(x, y, rotation, tracker, playerName) {
         this.startPosX = x;
         this.startPosY = y;
+        this.startRotation = rotation;
         this.x = x;
         this.y = y;
         this.health = CONSTANTS.HP_FULL
@@ -69,6 +86,9 @@ class Player {
         this.initBulletPool()
         this.targetX = 0
         this.targetY = 0
+        this.tracker = tracker
+        this.playerName = playerName
+        this.cooldownTicks = 0
     }
 
     refreshEnergy() {
@@ -84,12 +104,19 @@ class Player {
     resetPosition() {
         this.x = this.startPosX
         this.y = this.startPosY
+        this.rotation = this.startRotation
     }
 
     applyDamage(damage) {
-        if (this.health - damage > 0)
+        if (this.health - damage >= 0) {
             this.health -= damage
-        else this.health = 0
+            return damage
+        }
+        else {
+            let healthLeftover = this.health
+            this.health = 0
+            return healthLeftover
+        }
     }
 
     rotate(x, y, delta) {
@@ -124,6 +151,16 @@ class Player {
         }
     }
 
+    // on each round
+    resetBulletPool() {
+        this.bulletPool.forEach(bullet => {
+            bullet.x = 0
+            bullet.y = 0
+            bullet.rotation = 0
+            bullet.isAlive = false
+        })
+    }
+
     updateBulletPositions(delta, onBulletMissCallback) {
         this.bulletPool.filter(bullet => bullet.isAlive == true).forEach(bullet => {
             if (bullet.x > CONSTANTS.MAP_WIDTH + CONSTANTS.VISIBLE_MAP_OFFSET ||
@@ -141,7 +178,16 @@ class Player {
         })
     }
 
+    decrementGunCooldown() {
+        if (this.cooldownTicks > 0)
+            this.cooldownTicks--
+    }
+
     createBullet() {
+
+        if (this.cooldownTicks !== 0)
+            return;
+
         for (let i = 0; i < CONSTANTS.BULLET_POOL_SIZE; i++) {
             if (this.bulletPool[i].isAlive == false) {
                 this.bulletPool[i] = {
@@ -151,12 +197,15 @@ class Player {
                     isAlive: true
                 }
 
+                this.tracker.registerShotFired()
+                this.cooldownTicks = CONSTANTS.GUN_COOLDOWN
                 this.energy -= CONSTANTS.BULLET_COST
-                break
+                return;
             }
 
-            if (i == CONSTANTS.BULLET_POOL_SIZE - 1)
+            if (i == CONSTANTS.BULLET_POOL_SIZE - 1) {
                 console.log("Bullet pool is too small")
+            }
         }
     }
 
@@ -189,7 +238,9 @@ class Player {
             turretRotation: this.turretRotation,
             bulletPool: this.bulletPool,
             enemyDistance: this.enemyDistance,
-            enemyVisible: false
+            enemyVisible: false,
+            gunCooldown: this.cooldownTicks,
+            tracker: this.tracker.getData()
         }
     }
 }
@@ -220,13 +271,14 @@ const CONSTANTS = {
     PLAYER_HALF_WIDTH: 28,
     PLAYER_HALF_HEIGHT: 21.3,
     FOV: 8, // Approximate half angle size
+    GUN_COOLDOWN: 30, // In ticks
 
     // Misc
     ENERGY_REFRESH_STEP: 10,
     PRECISION: 0.1,
     VISIBLE_MAP_OFFSET: 100,
     ROUND_COUNT: 5,             // One multiplayer match length
-    ROUND_TICKS_LENGTH: 60    // 1800 -> ~1 min
+    ROUND_TICKS_LENGTH: 500      // 1800 -> ~1 min
 }
 
 const utilities = {
@@ -268,7 +320,7 @@ const utilities = {
             playerOnePos.x <= playerTwoPos.x + CONSTANTS.PLAYER_HALF_WIDTH &&
             playerOnePos.y <= playerTwoPos.y + CONSTANTS.PLAYER_HALF_HEIGHT) {
 
-            if(typeof onRobotHitCallback !== 'undefined')
+            if (typeof onRobotHitCallback !== 'undefined')
                 onRobotHitCallback()
         }
     },
@@ -279,20 +331,20 @@ const utilities = {
      * @param {Array} playerBulletPool 
      * @param {Object} enemyInstance 
      */
-    checkForHits(playerBulletPool, enemyInstance, onBulletHitCallback) {
-        playerBulletPool.forEach(bullet => {
+    checkForHits(playerInstance, enemyInstance, onBulletHitCallback) {
+        playerInstance.bulletPool.forEach(bullet => {
             if (bullet.isAlive) {
                 if (bullet.x >= enemyInstance.x - CONSTANTS.PLAYER_HALF_WIDTH &&
                     bullet.y >= enemyInstance.y - CONSTANTS.PLAYER_HALF_HEIGHT &&
                     bullet.x <= enemyInstance.x + CONSTANTS.PLAYER_HALF_WIDTH &&
                     bullet.y <= enemyInstance.y + CONSTANTS.PLAYER_HALF_HEIGHT) {
                     bullet.isAlive = false
-                    enemyInstance.applyDamage(CONSTANTS.BULLET_DAMAGE)
+                    let damageAmount = enemyInstance.applyDamage(CONSTANTS.BULLET_DAMAGE)
+                    playerInstance.tracker.registerDamageDone(damageAmount)
 
                     // Pass info event of enemy being hit
                     // Should be wrapped inside try / catch
                     if (typeof onBulletHitCallback !== 'undefined') {
-                        // Unsafe call
                         onBulletHitCallback({
                             getHealth: () => enemyInstance.health,
                             getEnergy: () => enemyInstance.energy,
@@ -346,6 +398,29 @@ const utilities = {
         } catch (err) {
             console.log(err)
         }
+    },
+
+    registerRoundWin(playerOne, playerTwo) {
+        if (playerOne.health > playerTwo.health)
+            playerOne.tracker.registerRoundWon()
+        else if (playerOne.health < playerTwo.health)
+            playerTwo.tracker.registerRoundWon()
+
+        // Otherwise: draw. Match round count is still incremented, 
+        // but win is not registered to either player 
+    },
+
+    /**
+     * Determines round winner by comparing won rounds of both players
+     * @param {Object} playerOne First player 
+     * @param {Object} playerTwo Second player
+     */
+    getGameWinner(playerOne, playerTwo) {
+        if (playerOne.tracker.roundsWon > playerTwo.tracker.roundsWon)
+            return 1
+        else if (playerOne.tracker.roundsWon < playerTwo.tracker.roundsWon)
+            return 2
+        else return -1
     },
 
     /**

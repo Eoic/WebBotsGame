@@ -370,7 +370,7 @@ socket.onmessage = (event) => {
             playerObjectKeys.forEach(key => updateRobotName(key, payload.names[key]))
             break;
         case 'GAME_END':
-            showMatchEndStatistics(payload.gameData)
+            showMatchEndStatistics(payload.gameData, payload.totalTime)
             break;
     }
 }
@@ -517,8 +517,8 @@ function updateRobotName(playerKey, name) {
 }
 
 // Show overlay with data
-function showMatchEndStatistics(data) {
-
+function showMatchEndStatistics(data, totalTime) {
+ 
     let statisticsTable = document.getElementById('statistics-body')
 
     data.forEach(item => {
@@ -530,6 +530,8 @@ function showMatchEndStatistics(data) {
         statisticsTable.appendChild(tableRow)
     })
 
+    document.getElementById('ticks').innerText = totalTime
+    document.getElementById('seconds').innerText = Math.floor(totalTime / 30)
     document.getElementById('overlay').style.visibility = 'visible'
 }
 

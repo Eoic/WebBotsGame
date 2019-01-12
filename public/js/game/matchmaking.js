@@ -9,6 +9,7 @@ window.addEventListener('load', () => {
 
         request.onreadystatechange = (_event) => {
             if (request.readyState === 4) {
+                console.log(request.status)
                 if (request.status === 200) {
                     let loadingStatus = document.getElementById('loading-status')
                     loadingStatus.children[0].innerText = 'Game found'

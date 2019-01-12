@@ -2,7 +2,7 @@
  * For running game logic (i.e. game loop(s))
  */
 
-const { NodeVM } = require('vm2');
+const { NodeVM, VMScript, VM } = require('vm2');
 const uuidv4 = require('uuid/v4');
 const { Player, GameTracker, CONSTANTS, MESSAGE_TYPE, utilities } = require('./api')
 const TICK_RATE = 30
@@ -22,13 +22,13 @@ const { RULE_CONDITIONS, AchievementUnlocker, RuleSet } = require('./achievement
 // + Allow "Manage users" page for admin
 // + Add user password reset
 // User redis memory storage instead of session for saving temporary multiplayer data
-// Send elapsed game ticks on multiplayer match ending
+// + Send elapsed game ticks on multiplayer match ending
 // Send which one of the players won the game 
 
 // FIX
 // + Tracker shots fired counting is wrong
 // + Tracker damage done counting is (maybe) wrong
-// Round winner finder doesn't work
+// + Round winner finder doesn't work
 // Game winner counter doesnt work
 // + Currently wrong order of names in game info panel
 // + Wrong order of starting robots in mp
@@ -45,6 +45,8 @@ const GAME_TYPE = {
     MULTIPLAYER: 'M'
 }
 
+let multiplayerCodeCache = []
+
 const nodeVM = new NodeVM({
     wrapper: "commonjs",
     require: {
@@ -54,6 +56,28 @@ const nodeVM = new NodeVM({
     },
     sandbox: { context }
 });
+
+/*
+Safer approach to code running in VM
+
+let moduleMethods = nodeVM.run(`
+    function update() {
+        let a = 10
+        return a * a
+    }
+
+    module.exports = { update }
+`)
+
+const vm = new VM({
+    timeout: 1000,
+    sandbox: {}
+});
+
+let methodToRun = moduleMethods.update.toString()
+let result = vm.run(methodToRun + ' update()')
+console.log(result)
+*/
 
 const time = () => {
     let time = process.hrtime();
@@ -302,9 +326,10 @@ function updateMultiplayerInfo(gameState) {
         return 0;
 
     gameState.multiplayerData.elapsedTicks++
-    damagedToZero(gameState)
 
-    if (gameState.multiplayerData.elapsedTicks >= CONSTANTS.ROUND_TICKS_LENGTH) {
+    if (gameState.multiplayerData.elapsedTicks >= CONSTANTS.ROUND_TICKS_LENGTH || damagedToZero(gameState)) { 
+        gameState.multiplayerData.elapsedTotalTime += gameState.multiplayerData.elapsedTicks
+
         if (gameState.multiplayerData.elapsedRounds === 5) {
             // Last round ended. Notify client about game end 
             // and delete client data from game states
@@ -324,10 +349,14 @@ function updateMultiplayerInfo(gameState) {
  */
 function damagedToZero(gameState) {
     if(gameState[playerKeys[0]].health === 0 || gameState[playerKeys[1]].health === 0)
-        nextRound(gameState)
+        return true
+    return false
 }
 
 function endMultiplayerMatch(gameState) {
+
+    // Determine who won the last round
+    utilities.registerRoundWin(gameState[playerKeys[0]], gameState[playerKeys[1]])
 
     let data = []
 
@@ -337,11 +366,11 @@ function endMultiplayerMatch(gameState) {
             statistics: gameState[key].tracker.getData()
         })
     })
-
-    // TODO: also send match length
+    
     gameState.socket.send(JSON.stringify({
         type: 'GAME_END',
-        gameData: data
+        gameData: data,
+        totalTime: gameState.multiplayerData.elapsedTotalTime
     }))
 }
 
@@ -350,10 +379,9 @@ function endMultiplayerMatch(gameState) {
  * @param {Object} gameState Data about robots in the game 
  */
 function nextRound(gameState) {
-    // On round change, reset robots state
-    // and determine, who won the round
+    // Determine who won the round
     utilities.registerRoundWin(gameState[playerKeys[0]], gameState[playerKeys[1]])
-
+    
     playerKeys.forEach(key => {
         gameState[key].resetVitals()
         gameState[key].resetPosition()
@@ -395,6 +423,8 @@ function compileScripts(scripts, keys) {
         console.log(err)
     }
 
+    // Check if code === {}
+
     return code
 }
 
@@ -418,7 +448,8 @@ function createGameObjects(scripts, playerKeys, ws, gameType, names = ['placehol
     if (gameType === GAME_TYPE.MULTIPLAYER) {
         gameStates[ws.id]['multiplayerData'] = {
             elapsedTicks: 0,
-            elapsedRounds: 1
+            elapsedRounds: 1,
+            elapsedTotalTime: 0
         }
     }
 }

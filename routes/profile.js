@@ -25,6 +25,7 @@ router.get('/', (req, res, next) => {
         res.render('profile', {
             title: 'Profile',
             achievementsBriefList: true,
+            identicons: true,
             active: { profile: true },
             scripts: user.scripts,
             selectedScript: (typeof user.multiplayerScript !== 'undefined' && user.multiplayerScript !== null) ? user.multiplayerScript._id : 0,
@@ -59,6 +60,7 @@ router.get('/achievements', (req, res, next) => {
         Achievement.find().then(achievements => {
             res.render('profile', {
                 title: 'Profile',
+                identicons: true,
                 achievementsBriefList: false,
                 active: { profile: true },
                 scripts: user.scripts,

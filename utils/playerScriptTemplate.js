@@ -39,8 +39,7 @@ module.exports = {
     update,
     onBulletHit,
     onBulletMiss,
-    onWallHit,
-    onRobotHit
+    onWallHit
 }
 `
 

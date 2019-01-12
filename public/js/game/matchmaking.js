@@ -9,16 +9,15 @@ window.addEventListener('load', () => {
 
         request.onreadystatechange = (_event) => {
             if (request.readyState === 4) {
-                console.log(request.status)
                 if (request.status === 200) {
                     let loadingStatus = document.getElementById('loading-status')
-                    loadingStatus.children[0].innerText = 'Game found'
+                    loadingStatus.children[0].innerText = `Game created (ID: ${request.response.gameSessionId})`
                     loadingStatus.removeChild(loadingStatus.children[1])
 
                     let gameLink = document.createElement('a');
                     gameLink.className = 'btn btn-success btn-block btn-center btn-link'
                     gameLink.innerHTML = "<span class='fa fa-play'></span> START"
-                    gameLink.href = `${window.location.origin}/multiplayer`
+                    gameLink.href = `${window.location.origin}/multiplayer/${request.response.gameSessionId}`
 
                     loadingStatus.appendChild(gameLink)
                 } else {

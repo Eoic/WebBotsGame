@@ -9,6 +9,7 @@ const TICK_RATE = 30
 const playerKeys = ['playerOne', 'playerTwo']
 const cookie = require('cookie')
 const User = require('../models/User')
+const GameSession = require('../models/GameSession')
 const { RULE_CONDITIONS, AchievementUnlocker, RuleSet } = require('./achievements')
 
 // TODO: 
@@ -44,8 +45,6 @@ const GAME_TYPE = {
     SIMULATION: 'S',
     MULTIPLAYER: 'M'
 }
-
-let multiplayerCodeCache = []
 
 const nodeVM = new NodeVM({
     wrapper: "commonjs",
@@ -327,13 +326,12 @@ function updateMultiplayerInfo(gameState) {
 
     gameState.multiplayerData.elapsedTicks++
 
-    if (gameState.multiplayerData.elapsedTicks >= CONSTANTS.ROUND_TICKS_LENGTH || damagedToZero(gameState)) { 
+    if (gameState.multiplayerData.elapsedTicks >= CONSTANTS.ROUND_TICKS_LENGTH || damagedToZero(gameState)) {
         gameState.multiplayerData.elapsedTotalTime += gameState.multiplayerData.elapsedTicks
 
         if (gameState.multiplayerData.elapsedRounds === 5) {
             // Last round ended. Notify client about game end 
-            // and delete client data from game states
-            // utilities.getGameWinner(...)
+            // and delete client data
             endMultiplayerMatch(gameState)
             Reflect.deleteProperty(gameStates, gameState.socket.id)
             return -1
@@ -348,7 +346,7 @@ function updateMultiplayerInfo(gameState) {
  * @param {Object} gameState 
  */
 function damagedToZero(gameState) {
-    if(gameState[playerKeys[0]].health === 0 || gameState[playerKeys[1]].health === 0)
+    if (gameState[playerKeys[0]].health === 0 || gameState[playerKeys[1]].health === 0)
         return true
     return false
 }
@@ -357,7 +355,7 @@ function endMultiplayerMatch(gameState) {
 
     // Determine who won the last round
     utilities.registerRoundWin(gameState[playerKeys[0]], gameState[playerKeys[1]])
-
+    const winner = utilities.getGameWinner(gameState[playerKeys[0]], gameState[playerKeys[1]])
     let data = []
 
     playerKeys.forEach(key => {
@@ -366,12 +364,30 @@ function endMultiplayerMatch(gameState) {
             statistics: gameState[key].tracker.getData()
         })
     })
-    
-    gameState.socket.send(JSON.stringify({
-        type: 'GAME_END',
-        gameData: data,
-        totalTime: gameState.multiplayerData.elapsedTotalTime
-    }))
+
+    /* Remove multiplayer session data after game is finished */
+    GameSession.findOneAndRemove({
+        'sessionId': gameState.multiplayerData.sessionId
+    }).then((sessionData) => {
+        gameState.socket.send(JSON.stringify({
+            type: 'GAME_END',
+            gameData: data,
+            totalTime: gameState.multiplayerData.elapsedTotalTime,
+            winner
+        }))
+
+        updatePlayerStatistics(sessionData, gameState, winner)
+    })
+}
+
+function updatePlayerStatistics(gameSessionData, gameState) {
+    User.findOneAndUpdate({
+        username: gameSessionData.createdBy
+    }, {
+        'statistic.gamesPlayed': 1
+    }).then(response => {
+        console.log(response)
+    })
 }
 
 /**
@@ -381,14 +397,13 @@ function endMultiplayerMatch(gameState) {
 function nextRound(gameState) {
     // Determine who won the round
     utilities.registerRoundWin(gameState[playerKeys[0]], gameState[playerKeys[1]])
-    
+
     playerKeys.forEach(key => {
         gameState[key].resetVitals()
         gameState[key].resetPosition()
         gameState[key].resetBulletPool()
     })
 
-    // nodeVM.run(gameStates[gameState.socket.id] ........................
     gameState.multiplayerData.elapsedRounds++
     gameState.multiplayerData.elapsedTicks = 0
     return 1
@@ -423,8 +438,6 @@ function compileScripts(scripts, keys) {
         console.log(err)
     }
 
-    // Check if code === {}
-
     return code
 }
 
@@ -434,7 +447,7 @@ function compileScripts(scripts, keys) {
  * @param {Array} playerKeys 
  * @param {Object} ws 
  */
-function createGameObjects(scripts, playerKeys, ws, gameType, names = ['placeholder', 'placeholder']) {
+function createGameObjects(scripts, playerKeys, ws, gameType, names = ['placeholder', 'placeholder'], sessionId = undefined) {
     let code = compileScripts(scripts, playerKeys)
 
     gameStates[ws.id] = {
@@ -449,7 +462,8 @@ function createGameObjects(scripts, playerKeys, ws, gameType, names = ['placehol
         gameStates[ws.id]['multiplayerData'] = {
             elapsedTicks: 0,
             elapsedRounds: 1,
-            elapsedTotalTime: 0
+            elapsedTotalTime: 0,
+            sessionId
         }
     }
 }
@@ -460,7 +474,7 @@ function createGameObjects(scripts, playerKeys, ws, gameType, names = ['placehol
  */
 const wsServerCallback = (ws, req, store) => {
     const cookieObject = cookie.parse(req.headers.cookie)
-    const sessionId = cookieObject['connect_sid'].slice(2, 38) // !!!
+    const sessionId = cookieObject['connect_sid'].slice(2, 38)
 
     store.get(sessionId, (err, sessionData) => {
 
@@ -478,20 +492,26 @@ const wsServerCallback = (ws, req, store) => {
                         break;
                     case 'MULTIPLAYER':
                         if (typeof sessionData.user.multiplayer !== 'undefined') {
-                            const gameData = sessionData.user.multiplayer
-                            createGameObjects([gameData.playerOne.scripts[0].code,
-                            gameData.playerTwo.scripts[0].code],
-                                playerKeys, ws, GAME_TYPE.MULTIPLAYER,
-                                [gameData.playerOne.username, gameData.playerTwo.username])
 
-                            // To update game info panel
-                            ws.send(JSON.stringify({
-                                type: 'PLAYER_NAMES',
-                                names: {
-                                    playerOne: gameData.playerOne.username,
-                                    playerTwo: gameData.playerTwo.username
-                                }
-                            }))
+                            GameSession.findOne({
+                                'sessionId': sessionData.user.multiplayer.sessionId,
+                                'createdBy': sessionData.user.username
+                            }).then(session => {
+                                createGameObjects([session.data[0].code, session.data[1].code],
+                                    playerKeys, ws, GAME_TYPE.MULTIPLAYER,
+                                    [session.data[0].username, session.data[1].username], 
+                                    session.sessionId)
+
+                                ws.send(JSON.stringify({
+                                    type: 'PLAYER_NAMES',
+                                    names: {
+                                        playerOne: session.data[0].username,
+                                        playerTwo: session.data[1].username
+                                    }
+                                }))
+                            }).catch(err => {
+                                console.log(err)
+                            })
                         }
                         break;
                     default:
@@ -501,7 +521,13 @@ const wsServerCallback = (ws, req, store) => {
 
             // Delete player connection from gameStates array
             ws.on('close', () => {
-                // if mp game was interrupted, notify client
+                if(gameStates[ws.id].gameType === GAME_TYPE.MULTIPLAYER) {
+                    GameSession.findOneAndRemove({
+                        'sessionId': sessionData.user.multiplayer.sessionId,
+                        'createdBy': sessionData.user.username
+                    }).exec()
+                }
+
                 delete gameStates[ws.id]
             });
         } else {

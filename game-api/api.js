@@ -201,9 +201,7 @@ class Player {
                 this.cooldownTicks = CONSTANTS.GUN_COOLDOWN
                 this.energy -= CONSTANTS.BULLET_COST
                 return;
-            }
-
-            if (i == CONSTANTS.BULLET_POOL_SIZE - 1) {
+            } else if (i == CONSTANTS.BULLET_POOL_SIZE - 1) {
                 console.log("Bullet pool is too small")
             }
         }
@@ -417,9 +415,9 @@ const utilities = {
      */
     getGameWinner(playerOne, playerTwo) {
         if (playerOne.tracker.roundsWon > playerTwo.tracker.roundsWon)
-            return 1
+            return playerOne.playerName
         else if (playerOne.tracker.roundsWon < playerTwo.tracker.roundsWon)
-            return 2
+            return playerTwo.playerName
         else return -1
     },
 

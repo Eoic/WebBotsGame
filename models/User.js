@@ -38,11 +38,15 @@ const UserSchema = new Schema({
         code: mongoose.Schema.Types.String
     }],
     statistic: {
+        gamesPlayed: {
+            type: mongoose.Schema.Types.Number,
+            default: 0
+        },
         gamesWon: {
             type: mongoose.Schema.Types.Number,
             default: 0
         },
-        gamesLost: {
+        gamesLost: { // Should be removed
             type: mongoose.Schema.Types.Number,
             default: 0
         },
@@ -58,6 +62,7 @@ const UserSchema = new Schema({
     },
     multiplayerScript: {
         type: mongoose.Schema.Types.ObjectId,
+        default: null,
         required: false
     }
 }, {

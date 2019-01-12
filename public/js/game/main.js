@@ -526,6 +526,7 @@ function showMatchEndStatistics(data, totalTime) {
         tableRow.appendChild(createTableCell(item.name))
         tableRow.appendChild(createTableCell(item.statistics.damageDone))
         tableRow.appendChild(createTableCell(item.statistics.shotsFired))
+        tableRow.appendChild(createTableCell(`${calculateDamageDone(item.statistics.shotsFired, item.statistics.damageDone)} %`))
         tableRow.appendChild(createTableCell(item.statistics.roundsWon))
         statisticsTable.appendChild(tableRow)
     })
@@ -539,4 +540,11 @@ function createTableCell(innerText) {
     let tableCell = document.createElement('td')
     tableCell.innerText = innerText
     return tableCell
+}
+
+function calculateDamageDone(shotsFired, damageDone) {
+    if(shotsFired === 0)
+        return 0
+
+    return damageDone / (shotsFired * 15) * 100
 }

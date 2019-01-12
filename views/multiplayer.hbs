@@ -1,10 +1,38 @@
 {{>loading}}
 <div id='messages-container'></div>
 {{>game-info-sidebar}}
+
+<div class="modal-blanket" id='overlay'>
+
+    <h2 style="text-align: center; color: #d3d7e6;"> 
+        Match length: <span id='ticks'></span> ticks (<span id='seconds'></span> seconds) 
+    </h2>
+
+    <table class="stats-table">
+        <thead class="stats-thead">
+            <tr>
+                <th> Player </th>
+                <th> Damage done </th>
+                <th> Shots fired </th>
+                <th> Accuracy </th>
+                <th> Rounds won </th>
+            </tr>
+        </thead>
+
+        <tbody class="stats-tbody" id='statistics-body'>
+        </tbody>
+    </table>
+
+    <a href="/profile" class='btn btn-success btn-block btn-center btn-link' style="margin-top: 15px"> CONTINUE </a>
+</div>
+
 <div id='game-map'></div>
 {{>round-info}}
 
 <script src='/static/js/ui/notifier.js'></script>
 <script src='/static/js/pixijs/pixi.min.js'></script>
+<script src='/static/js/pixijs/filters/drop-shadow-filter/filter-drop-shadow.js'></script>
+<script src='/static/js/pixijs/filters/glow-filter/filter-glow.js'></script>
+<script src='/static/js/pixijs/filters/kawase-blur-filter/filter-kawase-blur.js'></script>
 <script src='/static/js/game/main.js'></script>
 <script src='/static/js/game/multiplayer.js'></script>

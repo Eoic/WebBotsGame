@@ -1,28 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User')
-
-router.get('/', (req, res, next) => {
-    if (req.session.user && req.cookies.connect_sid)
-        next();
-    else res.redirect('/');
-}, (req, res) => {
-    if(typeof req.session.user.multiplayer === 'undefined')
-        return res.redirect('/')
-
-    res.render('multiplayer', {
-        title: 'Multiplayer',
-        active: {
-            multiplayer: true
-        }
-    });
-})
+const GameSession = require('../models/GameSession')
+const uuidv4 = require('uuid/v4');
 
 /**
  * Select random oponnent and gets code for both players
  */
 router.get('/start-game', (req, res) => {
-
     const userOne = req.session.user.username
 
     User.find({
@@ -31,8 +16,9 @@ router.get('/start-game', (req, res) => {
     }).select({
         'username': 1
     }).then(users => {
-        if (users.length === 0)
-            res.status(200).json({ error: 'No players available' })
+        if (users.length === 0) {
+            res.status(202).json({ error: 'No players available' })
+        }
         else {
             const userTwo = selectRandomUser(users)
 
@@ -43,62 +29,119 @@ router.get('/start-game', (req, res) => {
                         userTwo
                     ]
                 }
-            }).select({ 'multiplayerScript': 1, 'username': 1 }) // oh...... 
+            }).select({ 'multiplayerScript': 1, 'username': 1 })
                 .then(users => {
-                    User.findOne({
-                        'username': users[0].username
-                    }).select({
-                        scripts: {
-                            $elemMatch: {
-                                _id: users[0].multiplayerScript
-                            }
-                        },
-                        'username': 1,
-                        '_id': 0
-                    }).then(resultOne => {
 
-                        if (resultOne.scripts.length === 0)
-                            res.status(201).json({ error: 'You have not selected multiplayer script' })
-                        else {
-
-                            User.findOne({
-                                'username': users[1].username
-                            }).select({
-                                scripts: {
-                                    $elemMatch: {
-                                        _id: users[1].multiplayerScript
-                                    }
-                                },
-                                'username': 1,
-                                '_id': 0
-                            }).then(resultTwo => {
-
-                                if (resultTwo.scripts.length === 0) {
-                                    displayMessage(req, res, 'An error occoured')
-                                } else {
-                                    // Save data for multiplayer
-                                    req.session.user.multiplayer = {
-                                        playerOne: resultOne,
-                                        playerTwo: resultTwo
-                                    }
-
-                                    // Successfull
-                                    res.sendStatus(200)
+                    Promise.all([
+                        User.findOne({
+                            'username': users[0].username
+                        }).select({
+                            scripts: {
+                                $elemMatch: {
+                                    _id: users[0].multiplayerScript
                                 }
-                            }).catch(err => {
-                                res.status(500).json({ error: 'An error occoured' })
-                            })
+                            },
+                            'username': 1,
+                            '_id': 0
+                        }),
+                        User.findOne({
+                            'username': users[1].username
+                        }).select({
+                            scripts: {
+                                $elemMatch: {
+                                    _id: users[1].multiplayerScript
+                                }
+                            },
+                            'username': 1,
+                            '_id': 0
+                        })
+                    ]).then(([userOne, userTwo]) => {
+                        if (userOne.scripts.length === 0) {
+                            res.status(202).json({ error: 'You have not created any scripts' })
+                        } else {
+                            if (userTwo.scripts.length === 0) {
+                                res.status(202).json({ error: 'An error occured' })
+                            } else {
+                                createGameSession(req, res, userOne, userTwo, req.session.user.username)
+                            }
                         }
-                    }).catch(err => {
-                        res.status(500).json({ error: 'An error occoured' })
                     })
                 })
         }
     })
 })
 
+router.get('/:id', (req, res, next) => {
+    if (req.session.user && req.cookies.connect_sid)
+        next();
+    else res.redirect('/');
+}, (req, res) => {
+    if (typeof req.session.user.multiplayer === 'undefined')
+        return res.redirect('/')
+
+    GameSession.findOne({
+        sessionId: req.session.user.multiplayer.sessionId,
+        createdBy: req.session.user.username
+    }).then(user => {
+        if (!user) {
+            res.redirect('/')
+        } else {
+            res.render('multiplayer', {
+                title: 'Multiplayer',
+                active: {
+                    multiplayer: true
+                }
+            });
+        }
+    })
+})
+
 function selectRandomUser(userList) {
     return userList[Math.floor(Math.random() * userList.length)].username
+}
+
+function removeOldSession(user) {
+    return GameSession.findOneAndRemove({
+        'sessionId': user.multiplayer.sessionId,
+        'createdBy': user.username
+    })
+}
+
+function createNewSession(createdBy, sessionId, userOne, userTwo) {
+    return GameSession.create({
+        'createdBy': createdBy,
+        'sessionId': sessionId
+    })
+}
+
+function createGameSession(req, res, userOne, userTwo, createdBy) {
+    const sessionId = uuidv4()
+    const newSessionPromise = createNewSession(createdBy, sessionId, userOne, userTwo)
+    const deleteOldSessionPromise = (typeof req.session.user.multiplayer !== 'undefined') ?
+                                    removeOldSession(req.session.user) : Promise.resolve()
+ 
+    Promise.all([deleteOldSessionPromise, newSessionPromise]).then(([oldSession, newSession]) => {
+        GameSession.findOneAndUpdate({
+            '_id': newSession._id
+        }, {
+                $push: {
+                    data: {
+                        $each: [{
+                            username: userOne.username,
+                            code: userOne.scripts[0].code
+                        }, {
+                            username: userTwo.username,
+                            code: userTwo.scripts[0].code
+                        }]
+                    }
+                }
+            }).then(() => {
+                req.session.user.multiplayer = { sessionId }
+                res.json({ gameSessionId: sessionId })
+            })
+    }).catch(err => {
+        console.log(err)
+    })
 }
 
 module.exports = router;

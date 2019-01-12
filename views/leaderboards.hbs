@@ -18,7 +18,7 @@
                 <td> {{level}} </td>
                 <td> {{username}} </td>
                 <td style="text-align: center">
-                    <progress max="{{gamesPlayed}}" value="{{gamesWon}}"> </progress>
+                    <progress {{#if (isNotZero gamesPlayed)}} max="{{gamesPlayed}}" {{/if}}  value="{{gamesWon}}"> </progress>
                     ({{winRate}} %)
                 </td>
             </tr>

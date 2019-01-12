@@ -1,13 +1,13 @@
 <div id='messages-container'></div>
 
 <aside class="profile-sidebar">
-    {{generateImageFromSource user.identiconHash}}
+    <svg width="130" height="130" data-jdenticon-value={{user.identiconHash}}></svg>
     <h3> @{{user.username}} </h3>
     <p> Level {{level}} </p>
     <p style="margin: 0; text-align: left; margin-left: 29px;"> Exp. ({{experience}} / {{experienceNext}}) </p>
     <progress max="{{experienceNext}}" value="{{experience}}"> </progress>
     <hr />
-    <label for="multiplayer-script" style="margin-bottom: 5px; display: block;"> Multiplayer script </label>
+    <label style="margin-bottom: 5px; display: block;"> Multiplayer script </label>
     <select name="multiplayer-script" id="multiplayer-script-list" style="width: 80%; float: left;">
         <option value="0"> None </option>
         {{#each scripts}}

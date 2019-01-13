@@ -119,12 +119,13 @@ class Player {
         }
     }
 
-    rotate(x, y, delta) {
+    rotateGlobal(x, y, delta) {
         let destinationDegree = Math.atan2(x, y);
         let direction = (destinationDegree > 0) ? 1 : -1;
 
         if (Math.abs(this.rotation - destinationDegree) > CONSTANTS.PRECISION) {
             this.rotation += direction * delta
+            this.rotation = this.rotation % (2 * Math.PI)
             return false;
         }
         else {
@@ -213,6 +214,7 @@ class Player {
 
         if (Math.abs(this.turretRotation - destinationDegree) > CONSTANTS.PRECISION) {
             this.turretRotation += direction * delta
+            this.turretRotation = this.turretRotation % (2 * Math.PI)
             return false;
         }
         else {

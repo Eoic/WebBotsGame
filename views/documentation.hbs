@@ -6,13 +6,13 @@
         Here you can view JavaScript functions and objects available in game scripts.
     </p>
 
-    <div class="docs-code-block">
-        <h3> util </h3>
+    <div class="docs-code-block" id="player">
+        <a href='#player' class="code-anchor"><code> player </code></a>
         <p> Main game object which contains information about the game </p>
     </div>
 
-    <div class="docs-code-block">
-        <h3> util.getState() </h3>
+    <div class="docs-code-block" id="player_getstate">
+        <a href='#player_getstate' class="code-anchor"><code> player.getState() </code></a>
         <p> Returns information about player object </p>
         <table style="float: left;">
             <thead>
@@ -34,45 +34,123 @@
                     <td style="text-align: center;"> robot position in y axis on game map </td>
                 </tr>
                 <tr>
-                    <td> hp_current </td>
+                    <td> health </td>
                     <td> number </td>
                     <td style="text-align: center;"> remaining health points of robot </td>
                 </tr>
                 <tr>
-                    <td> energy_current </td>
+                    <td> energy </td>
                     <td> number </td>
                     <td style="text-align: center;"> remaining energy points of robot </td>
+                </tr>
+                <tr>
+                    <td> rotation </td>
+                    <td> number </td>
+                    <td style="text-align: center;"> global robot rotation in radians </td>
+                </tr>
+                <tr>
+                    <td> turretRotation </td>
+                    <td> number </td>
+                    <td style="text-align: center;"> local turret rotation in radians </td>
+                </tr>
+                <tr>
+                    <td> gunCooldown </td>
+                    <td> number </td>
+                    <td style="text-align: center;"> ticks remaining before bullet can be shot </td>
+                </tr>
+                <tr>
+                    <td> enemyVisible </td>
+                    <td> boolean </td>
+                    <td style="text-align: center;"> is enemy visible </td>
                 </tr>
             </tbody>
         </table>
         <div style="clear: left;"></div>
     </div>
 
-    <div class="docs-code-block">
-        <h3> player </h3>
-        <p> Object containing robot control functions </p>
-    </div>
-
-    <div class="docs-code-block">
-        <h3> player.moveForwardX()
-        </h3>
+    <div class="docs-code-block" id='player_moveforwardx'>
+        <a href='#player_moveforwardx' class="code-anchor"><code> player.moveForwardX() </code></a>
         <p> Moves robot forwards x axis at a constant speed </p>
     </div>
 
-    <div class="docs-code-block">
-        <h3> player.moveForwardY()
-        </h3>
+    <div class="docs-code-block" id='player_moveforwardy'>
+        <a href='#player_moveforwardy' class="code-anchor"><code> player.moveForwardY() </code></a>
         <p> Moves robot forwards y axis at a constant speed </p>
     </div>
 
-    <div class="docs-code-block">
-        <h3> player.moveBackX()
-        </h3>
+    <div class="docs-code-block" id='player_movebackx'>
+        <a href='#player_movebackx' class="code-anchor"><code> player.moveBackX() </code></a>
         <p> Moves robot backwards x axis at a constant speed </p>
     </div>
 
-    <div class="docs-code-block">
-        <h3> player.moveBackY() </h3>
+    <div class="docs-code-block" id='player_movebackx'>
+        <a href='#player_movebackx' class="code-anchor"><code> player.moveBackY() </code></a>
         <p> Moves robot backwards y axis at a constant speed </p>
+    </div>
+
+    <div class="docs-code-block" id='scanner'>
+        <a href='#scanner' class="code-anchor"><code> scanner </code></a>
+        <p> Contains methods for detecting enemy robot </p>
+    </div>
+
+    <div class="docs-code-block" id='scanner_pulse'>
+        <a href='#scanner_pulse' class="code-anchor"><code> scanner.pulse() </code></a>
+        <p> Returns true if turret is pointing towards enemy </p>
+    </div>
+
+    <div class="docs-code-block" id='scanner_gettargetdistance'>
+        <a href='#scanner_gettargetdistance' class="code-anchor"> <code> scanner.getTargetDistance() </code> </a>
+        <p> Returns distance from scanned enemy robot </p>
+    </div>
+
+    <div class="docs-code-block">
+        <code> Game </code>
+        <p> Contains constants available in the global scope </p>
+        <table style="float: left;">
+            <thead>
+                <tr>
+                    <th> name </th>
+                    <th> value </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td> MAP_WIDTH </td>
+                    <td> 674 </td>
+                </tr>
+
+                <tr>
+                    <td> MAP_HEIGHT </td>
+                    <td> 464 </td>
+                </tr>
+
+                <tr>
+                    <td> GUN_COOLDOWN </td>
+                    <td> 30 </td>
+                </tr>
+
+                <tr>
+                    <td> BULLET_DAMAGE </td>
+                    <td> 15 </td>
+                </tr>
+
+                <tr>
+                    <td> BULLET_COST </td>
+                    <td> 16 </td>
+                </tr>
+
+                <tr>
+                    <td> MOVEMENT_SPEED </td>
+                    <td> 130 </td>
+                </tr>
+
+                <tr>
+                    <td> BULLET_TRAVEL_SPEED </td>
+                    <td> 350 </td>
+                </tr>
+            </tbody>
+        </table>
+        <div style="clear: left;"></div>
+        <p></p>
     </div>
 </section>

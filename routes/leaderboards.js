@@ -6,7 +6,7 @@ router.get('/', (_request, response) => {
     User.find().select({
         "username": 1,
         "statistic.gamesWon": 1,
-        "statistic.gamesLost": 1,
+        "statistic.gamesPlayed": 1,
         "statistic.experience": 1
     }).then((res, err) => {
         if (err)
@@ -33,14 +33,14 @@ function modifyAndSort(users) {
     users.forEach(item => {
         let winRate = 0;
 
-        if(item.statistic.gamesWon + item.statistic.gamesLost !== 0)
-            winRate =  Math.round(item.statistic.gamesWon / (item.statistic.gamesWon + item.statistic.gamesLost) * 100)
+        if(item.statistic.gamesWon + item.statistic.gamesPlayed !== 0)
+            winRate =  Math.round((item.statistic.gamesWon / item.statistic.gamesPlayed) * 100)
 
         usersModified.push({
             username: item.username,
             level: Math.floor(0.5 * Math.sqrt(item.statistic.experience)),
             gamesWon: item.statistic.gamesWon,
-            gamesPlayed: item.statistic.gamesWon + item.statistic.gamesLost,
+            gamesPlayed: item.statistic.gamesPlayed,
             winRate
         })
     })

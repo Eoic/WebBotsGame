@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User')
-const Achievement = require('../models/Achievement')
 const bcryptjs = require('bcryptjs')
+const User = require('../models/User')
+const privateRoute = require('./privateRoute')
+const Achievement = require('../models/Achievement')
 const SALT_ROUNDS = 10
 
-router.get('/', (req, res, next) => {
+router.get('/', privateRoute, (req, res, next) => {
     if (req.session.user && req.cookies.connect_sid)
         next();
     else res.redirect('/');
@@ -49,7 +50,7 @@ router.get('/', (req, res, next) => {
     });
 })
 
-router.get('/achievements', (req, res, next) => {
+router.get('/achievements', privateRoute, (req, res, next) => {
     if (req.session.user && req.cookies.connect_sid)
         next();
     else res.redirect('/');
@@ -86,7 +87,7 @@ router.get('/achievements', (req, res, next) => {
     });
 })
 
-router.get('/edit-account', (req, res) => {
+router.get('/edit-account', privateRoute, (req, res) => {
 
     let error = (typeof req.query.error !== 'undefined') ? req.query.error : undefined;
     let success = (typeof req.query.success !== 'undefined') ? req.query.success : undefined 
@@ -124,10 +125,10 @@ router.get('/edit-account', (req, res) => {
     });
 })
 
-router.post('/edit-account', (req, res) => {
+router.post('/edit-account', privateRoute, (req, res) => {
     const currentPassword = req.body.currentPassword
     const newPassword = req.body.newPassword
-    const repeatNewPassword = req.body.newPassword
+    const repeatNewPassword = req.body.repeatNewPassword
 
     if(newPassword.length < 6){
         sendErrorMessage(res, 'New password must be at least 6 characters long')

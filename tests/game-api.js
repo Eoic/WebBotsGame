@@ -24,6 +24,4 @@ describe('utilities', () => {
             assert.strictEqual(utilities.checkMapBounds(700, 464), false)
         })
     })
-
-    describe('#')
 })

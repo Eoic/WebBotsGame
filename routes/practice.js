@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
+const privateRoute = require('./privateRoute')
 
-router.get('/', (req, res, next) => {
+router.get('/', privateRoute, (req, res, next) => {
     if (req.session.user && req.cookies.connect_sid)
         next();
     else res.redirect('/');

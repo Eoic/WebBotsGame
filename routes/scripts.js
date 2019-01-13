@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
 const mongoose = require('mongoose')
+const User = require('../models/User');
+const privateRoute = require('./privateRoute')
 const scriptTemplate = require('../utils/playerScriptTemplate')
 const USER_SCRIPTS_LIMIT = 5;
 
 /**
  * Gets all scripts of specific user
  */
-router.get('/', (req, res) => {
+router.get('/', privateRoute, (req, res) => {
     User.findOne({
         username: req.session.user.username
     }).select({
@@ -26,7 +27,7 @@ router.get('/', (req, res) => {
 /**
  * Get script by objectId
  */
-router.get('/:id', (req, res, next) => {
+router.get('/:id', privateRoute, (req, res, next) => {
     if (req.session.user && req.cookies.connect_sid)
         next();
     else res.redirect('/');
@@ -55,7 +56,7 @@ router.get('/:id', (req, res, next) => {
 /**
  * Creates new script
  */
-router.post('/', (req, res) => {
+router.post('/', privateRoute, (req, res) => {
 
     if (typeof req.body.filename === 'undefined')
         return res.sendStatus(400);
@@ -110,7 +111,7 @@ router.post('/', (req, res) => {
 /**
  * Updates one script
  */
-router.put('/', (req, res) => {
+router.put('/', privateRoute, (req, res) => {
 
     let filename = req.body.filename;
     let code = req.body.code;
@@ -130,7 +131,7 @@ router.put('/', (req, res) => {
         });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', privateRoute, (req, res) => {
     let filename = req.params.id;
 
     User.updateOne({
@@ -149,7 +150,7 @@ router.delete('/:id', (req, res) => {
         })
 });
 
-router.post('/select-mp-script', (req, res) => {
+router.post('/select-mp-script', privateRoute, (req, res) => {
     let selectedScriptId = null
 
     if (typeof req.body._id !== 'undefined')
@@ -162,7 +163,7 @@ router.post('/select-mp-script', (req, res) => {
 })
 
 /** RUN CODE ROUTE (SIMULATION) */
-router.post('/run-code', (req, res, next) => {
+router.post('/run-code', privateRoute, (req, res, next) => {
     if (req.session.user && req.cookies.connect_sid)
         next();
     else res.redirect('/');

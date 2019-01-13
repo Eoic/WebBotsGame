@@ -7,13 +7,10 @@ const RANDOM_BYTES = 24
 const SALT_ROUNDS = 10
 const bcryptjs = require('bcryptjs')
 const passwordResetLifespan = require('../config').passwordResetLifespan
+const privateRoute = require('./privateRoute')
 
 // Get all registered users
-router.get('/manage-users', (req, res, next) => {
-    if (req.session.user && req.cookies.connect_sid)
-        next();
-    else res.redirect('/');
-}, (req, res) => {
+router.get('/manage-users', privateRoute, (req, res) => {
     if (!req.session.user.isAdmin) {
         res.redirect('/')
     }
@@ -31,7 +28,7 @@ router.get('/manage-users', (req, res, next) => {
 })
 
 // Delete user
-router.delete('/manage-users/:id', (req, res, next) => {
+router.delete('/manage-users/:id', privateRoute, (req, res, next) => {
     if (req.session.user && req.cookies.connect_sid)
         next();
     else res.redirect('/');

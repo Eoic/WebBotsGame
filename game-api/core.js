@@ -2,7 +2,7 @@
  * For running game logic (i.e. game loop(s))
  */
 
-const { NodeVM, VMScript, VM } = require('vm2');
+const { NodeVM } = require('vm2');
 const uuidv4 = require('uuid/v4');
 const { Player, GameTracker, CONSTANTS, MESSAGE_TYPE, utilities } = require('./api')
 const TICK_RATE = 30
@@ -15,25 +15,23 @@ const { RULE_CONDITIONS, AchievementUnlocker, RuleSet } = require('./achievement
 // TODO: 
 // + Reset bullet pool on next round start
 // + Import User model for statistic updating
-// +- Round reset and statistics collection update
+// + Round reset and statistics collection update
 // + End round after one of the robots reach 0 HP
 // + Enemy scanning API function
 // + Identify multiplayer game ending(reached round count)
 // + Save isAdmin in session
 // + Allow "Manage users" page for admin
 // + Add user password reset
-// User redis memory storage instead of session for saving temporary multiplayer data
 // + Send elapsed game ticks on multiplayer match ending
-// Send which one of the players won the game 
+// + Send which one of the players won the game 
 
 // FIX
 // + Tracker shots fired counting is wrong
 // + Tracker damage done counting is (maybe) wrong
 // + Round winner finder doesn't work
-// Game winner counter doesnt work
+// + Game winner counter doesnt work
 // + Currently wrong order of names in game info panel
 // + Wrong order of starting robots in mp
-// Reset robot code on each but first round start
 
 const context = {
     delta: 0,
@@ -56,28 +54,6 @@ const nodeVM = new NodeVM({
     sandbox: { context }
 });
 
-/*
-Safer approach to code running in VM
-
-let moduleMethods = nodeVM.run(`
-    function update() {
-        let a = 10
-        return a * a
-    }
-
-    module.exports = { update }
-`)
-
-const vm = new VM({
-    timeout: 1000,
-    sandbox: {}
-});
-
-let methodToRun = moduleMethods.update.toString()
-let result = vm.run(methodToRun + ' update()')
-console.log(result)
-*/
-
 const time = () => {
     let time = process.hrtime();
     return time[0] * 1000 + time[1] / 1000000;
@@ -98,6 +74,12 @@ let callMap = {
     rotateTurret: false,
     scan: false
 }
+
+nodeVM.freeze(player, 'player');                // Game API calls
+nodeVM.freeze(CONSTANTS, 'Game');               // Constants
+nodeVM.freeze(logger, 'logger')                 // Info output
+nodeVM.freeze(MESSAGE_TYPE, 'MESSAGE_TYPE')     // Logger message type
+nodeVM.freeze(scanner, 'scanner')               // Scanner api for locating enemy robot
 
 // API
 // Robot control functions
@@ -256,12 +238,6 @@ const logger = {
         })
     }
 }
-
-nodeVM.freeze(player, 'player');                // Game API calls
-nodeVM.freeze(CONSTANTS, 'Game');               // Constants
-nodeVM.freeze(logger, 'logger')                 // Info output
-nodeVM.freeze(MESSAGE_TYPE, 'MESSAGE_TYPE')     // Logger message type
-nodeVM.freeze(scanner, 'scanner')               // Scanner api for locating enemy robot
 
 /**
  * Updates pair of players and returns their updated state

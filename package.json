@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "mocha"
+    "test": "node ./node_modules/mocha/bin/mocha ./tests/game-api.js ./tests/models.js ./tests/achievement-unlocker.js"
   },
   "repository": {
     "type": "git",

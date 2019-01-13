@@ -10,7 +10,8 @@ const playerKeys = ['playerOne', 'playerTwo']
 const cookie = require('cookie')
 const User = require('../models/User')
 const GameSession = require('../models/GameSession')
-const { RULE_CONDITIONS, AchievementUnlocker, RuleSet } = require('./achievements')
+const Achievement = require('../models/Achievement')
+const { updateUserAchievements } = require('./achievements')
 
 // TODO: 
 // + Reset bullet pool on next round start
@@ -74,12 +75,6 @@ let callMap = {
     rotateTurret: false,
     scan: false
 }
-
-nodeVM.freeze(player, 'player');                // Game API calls
-nodeVM.freeze(CONSTANTS, 'Game');               // Constants
-nodeVM.freeze(logger, 'logger')                 // Info output
-nodeVM.freeze(MESSAGE_TYPE, 'MESSAGE_TYPE')     // Logger message type
-nodeVM.freeze(scanner, 'scanner')               // Scanner api for locating enemy robot
 
 // API
 // Robot control functions
@@ -239,6 +234,12 @@ const logger = {
     }
 }
 
+nodeVM.freeze(player, 'player');                // Game API calls
+nodeVM.freeze(CONSTANTS, 'Game');               // Constants
+nodeVM.freeze(logger, 'logger')                 // Info output
+nodeVM.freeze(MESSAGE_TYPE, 'MESSAGE_TYPE')     // Logger message type
+nodeVM.freeze(scanner, 'scanner')               // Scanner api for locating enemy robot
+
 /**
  * Updates pair of players and returns their updated state
  * through web socket connection
@@ -361,16 +362,16 @@ function updatePlayerStatistics(gameSessionData, gameState, winner) {
     if (winner === gameSessionData.createdBy)
         gameWon = 1
 
-    User.findOneAndUpdate({
-        username: gameSessionData.createdBy
-    }, {
-            $inc: {
-                'statistic.gamesPlayed': 1,
-                'statistic.gamesWon': gameWon
-            }
-        }).then(response => {
-            console.log(response)
-        })
+    // also add time played, 
+
+    User.findOneAndUpdate({ username: gameSessionData.createdBy }, {
+        $inc: {
+            'statistic.gamesPlayed': 1,
+            'statistic.gamesWon': gameWon
+        }
+    }).then(user => {
+        updateUserAchievements(user._id)
+    })
 }
 
 /**
@@ -506,7 +507,7 @@ const wsServerCallback = (ws, req, store) => {
             ws.on('close', () => {
                 if (gameStates[ws.id] !== undefined) {
                     if (gameStates[ws.id].gameType === GAME_TYPE.MULTIPLAYER) {
-                        
+
                         // User left mid-game. 
                         // Remove session data and count game as played 
                         GameSession.findOneAndRemove({
@@ -515,8 +516,8 @@ const wsServerCallback = (ws, req, store) => {
                         }).then(() => {
                             User.findOneAndUpdate({
                                 'username': sessionData.user.username
-                            }, { $inc: { 'statistic.gamesPlayed': 1 } }).then(() => {
-                                console.log('User left mid-game')
+                            }, { $inc: { 'statistic.gamesPlayed': 1 } }).then(user => {
+                                updateUserAchievements(user._id)
                             })
 
                             Reflect.deleteProperty(gameStates, ws.id)

@@ -94,7 +94,7 @@ let callMap = {
     moveBackY: false,
     moveBack: false,
     shoot: false,
-    rotate: false,
+    rotateGlobal: false,
     rotateTurret: false,
     scan: false
 }
@@ -121,7 +121,7 @@ const player = {
         if (utilities.functionCalledThisFrame(callMap, player.moveBackY.name))
             return;
 
-        if (context.robot.rotate(-1, 0, context.delta))
+        if (context.robot.rotateGlobal(-1, 0, context.delta))
             if (utilities.checkBoundsUpperY(context.robot.y))
                 context.robot.y -= context.delta * CONSTANTS.MOVEMENT_SPEED
     },
@@ -133,7 +133,7 @@ const player = {
         if (utilities.functionCalledThisFrame(callMap, player.moveBackX.name))
             return
 
-        if (context.robot.rotate(0, -1, context.delta))
+        if (context.robot.rotateGlobal(0, -1, context.delta))
             if (utilities.checkBoundsLowerX(context.robot.x))
                 context.robot.x -= context.delta * CONSTANTS.MOVEMENT_SPEED;
     },
@@ -145,7 +145,7 @@ const player = {
         if (utilities.functionCalledThisFrame(callMap, player.moveBackY.name))
             return
 
-        if (context.robot.rotate(1, 0, context.delta))
+        if (context.robot.rotateGlobal(1, 0, context.delta))
             if (utilities.checkBoundsLowerY(context.robot.y))
                 context.robot.y += context.delta * CONSTANTS.MOVEMENT_SPEED
     },
@@ -183,13 +183,13 @@ const player = {
      * Rotates player clockwise if degrees < 0, 
      * and counter-clockwise if degrees > 0
      */
-    rotate: (degrees) => {
-        if (utilities.functionCalledThisFrame(callMap, player.rotate.name))
+    rotateGlobal: (degrees) => {
+        if (utilities.functionCalledThisFrame(callMap, player.rotateGlobal.name))
             return
 
         degrees += 90;
         let radians = degrees * (Math.PI / 180)
-        return context.robot.rotate(Math.cos(radians), Math.sin(radians), context.delta)
+        return context.robot.rotateGlobal(Math.cos(radians), Math.sin(radians), context.delta)
     },
 
     /**
@@ -258,7 +258,7 @@ const logger = {
 }
 
 nodeVM.freeze(player, 'player');                // Game API calls
-nodeVM.freeze(CONSTANTS, 'GAME');               // Constants
+nodeVM.freeze(CONSTANTS, 'Game');               // Constants
 nodeVM.freeze(logger, 'logger')                 // Info output
 nodeVM.freeze(MESSAGE_TYPE, 'MESSAGE_TYPE')     // Logger message type
 nodeVM.freeze(scanner, 'scanner')               // Scanner api for locating enemy robot

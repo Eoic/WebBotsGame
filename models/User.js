@@ -53,13 +53,12 @@ const UserSchema = new Schema({
         experience: {
             type: mongoose.Schema.Types.Number,
             default: 4
-        },
-        achievements: [{
-            achievementId: mongoose.Schema.Types.ObjectId,
-            key: mongoose.Schema.Types.ObjectId,
-            unlockedAt: mongoose.Schema.Types.Date
-        }]
+        }
     },
+    achievements: [{
+        key: mongoose.Schema.Types.String,
+        unlockedAt: mongoose.Schema.Types.Date
+    }],
     multiplayerScript: {
         type: mongoose.Schema.Types.ObjectId,
         default: null,

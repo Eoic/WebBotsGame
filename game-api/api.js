@@ -397,6 +397,7 @@ const utilities = {
             return undefined
         } catch (err) {
             console.log(err)
+            return undefined;
         }
     },
 
@@ -448,7 +449,6 @@ const utilities = {
         }
     }
 }
-
 
 module.exports = {
     CONSTANTS,

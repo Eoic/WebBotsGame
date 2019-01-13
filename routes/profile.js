@@ -17,24 +17,27 @@ router.get('/', (req, res, next) => {
         'statistic.experience': 1,
         'statistic.gamesPlayed': 1,
         'statistic.gamesWon': 1,
-        'statistics.achievements': 1
+        'achievements': 1
     }).lean().then(user => {
         if (!user)
             return res.sendStatus(404);
 
-        res.render('profile', {
-            title: 'Profile',
-            achievementsBriefList: true,
-            identicons: true,
-            active: { profile: true },
-            scripts: user.scripts,
-            selectedScript: (typeof user.multiplayerScript !== 'undefined' && user.multiplayerScript !== null) ? user.multiplayerScript._id : 0,
-            level: Math.floor(0.5 * Math.sqrt(user.statistic.experience)),
-            experience: user.statistic.experience,
-            experienceNext: Math.pow(2 * (Math.floor(0.5 * Math.sqrt(user.statistic.experience)) + 1), 2),
-            gamesWon: user.statistic.gamesWon,
-            gamesLost: user.statistic.gamesPlayed - user.statistic.gamesWon,
-            gamesPlayed: user.statistic.gamesPlayed
+        getUnlockedAchievements(user, (unlockedAchievements) => {
+            res.render('profile', {
+                title: 'Profile',
+                achievementsBriefList: true,
+                identicons: true,
+                active: { profile: true },
+                scripts: user.scripts,
+                selectedScript: (typeof user.multiplayerScript !== 'undefined' && user.multiplayerScript !== null) ? user.multiplayerScript._id : 0,
+                level: Math.floor(0.5 * Math.sqrt(user.statistic.experience)),
+                experience: user.statistic.experience,
+                experienceNext: Math.pow(2 * (Math.floor(0.5 * Math.sqrt(user.statistic.experience)) + 1), 2),
+                gamesWon: user.statistic.gamesWon,
+                gamesLost: user.statistic.gamesPlayed - user.statistic.gamesWon,
+                gamesPlayed: user.statistic.gamesPlayed,
+                unlockedAchievements
+            })
         })
     }).catch(err => {
         res.status(500).send(err.message);
@@ -77,5 +80,43 @@ router.get('/achievements', (req, res, next) => {
         res.status(500).send(err.message);
     });
 })
+
+function getUnlockedAchievements(user, callback) {
+    let keys = []
+
+    if (user.achievements !== undefined) {
+        user.achievements.forEach(item => {
+            keys.push(item.key)
+        });
+    }
+
+    Achievement.find({
+        'key': { $in: keys }
+    }).select({
+        '_id': 0,
+        'key': 1,
+        'title': 1,
+        'description': 1,
+        'iconName': 1
+    }).then(achievements => {
+        achievements.sort(compareByKey)
+        user.achievements.sort(compareByKey)
+        
+        user.achievements.forEach((achievement, index) => {
+            achievements[index].unlockedAt = achievement.unlockedAt
+        })
+
+        callback((achievements !== undefined) ? achievements : [])
+    })
+}
+
+function compareByKey(left, right) {
+    if(left.key < right.key)
+        return -1
+    else if(left.key > right.key)
+        return 1
+
+    return 0
+}
 
 module.exports = router;

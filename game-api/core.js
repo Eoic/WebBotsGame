@@ -2,7 +2,7 @@
  * For running game logic (i.e. game loop(s))
  */
 
-const { NodeVM, VMScript, VM } = require('vm2');
+const { NodeVM } = require('vm2');
 const uuidv4 = require('uuid/v4');
 const { Player, GameTracker, CONSTANTS, MESSAGE_TYPE, utilities } = require('./api')
 const TICK_RATE = 30
@@ -10,30 +10,29 @@ const playerKeys = ['playerOne', 'playerTwo']
 const cookie = require('cookie')
 const User = require('../models/User')
 const GameSession = require('../models/GameSession')
-const { RULE_CONDITIONS, AchievementUnlocker, RuleSet } = require('./achievements')
+const Achievement = require('../models/Achievement')
+const { updateUserAchievements } = require('./achievements')
 
 // TODO: 
 // + Reset bullet pool on next round start
 // + Import User model for statistic updating
-// +- Round reset and statistics collection update
+// + Round reset and statistics collection update
 // + End round after one of the robots reach 0 HP
 // + Enemy scanning API function
 // + Identify multiplayer game ending(reached round count)
 // + Save isAdmin in session
 // + Allow "Manage users" page for admin
 // + Add user password reset
-// User redis memory storage instead of session for saving temporary multiplayer data
 // + Send elapsed game ticks on multiplayer match ending
-// Send which one of the players won the game 
+// + Send which one of the players won the game 
 
 // FIX
 // + Tracker shots fired counting is wrong
 // + Tracker damage done counting is (maybe) wrong
 // + Round winner finder doesn't work
-// Game winner counter doesnt work
+// + Game winner counter doesnt work
 // + Currently wrong order of names in game info panel
 // + Wrong order of starting robots in mp
-// Reset robot code on each but first round start
 
 const context = {
     delta: 0,
@@ -55,28 +54,6 @@ const nodeVM = new NodeVM({
     },
     sandbox: { context }
 });
-
-/*
-Safer approach to code running in VM
-
-let moduleMethods = nodeVM.run(`
-    function update() {
-        let a = 10
-        return a * a
-    }
-
-    module.exports = { update }
-`)
-
-const vm = new VM({
-    timeout: 1000,
-    sandbox: {}
-});
-
-let methodToRun = moduleMethods.update.toString()
-let result = vm.run(methodToRun + ' update()')
-console.log(result)
-*/
 
 const time = () => {
     let time = process.hrtime();
@@ -385,16 +362,16 @@ function updatePlayerStatistics(gameSessionData, gameState, winner) {
     if (winner === gameSessionData.createdBy)
         gameWon = 1
 
-    User.findOneAndUpdate({
-        username: gameSessionData.createdBy
-    }, {
-            $inc: {
-                'statistic.gamesPlayed': 1,
-                'statistic.gamesWon': gameWon
-            }
-        }).then(response => {
-            console.log(response)
-        })
+    // also add time played, 
+
+    User.findOneAndUpdate({ username: gameSessionData.createdBy }, {
+        $inc: {
+            'statistic.gamesPlayed': 1,
+            'statistic.gamesWon': gameWon
+        }
+    }).then(user => {
+        updateUserAchievements(user._id)
+    })
 }
 
 /**
@@ -530,7 +507,7 @@ const wsServerCallback = (ws, req, store) => {
             ws.on('close', () => {
                 if (gameStates[ws.id] !== undefined) {
                     if (gameStates[ws.id].gameType === GAME_TYPE.MULTIPLAYER) {
-                        
+
                         // User left mid-game. 
                         // Remove session data and count game as played 
                         GameSession.findOneAndRemove({
@@ -539,8 +516,8 @@ const wsServerCallback = (ws, req, store) => {
                         }).then(() => {
                             User.findOneAndUpdate({
                                 'username': sessionData.user.username
-                            }, { $inc: { 'statistic.gamesPlayed': 1 } }).then(() => {
-                                console.log('User left mid-game')
+                            }, { $inc: { 'statistic.gamesPlayed': 1 } }).then(user => {
+                                updateUserAchievements(user._id)
                             })
 
                             Reflect.deleteProperty(gameStates, ws.id)

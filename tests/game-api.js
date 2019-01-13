@@ -1,8 +1,8 @@
 const { utilities, Player, GameTracker, CONSTANTS }  = require('../game-api/api')
 const assert = require('assert')
 
-let tracker = new GameTracker()
-let player = new Player(0, 0, 0, tracker, 'TestPlayer')
+let playerOne = new Player(0, 0, 0, new GameTracker(), 'TestPlayerTwo')
+let playerTwo = new Player(0, 0, 0, new GameTracker(), 'TestPlayerOne')
 
 describe('utilities', () => {
     describe('#checkBoundsLowerX()', () => {
@@ -15,7 +15,7 @@ describe('utilities', () => {
         })
     })
 
-    describe('#chackMapBounds()', () => {
+    describe('#checkMapBounds()', () => {
         it(`should return true if given point (155, 298) is inside map bounds: X: [0, ${CONSTANTS.MAP_WIDTH}] y: [0; ${CONSTANTS.MAP_HEIGHT}]`, () => {
             assert.strictEqual(utilities.checkMapBounds(155, 298), true)
         })

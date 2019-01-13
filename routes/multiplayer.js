@@ -3,11 +3,12 @@ const router = express.Router();
 const User = require('../models/User')
 const GameSession = require('../models/GameSession')
 const uuidv4 = require('uuid/v4');
+const privateRoute = require('./privateRoute')
 
 /**
  * Select random oponnent and gets code for both players
  */
-router.get('/start-game', (req, res) => {
+router.get('/start-game', privateRoute, (req, res) => {
     const userOne = req.session.user.username
 
     User.find({
@@ -71,7 +72,7 @@ router.get('/start-game', (req, res) => {
     })
 })
 
-router.get('/:id', (req, res, next) => {
+router.get('/:id', privateRoute, (req, res, next) => {
     if (req.session.user && req.cookies.connect_sid)
         next();
     else res.redirect('/');

@@ -1,7 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const path = require('path')
-const Achievements = require('../models/Achievement')
 
 function getFile(filename) {
     return path.join(__dirname, '..', filename)

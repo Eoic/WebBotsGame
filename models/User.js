@@ -46,7 +46,7 @@ const UserSchema = new Schema({
             type: mongoose.Schema.Types.Number,
             default: 0
         },
-        gamesLost: { // Should be removed
+        gameTime: {
             type: mongoose.Schema.Types.Number,
             default: 0
         },
@@ -73,7 +73,7 @@ const UserSchema = new Schema({
  */
 UserSchema.pre('save', function (next) {
     const user = this;
-
+    console.log('Called pre-save.')
     return bcrypt.hash(user.password, SALT_ROUNDS).then(hash => {
         user.password = hash;
         next();

@@ -1,12 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User')
+const privateRoute = require('./privateRoute')
 
-router.get('/', (req, res, next) => {
-    if (req.session.user && req.cookies.connect_sid)
-        next();
-    else res.redirect('/');
-}, (req, res) => {
+router.get('/', privateRoute, (req, res) => {
     User.find().select({
         'username': 1
     }).where('username').ne(req.session.user.username)

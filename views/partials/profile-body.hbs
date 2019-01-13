@@ -1,12 +1,13 @@
 <section class="padded section-full-size profile-section">
     <h2>Statistics</h2>
     <hr />
-    <ul style="list-style-type: none; font-size: x-large; ">
-        <li> <span class="fas fa fa-play" style="padding: 10px;"></span> Games played: {{gamesPlayed}} </li>
-        <li> <span class="fas fa fa-trophy" style="padding: 10px;"></span>Games won: {{gamesWon}} ({{{getPercent gamesWon gamesPlayed}}} %)</li>
-    </ul>
+    <div style="column-count: auto; font-size: large;">
+        <p> <span class="fas fa fa-play" style="padding: 10px;"></span> Games played: {{gamesPlayed}} </p>
+        <p> <span class="fas fa fa-trophy" style="padding: 10px;"></span>Games won: {{gamesWon}} ({{{getPercent gamesWon gamesPlayed}}} %)</p>
+        <p> <span class="fas fa fa-clock" style="padding: 10px;"></span> Time spent in multiplayer: {{ticksToSeconds gameTime}} s. </p>
+    </div>
 
-    <h2>Achievements</h2>
+    <h2> Unlocked achievements</h2>
     <hr />
 
     {{#each unlockedAchievements}}

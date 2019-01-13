@@ -151,5 +151,8 @@ function calculateUnlockedExp(unlockedList, callback) {
 }
 
 module.exports = { 
-    updateUserAchievements
+    updateUserAchievements,
+    AchievementUnlocker,
+    RULE_CONDITIONS,
+    RuleSet
 }

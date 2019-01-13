@@ -6,35 +6,35 @@ let achievementUnlocker = new AchievementUnlocker(RuleSet)
 describe('AchievementUnlocker', () => {
     describe('#unlock', () => {
         it('should return false if achievement key is not in rule set', () => {
-            assert.strictEqual(achievementUnlocker.unlock('ACH_NO_SUCH_KEY', 0, RULE_CONDITIONS.EQUAL), false)
+            assert.strictEqual(achievementUnlocker.unlock('ACH_NO_SUCH_KEY', 0), false)
         })
 
         it('should return true with ACH_WIN_ONE_GAME rule key and value of 1', () => {
-            assert.strictEqual(achievementUnlocker.unlock('ACH_WIN_ONE_GAME', 1, RULE_CONDITIONS.EQUAL), true)
+            assert.strictEqual(achievementUnlocker.unlock('ACH_WIN_ONE_GAME', 1), true)
         })
 
         it('should return true with ACH_WIN_TEN_GAMES rule key and value of 10', () => {
-            assert.strictEqual(achievementUnlocker.unlock('ACH_WIN_TEN_GAMES', 10, RULE_CONDITIONS.EQUAL), true)
+            assert.strictEqual(achievementUnlocker.unlock('ACH_WIN_TEN_GAMES', 10), true)
         })
 
         it('should return true with ACH_WIN_FIFTY_GAMES rule key and value of 50', () => {
-            assert.strictEqual(achievementUnlocker.unlock('ACH_WIN_FIFTY_GAMES', 50, RULE_CONDITIONS.EQUAL), true)
+            assert.strictEqual(achievementUnlocker.unlock('ACH_WIN_FIFTY_GAMES', 50), true)
         })
 
         it('should return true with ACH_PLAY_ONE_GAME rule key and value of 1', () => {
-            assert.strictEqual(achievementUnlocker.unlock('ACH_PLAY_ONE_GAME', 1, RULE_CONDITIONS.EQUAL), true)
+            assert.strictEqual(achievementUnlocker.unlock('ACH_PLAY_ONE_GAME', 1), true)
         })
 
         it('should return true with ACH_PLAY_TEN_GAMES rule key and value of 10', () => {
-            assert.strictEqual(achievementUnlocker.unlock('ACH_PLAY_TEN_GAMES', 10, RULE_CONDITIONS.EQUAL), true)
+            assert.strictEqual(achievementUnlocker.unlock('ACH_PLAY_TEN_GAMES', 10), true)
         })
 
         it('should return true with ACH_PLAY_FIFTY_GAMES rule key and value of 50', () => {
-            assert.strictEqual(achievementUnlocker.unlock('ACH_WIN_FIFTY_GAMES', 50, RULE_CONDITIONS.EQUAL), true)
+            assert.strictEqual(achievementUnlocker.unlock('ACH_WIN_FIFTY_GAMES', 50), true)
         })
 
         it('should return true with ACH_NO_GAME_DAMAGE rule key and value of 0', () => {
-            assert.strictEqual(achievementUnlocker.unlock('ACH_NO_GAME_DAMAGE', 0, RULE_CONDITIONS.EQUAL), true)
+            assert.strictEqual(achievementUnlocker.unlock('ACH_NO_GAME_DAMAGE', 0), true)
         })
     })
 

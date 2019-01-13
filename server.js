@@ -32,7 +32,7 @@ const hbs = expressHbs.create({
             return 0
         },
         toLocaleString: (dateString) => { 
-            return new Date(dateString).toLocaleString()
+            return new Date(dateString).toLocaleString('lt-LT', { day: 'numeric', month: '2-digit', year: 'numeric', hour: 'numeric', minute: 'numeric' })
         },  
         isNotZero: (value) => !(value === 0),
         isArrayEmpty: (array) => (array.length === 0),

@@ -25,6 +25,7 @@ const hbs = expressHbs.create({
     extname: '.hbs',
     partialsDir: 'views/partials',
     helpers: {
+        ticksToSeconds: (ticks) => Math.round(ticks / 30),
         getPercent: (numerator, denominator) => {
             if (denominator !== 0 && numerator <= denominator)
                 return Math.round((numerator / denominator) * 100)

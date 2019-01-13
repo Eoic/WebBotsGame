@@ -17,7 +17,8 @@ router.get('/', (req, res, next) => {
         'statistic.experience': 1,
         'statistic.gamesPlayed': 1,
         'statistic.gamesWon': 1,
-        'achievements': 1
+        'achievements': 1,
+        'statistic.gameTime': 1
     }).lean().then(user => {
         if (!user)
             return res.sendStatus(404);
@@ -36,6 +37,7 @@ router.get('/', (req, res, next) => {
                 gamesWon: user.statistic.gamesWon,
                 gamesLost: user.statistic.gamesPlayed - user.statistic.gamesWon,
                 gamesPlayed: user.statistic.gamesPlayed,
+                gameTime: user.statistic.gameTime,
                 unlockedAchievements
             })
         })

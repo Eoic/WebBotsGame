@@ -46,7 +46,7 @@ const UserSchema = new Schema({
             type: mongoose.Schema.Types.Number,
             default: 0
         },
-        gamesLost: { // Should be removed
+        gameTime: {
             type: mongoose.Schema.Types.Number,
             default: 0
         },

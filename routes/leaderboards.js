@@ -13,7 +13,7 @@ router.get('/', (_request, response) => {
             response.redirect('/')
         else {
             response.render('leaderboards', {
-                title: 'NETBOTS | Leaderboards',
+                title: 'NETBOTS | Leaderboard',
                 active: {
                     leaderboards: true
                 },

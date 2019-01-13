@@ -367,7 +367,8 @@ function updatePlayerStatistics(gameSessionData, gameState, winner) {
     User.findOneAndUpdate({ username: gameSessionData.createdBy }, {
         $inc: {
             'statistic.gamesPlayed': 1,
-            'statistic.gamesWon': gameWon
+            'statistic.gamesWon': gameWon,
+            'statistic.gameTime': gameState.multiplayerData.elapsedTotalTime
         }
     }).then(user => {
         updateUserAchievements(user._id)

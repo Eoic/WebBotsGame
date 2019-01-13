@@ -5,8 +5,3 @@ Allow: /login
 Allow: /tutorial
 Allow: /documentation
 Allow: /leaderboards
-Disallow: /logout
-Disallow: /practice
-Disallow: /lobby
-Disallow: /multiplayer
-Disallow: /profile

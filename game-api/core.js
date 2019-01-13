@@ -10,7 +10,6 @@ const playerKeys = ['playerOne', 'playerTwo']
 const cookie = require('cookie')
 const User = require('../models/User')
 const GameSession = require('../models/GameSession')
-const Achievement = require('../models/Achievement')
 const { updateUserAchievements } = require('./achievements')
 
 // TODO: 
@@ -70,7 +69,6 @@ let callMap = {
     moveBackX: false,
     moveBackY: false,
     moveBack: false,
-    shoot: false,
     rotateGlobal: false,
     rotateTurret: false,
     scan: false
@@ -84,8 +82,10 @@ const player = {
      * Moves player forwards along by x axis
      */
     moveForwardX: () => {
-        if (utilities.functionCalledThisFrame(callMap, player.moveForwardX.name))
+        if (utilities.functionCalledThisFrame(callMap, player.moveForwardX.name) || 
+            utilities.functionCalledThisFrame(callMap, player.moveForward.name)) {
             return;
+        }
 
         if (utilities.checkBoundsUpperX(context.robot.x))
             context.robot.x += context.delta * CONSTANTS.MOVEMENT_SPEED;
@@ -95,7 +95,8 @@ const player = {
      * Moves player forwards along y axis
      */
     moveForwardY: () => {
-        if (utilities.functionCalledThisFrame(callMap, player.moveBackY.name))
+        if (utilities.functionCalledThisFrame(callMap, player.moveBackY.name) ||
+            utilities.functionCalledThisFrame(callMap, player.moveForward))
             return;
 
         if (context.robot.rotateGlobal(-1, 0, context.delta))
@@ -107,7 +108,8 @@ const player = {
      * Moves player backwards along x axis
      */
     moveBackX: () => {
-        if (utilities.functionCalledThisFrame(callMap, player.moveBackX.name))
+        if (utilities.functionCalledThisFrame(callMap, player.moveBackX.name) ||
+            utilities.functionCalledThisFrame(callMap, player.moveBack.name))
             return
 
         if (context.robot.rotateGlobal(0, -1, context.delta))
@@ -119,7 +121,8 @@ const player = {
      * Moves player backwards along y axis
      */
     moveBackY: () => {
-        if (utilities.functionCalledThisFrame(callMap, player.moveBackY.name))
+        if (utilities.functionCalledThisFrame(callMap, player.moveBackY.name) ||
+            utilities.functionCalledThisFrame(callMap, player.moveBack.name))
             return
 
         if (context.robot.rotateGlobal(1, 0, context.delta))
@@ -131,7 +134,8 @@ const player = {
      * Moves player forwards according to its rotation
      */
     moveForward: () => {
-        if (utilities.functionCalledThisFrame(callMap, player.moveForward.name))
+        if (utilities.functionCalledThisFrame(callMap, player.moveForward.name) ||
+            utilities.functionCalledThisFrame(callMap, player.moveForwardX.name))
             return
 
         if (!utilities.checkMapBounds(context.robot.x, context.robot.y))
@@ -146,7 +150,8 @@ const player = {
      * Moves layer backwards according to its rotation
      */
     moveBack: () => {
-        if (utilities.functionCalledThisFrame(callMap, player.moveBack.name))
+        if (utilities.functionCalledThisFrame(callMap, player.moveBack.name) || 
+            utilities.functionCalledThisFrame(callMap, player.moveBackX.name))
             return
 
         if (!utilities.checkMapBounds(context.robot.x, context.robot.y))
@@ -154,6 +159,22 @@ const player = {
 
         context.robot.x -= context.delta * Math.cos(context.robot.rotation) * CONSTANTS.MOVEMENT_SPEED
         context.robot.y -= context.delta * Math.sin(context.robot.rotation) * CONSTANTS.MOVEMENT_SPEED
+    },
+
+    /**
+     * Moves robot forwards its rotation by distance given 
+     * @param {Number} distance Distance in pixels 
+     */
+    moveForwardBy(distance) {
+        
+    },
+
+    /**
+     * Moves robot backwards in opposite side of its rotation
+     * @param {Number} distance Distance in pixels
+     */
+    moveBackBy(distance) {
+
     },
 
     /**
@@ -186,9 +207,6 @@ const player = {
      * Shoots bullets by direction of turet rotation
      */
     shoot: () => {
-        if (utilities.functionCalledThisFrame(callMap, player.shoot.name))
-            return
-
         if (context.robot.energy >= CONSTANTS.BULLET_COST) {
             context.robot.createBullet()
             return true

@@ -17,10 +17,14 @@
     <button class="btn-small" onclick="submitSelection()">
         <span class="fa fa-save"></span>
     </button>
+    <hr/>
+    <a href="/profile/edit-account" class="styled-link" style="color: #FFFFFF"> Edit account details </a>
 </aside>
 
 {{#if achievementsBriefList}}
     {{>profile-body}}
+{{else if editAccount}}
+    {{>edit-account}}
 {{else}}
     {{>achievements-all}}
 {{/if}}

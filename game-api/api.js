@@ -84,11 +84,12 @@ class Player {
         this.enemyDistance = -1
         this.bulletPool = []
         this.initBulletPool()
-        this.targetX = 0
-        this.targetY = 0
+        this.targetPosX = 0
+        this.targetPosY = 0
         this.tracker = tracker
         this.playerName = playerName
         this.cooldownTicks = 0
+        this.targetPositionReached = true
     }
 
     refreshEnergy() {
@@ -139,6 +140,11 @@ class Player {
             x: this.x,
             y: this.y
         }
+    }
+
+    setTargetPosition(x, y) {
+        this.targetPosX = x;
+        this.targetPosY = y
     }
 
     initBulletPool() {

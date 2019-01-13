@@ -22,7 +22,11 @@ main {
 
 select {
     padding: 5px;
-    border-radius: 2px;
+    border-radius: 1px;
+    appearance: none;
+    border-style: solid;
+    -webkit-appearance: none; 
+   -moz-appearance: none;
 }
 
 header {
@@ -89,6 +93,8 @@ footer {
     height: 100px;
 }
 
+/* Form */
+
 .form {
     padding: 40px 40px 40px 40px;
     background-color: aliceblue;
@@ -116,6 +122,32 @@ footer {
     border-radius: 2px;
     padding: 10px 10px 10px 30px;
     box-sizing: border-box;
+}
+
+.profile-form>input {
+    float: left;
+    margin: 6px 12px 6px auto;
+    padding: 5px 70px 10px 0;
+    border: 1px solid #afaeae;
+    border-radius: 2px;
+    color: #5e5e5e;
+    transition: all 0.2s;
+    min-width: 300px;
+    padding: 0.7em 0.8em;
+}
+
+.profile-form>input:focus {
+    background-color: rgb(252, 252, 252);
+    box-shadow: 0px 0px 2px 0px rgb(66, 100, 255);
+}
+
+.profile-form>label{
+    float: left;
+    padding: 13px 0 10px 0;
+    clear: both;
+    display: block;
+    width: 200px;
+    font-size: 17px;
 }
 
 /* Flex box */
@@ -320,7 +352,7 @@ footer {
     border-style: none;
     transition: all 0.2s;
     padding: 0.7em 1.7em;
-    font-size: 16px;
+    font-size: 15px;
     max-height: 40px;
 }
 
@@ -439,7 +471,7 @@ footer {
     width: 30px;
     background-color: #2468ce;
     border: 1px solid #777777;
-    height: 27px;
+    height: 30px;
     margin-top: 1px;
     border-radius: 2px;
     color: #ffffff;
@@ -531,6 +563,7 @@ footer {
 
 .dropdown {
     border-style: none;
+    min-width: 80px;
 }
 
 .info-sidebar {
@@ -729,14 +762,16 @@ td {
 /* Headers */
 
 h2.section-header {
-    padding-bottom: 20px;
+    /* padding-bottom: 2px;*/
     margin-top: -13px;
-    box-shadow: inset 0px -6px 9px -8px #2f2f2f;
+    border-radius: 2px;
+    /*box-shadow: inset 0px -6px 9px -8px #2f2f2f;*/
     color: #333333;
 }
 
 .padded-header {
-    padding-left: 150px;
+    position: relative;
+    padding-left: 20%;
 }
 
 .section-paragraph {
@@ -875,18 +910,19 @@ progress::-webkit-progress-bar {
     text-align: center;
     color: #2f2f2f;
     text-decoration: none;
-    transition: 0.3s all;
-    border-radius: 3px;
-    padding: 3px;
+    transition: 0.2s all;
+    border-radius: 2px;
+    padding: 5px;
+    text-decoration: dashed underline;
 }
 
 .styled-link:hover {
-    background-color: #a8bfc9;
+    background-color: #3f51b5;
+    color: #ffffff;
 }
 
 .message-box {
     max-width: 500px;
-    margin: 0 auto;
     padding: 15px;
     border-radius: 3px;
 }

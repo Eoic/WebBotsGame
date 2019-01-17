@@ -1,18 +1,29 @@
-<section>
-    <aside class="docs-sidebar">
-        list a
-    </aside>
-    <p class="section-paragraph">
-        Here you can view JavaScript functions and objects available in game scripts.
-    </p>
-
-    <div class="docs-code-block" id="player">
+<aside class="fixed-sidebar docs-sidebar">
+    <h4 style="text-align: center;"> API reference </h4>
+    <hr/>
+    <a href="#player"> <code> player </code> </a>
+    <a href="#player_getplayerinfo"> <code> player.getPlayerInfo() </code> </a>
+    <a href="#player_moveforward"> <code> player.moveForward() </code> </a>
+    <a href="#player_moveforwardx"> <code> player.moveForwardX() </code> </a>
+    <a href="#player_moveforwardy"> <code> player.moveForwardY() </code> </a>
+    <a href="#player_moveback"> <code> player.moveBack() </code> </a>
+    <a href="#player_movebackx"> <code> player.moveBackX() </code> </a>
+    <a href="#player_movebacky"> <code> player.moveBackY() </code> </a>
+    <a href="#player_rotateglobal"> <code> player.rotateGlobal() </code> </a>
+    <a href="#player_rotateturret"> <code> player.rotateTurret() </code> </a>
+    <a href="#player_shoot"> <code> player.shoot() </code> </a>
+    <a href="#scanner_pulse"> <code> scanner.pulse() </code> </a>
+    <a href="#scanner_gettargetdistance"> <code> scanner.getTargetDistance() </code> </a>
+    <a href="#game"> <code> game </code></a>
+</aside>
+<section class="aside-section docs-section">
+    <div class="docs-code-block docs-code-block-object" id="player">
         <a href='#player' class="code-anchor"><code> player </code></a>
-        <p> Main game object which contains information about the game </p>
+        <p> Global game object which contains information about the robot and control methods. </p>
     </div>
 
-    <div class="docs-code-block" id="player_getstate">
-        <a href='#player_getstate' class="code-anchor"><code> player.getPlayerInfo() </code></a>
+    <div class="docs-code-block" id="player_getplayerinfo">
+        <a href='#player_getplayerinfo' class="code-anchor"><code> player.getPlayerInfo() </code></a>
         <p> Returns information about player object </p>
         <table style="float: left;">
             <thead>
@@ -63,85 +74,114 @@
         <div style="clear: left;"></div>
     </div>
 
+    <div class="docs-code-block" id='player_moveforward'>
+        <a href='#player_moveforward' class="code-anchor"><code> player.moveForward() </code></a>
+        <p> Moves robot forwards in a direction it faces. </p>
+    </div>
+
     <div class="docs-code-block" id='player_moveforwardx'>
         <a href='#player_moveforwardx' class="code-anchor"><code> player.moveForwardX() </code></a>
-        <p> Moves robot forwards x axis at a constant speed </p>
+        <p> Moves robot forwards x axis at a constant speed. </p>
     </div>
 
     <div class="docs-code-block" id='player_moveforwardy'>
         <a href='#player_moveforwardy' class="code-anchor"><code> player.moveForwardY() </code></a>
-        <p> Moves robot forwards y axis at a constant speed </p>
+        <p> Moves robot forwards y axis at a constant speed. </p>
+    </div>
+
+    <div class="docs-code-block" id='player_moveback'>
+        <a href='#player_moveback' class="code-anchor"><code> player.moveBackX() </code></a>
+        <p> Moves robot backwards in an opposite direction it faces. </p>
     </div>
 
     <div class="docs-code-block" id='player_movebackx'>
         <a href='#player_movebackx' class="code-anchor"><code> player.moveBackX() </code></a>
-        <p> Moves robot backwards x axis at a constant speed </p>
+        <p> Moves robot backwards x axis at a constant speed. </p>
     </div>
 
     <div class="docs-code-block" id='player_movebackx'>
         <a href='#player_movebackx' class="code-anchor"><code> player.moveBackY() </code></a>
-        <p> Moves robot backwards y axis at a constant speed </p>
+        <p> Moves robot backwards y axis at a constant speed. </p>
     </div>
 
-    <div class="docs-code-block" id='scanner'>
+    <div class="docs-code-block" id='player_rotateglobal'>
+        <a href='#player_rotateglobal' class="code-anchor"><code> player.rotateGlobal(number: degrees) </code></a>
+        <p> Rotates robot by number of degrees given in global coordinates. </p>
+    </div>
+
+    <div class="docs-code-block" id='player_movebackx'>
+        <a href='#player_movebackx' class="code-anchor"><code> player.rotateTurret(number: degrees) </code></a>
+        <p> Rotates turret by number of degrees given. Rotation is relative to robot's rotation, therefore if robot is rotated 
+            by 45 degrees, rotating turret by 15 degress will result in 60 degrees rotation in global map coordinates. </p>
+    </div>
+
+    <div class="docs-code-block docs-code-block-object" id='scanner'>
         <a href='#scanner' class="code-anchor"><code> scanner </code></a>
-        <p> Contains methods for detecting enemy robot </p>
+        <p> Contains methods for detecting enemy robot. </p>
     </div>
 
     <div class="docs-code-block" id='scanner_pulse'>
         <a href='#scanner_pulse' class="code-anchor"><code> scanner.pulse() </code></a>
-        <p> Returns true if turret is pointing towards enemy </p>
+        <p> Returns true if turret is pointing towards enemy. </p>
     </div>
 
     <div class="docs-code-block" id='scanner_gettargetdistance'>
         <a href='#scanner_gettargetdistance' class="code-anchor"> <code> scanner.getTargetDistance() </code> </a>
-        <p> Returns distance from scanned enemy robot </p>
+        <p> Returns distance from scanned enemy robot. </p>
     </div>
 
-    <div class="docs-code-block">
-        <code> Game </code>
-        <p> Contains constants available in the global scope </p>
+    <div class="docs-code-block docs-code-block-object" id='game'>
+        <a href="#game" class="code-anchor"><code> Game </code></a>
+        <p> Contains constants available in the global scope. </p>
         <table style="float: left;">
             <thead>
                 <tr>
                     <th> name </th>
                     <th> value </th>
+                    <th> description</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td> MAP_WIDTH </td>
                     <td> 674 </td>
+                    <td> Game map width in pixels </td>
                 </tr>
 
                 <tr>
                     <td> MAP_HEIGHT </td>
                     <td> 464 </td>
+                    <td> Game map height in pixels </td>
                 </tr>
 
                 <tr>
                     <td> GUN_COOLDOWN </td>
                     <td> 30 </td>
+                    <td> Gun cooldown time in ticks after bullet is fired. Equals to 1 second. </td>
                 </tr>
 
                 <tr>
                     <td> BULLET_DAMAGE </td>
                     <td> 15 </td>
+                    <td> Amount of health subtracted from enemy robot if bullet successfully hits it </td>
                 </tr>
 
                 <tr>
                     <td> BULLET_COST </td>
                     <td> 16 </td>
+                    <td> Amount of energy required to shoot a single bullet </td>
                 </tr>
 
                 <tr>
                     <td> MOVEMENT_SPEED </td>
                     <td> 130 </td>
+                    <td> Robot movement speed </th>
                 </tr>
 
                 <tr>
                     <td> BULLET_TRAVEL_SPEED </td>
                     <td> 350 </td>
+                    <td> Bullet travel speed </td>
                 </tr>
             </tbody>
         </table>

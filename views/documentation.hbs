@@ -1,4 +1,5 @@
 <aside class="fixed-sidebar docs-sidebar">
+    <hr/>
     <h4 style="text-align: center;"> API reference </h4>
     <hr/>
     <a href="#player"> <code> player </code> </a>
@@ -15,6 +16,13 @@
     <a href="#scanner_pulse"> <code> scanner.pulse() </code> </a>
     <a href="#scanner_gettargetdistance"> <code> scanner.getTargetDistance() </code> </a>
     <a href="#game"> <code> game </code></a>
+    <hr/>
+    <h4 style="text-align: center;"> Events </h4>
+    <a href="#onbullethit"> <code> onBulletHit() </code> </a>
+    <a href="#onbulletmiss"> <code> onBulletMiss() </code> </a>
+    <a href="#oncollision"> <code> onCollision() </code> </a>
+    <a href="#onwallhit"> <code> onWallHit() </code> </a>
+    <hr/>
 </aside>
 <section class="aside-section docs-section">
     <div class="docs-code-block docs-code-block-object" id="player">
@@ -24,11 +32,12 @@
 
     <div class="docs-code-block" id="player_getplayerinfo">
         <a href='#player_getplayerinfo' class="code-anchor"><code> player.getPlayerInfo() </code></a>
-        <p> Returns information about player object </p>
+        <p> Contains information about player object </p>
+        <h4 class="gray-header"> Returns </h4>
         <table style="float: left;">
             <thead>
                 <tr>
-                    <th> parameter </th>
+                    <th> field </th>
                     <th> type </th>
                     <th> description </th>
                 </tr>
@@ -99,8 +108,8 @@
         <p> Moves robot backwards x axis at a constant speed. </p>
     </div>
 
-    <div class="docs-code-block" id='player_movebackx'>
-        <a href='#player_movebackx' class="code-anchor"><code> player.moveBackY() </code></a>
+    <div class="docs-code-block" id='player_movebacky'>
+        <a href='#player_movebacky' class="code-anchor"><code> player.moveBackY() </code></a>
         <p> Moves robot backwards y axis at a constant speed. </p>
     </div>
 
@@ -109,10 +118,15 @@
         <p> Rotates robot by number of degrees given in global coordinates. </p>
     </div>
 
-    <div class="docs-code-block" id='player_movebackx'>
-        <a href='#player_movebackx' class="code-anchor"><code> player.rotateTurret(number: degrees) </code></a>
+    <div class="docs-code-block" id='player_rotateturret'>
+        <a href='#player_rotateturret' class="code-anchor"><code> player.rotateTurret(number: degrees) </code></a>
         <p> Rotates turret by number of degrees given. Rotation is relative to robot's rotation, therefore if robot is rotated 
             by 45 degrees, rotating turret by 15 degress will result in 60 degrees rotation in global map coordinates. </p>
+    </div>
+
+    <div class="docs-code-block" id='player_shoot'>
+        <a href='#player_shoot' class="code-anchor"><code> player.shoot() </code></a>
+        <p> Shoots a bullet in a direction turret is facing </p>
     </div>
 
     <div class="docs-code-block docs-code-block-object" id='scanner'>
@@ -175,7 +189,7 @@
                 <tr>
                     <td> MOVEMENT_SPEED </td>
                     <td> 130 </td>
-                    <td> Robot movement speed </th>
+                    <td> Robot movement speed </td>
                 </tr>
 
                 <tr>
@@ -186,6 +200,29 @@
             </tbody>
         </table>
         <div style="clear: left;"></div>
-        <p></p>
+    </div>
+
+    <div class="docs-code-block" id='events'>
+        <a href="#events" class="code-anchor"><code> EVENTS </code></a>
+    </div>
+
+    <div class="docs-code-block" id='onbullethit'>
+        <a href='#onbullethit' class="code-anchor"> <code> onBulletHit(object: event) </code> </a>
+        <p> Called once robot has been hit by enemy player. </p>
+    </div>
+
+    <div class="docs-code-block" id='onbulletmiss'>
+        <a href='#onbulletmiss' class="code-anchor"> <code> onBulletMiss() </code> </a>
+        <p> Called when bullet flies outside map bounds without hitting anything  </p>
+    </div>
+
+    <div class="docs-code-block" id='onwallhit'>
+        <a href='#onwallhit' class="code-anchor"> <code> onWallHit() </code> </a>
+        <p> Called once robot collides with map border </p>
+    </div>
+
+    <div class="docs-code-block" id='oncollision'>
+        <a href='#oncollision' class="code-anchor"> <code> onCollision() </code> </a>
+        <p> Called once robot collides with enemy robot </p>
     </div>
 </section>

@@ -680,6 +680,10 @@ td {
     position: fixed;
 }
 
+.fixed-sidebar > a {
+    display: block;
+}
+
 .profile-section {
     width: calc(100% - 250px);
 }
@@ -1066,4 +1070,9 @@ code {
     .docs-section {
         width: calc(100% - 280px);
     }
+}
+
+.gray-header {
+    color: rgb(116, 116, 116); 
+    padding: 10px 0px;
 }

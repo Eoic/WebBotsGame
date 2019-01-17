@@ -413,17 +413,19 @@ const loop = () => {
  * @param {Array} scripts 
  * @param {Array} keys 
  */
-function compileScripts(scripts, keys) {
-    let code = {}
+function compileScripts(scripts, keys, players) {
+    let code = { }
 
     try {
         keys.forEach((key, index) => {
+            context.robot = players[index]
             code[key] = nodeVM.run(scripts[index])
         })
     } catch (err) {
         console.log(err)
     }
 
+    context.robot = {}
     return code
 }
 
@@ -434,11 +436,13 @@ function compileScripts(scripts, keys) {
  * @param {Object} ws 
  */
 function createGameObjects(scripts, playerKeys, ws, gameType, names = ['placeholder', 'placeholder'], sessionId = undefined) {
-    let code = compileScripts(scripts, playerKeys)
+    let playerOne = new Player(CONSTANTS.P_ONE_START_POS.X, CONSTANTS.P_ONE_START_POS.Y, 0, new GameTracker(), names[0])
+    let playerTwo = new Player(CONSTANTS.P_TWO_START_POS.X, CONSTANTS.P_TWO_START_POS.Y, Math.PI, new GameTracker(), names[1])
+    let code = compileScripts(scripts, playerKeys, [playerOne, playerTwo])
 
     gameStates[ws.id] = {
-        playerOne: new Player(CONSTANTS.P_ONE_START_POS.X, CONSTANTS.P_ONE_START_POS.Y, 0, new GameTracker(), names[0]),
-        playerTwo: new Player(CONSTANTS.P_TWO_START_POS.X, CONSTANTS.P_TWO_START_POS.Y, Math.PI, new GameTracker(), names[1]),
+        playerOne, 
+        playerTwo,
         socket: ws,
         gameType,
         code

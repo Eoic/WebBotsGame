@@ -7,7 +7,7 @@ function update() {
 }
 
 /* 
-    Called once robot is hit by enemy bullet 
+    Called once robot has been hit by enemy player
 */
 function onBulletHit(event) {
     

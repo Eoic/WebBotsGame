@@ -262,9 +262,10 @@ footer {
 /* Section */
 
 .section-full-size {
-    padding-top: 85px;
+    margin-top: 54px;
     background-color: rgb(220, 223, 228);
-    height: 100%;
+    min-height: 100%;
+    padding-bottom: 10px;
 }
 
 @media only screen and (max-width: 999px) {
@@ -274,12 +275,6 @@ footer {
     }
     .navlink-right {
         float: none;
-    }
-    .navbar {
-        position: inherit;
-    }
-    .section-full-size {
-        padding-top: 33px;
     }
 }
 
@@ -675,6 +670,7 @@ td {
     width: 250px;
     height: 100%;
     box-sizing: border-box;
+    position: fixed;
     padding: 85px 15px;
     text-align: center;
     color: rgb(250, 250, 250);
@@ -762,8 +758,7 @@ td {
 /* Headers */
 
 h2.section-header {
-    /* padding-bottom: 2px;*/
-    margin-top: -13px;
+    padding-top: 10px;
     border-radius: 2px;
     /*box-shadow: inset 0px -6px 9px -8px #2f2f2f;*/
     color: #333333;
@@ -1022,4 +1017,13 @@ progress::-webkit-progress-bar {
 code {
     font-size: 30px;
     color: #0b8843;
+}
+
+.docs-sidebar {
+    position: fixed;
+    width: 200px;
+    height: 100%;
+    padding: 10px;
+    background-color: #515d86;
+    color: rgb(233, 221, 233);
 }

@@ -70,7 +70,7 @@ function onMouseMove(event) {
 }
 
 /**
- * Sets primary editor and splitter heights form
+ * Sets primary editor and splitter heights from
  * local storage.
  */
 function setInitialEditorHeight() {

@@ -127,11 +127,11 @@ class Player {
         if (Math.abs(this.rotation - destinationDegree) > CONSTANTS.PRECISION) {
             this.rotation += direction * delta
             this.rotation = this.rotation % (2 * Math.PI)
-            return false;
+            return true;
         }
         else {
             this.rotation = Math.atan2(x, y)
-            return true;
+            return false;
         }
     }
 
@@ -193,7 +193,7 @@ class Player {
     createBullet() {
 
         if (this.cooldownTicks !== 0)
-            return;
+            return false
 
         for (let i = 0; i < CONSTANTS.BULLET_POOL_SIZE; i++) {
             if (this.bulletPool[i].isAlive == false) {
@@ -207,25 +207,31 @@ class Player {
                 this.tracker.registerShotFired()
                 this.cooldownTicks = CONSTANTS.GUN_COOLDOWN
                 this.energy -= CONSTANTS.BULLET_COST
-                return;
+                return true
             } else if (i == CONSTANTS.BULLET_POOL_SIZE - 1) {
                 console.log("Bullet pool is too small")
+                return false
             }
         }
     }
 
+    /**
+     * @param {Number} x 
+     * @param {Number} y 
+     * @param {Number} delta 
+     */
     rotateTurret(x, y, delta) {
         let destinationDegree = Math.atan2(x, y);
         let direction = (destinationDegree > 0) ? 1 : -1;
 
         if (Math.abs(this.turretRotation - destinationDegree) > CONSTANTS.PRECISION) {
-            this.turretRotation += direction * delta
+            this.turretRotation += direction * delta * CONSTANTS.TURRET_ROTATION_SPEED
             this.turretRotation = this.turretRotation % (2 * Math.PI)
-            return false;
+            return true;
         }
         else {
             this.turretRotation = Math.atan2(x, y)
-            return true;
+            return false;
         }
     }
 
@@ -273,6 +279,7 @@ const CONSTANTS = {
     MAP_WIDTH: 674,
     MAP_HEIGHT: 464,
     MOVEMENT_SPEED: 130,
+    TURRET_ROTATION_SPEED: 3,
     P_ONE_START_POS: {
         X: 32,
         Y: 32
@@ -363,7 +370,7 @@ const utilities = {
                     bullet.isAlive = false
                     let damageAmount = enemyInstance.applyDamage(CONSTANTS.BULLET_DAMAGE)
                     playerInstance.tracker.registerDamageDone(damageAmount)
-
+                    
                     // Pass info event of enemy being hit
                     // Should be wrapped inside try / catch
                     if (typeof onBulletHitCallback !== 'undefined') {

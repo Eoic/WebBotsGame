@@ -192,8 +192,7 @@ const player = {
      */
     shoot: () => {
         if (context.robot.energy >= CONSTANTS.BULLET_COST) {
-            context.robot.createBullet()
-            return true
+            return context.robot.createBullet()
         }
 
         return false

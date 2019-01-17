@@ -1,7 +1,7 @@
-<section class="section-full-size" style="height:unset">
-    <h2 class="section-header" style="padding-left: 8%;"> 
-        Documentation
-    </h2>
+<section>
+    <aside class="docs-sidebar">
+        list a
+    </aside>
     <p class="section-paragraph">
         Here you can view JavaScript functions and objects available in game scripts.
     </p>
@@ -12,7 +12,7 @@
     </div>
 
     <div class="docs-code-block" id="player_getstate">
-        <a href='#player_getstate' class="code-anchor"><code> player.getState() </code></a>
+        <a href='#player_getstate' class="code-anchor"><code> player.getPlayerInfo() </code></a>
         <p> Returns information about player object </p>
         <table style="float: left;">
             <thead>
@@ -24,14 +24,9 @@
             </thead>
             <tbody>
                 <tr>
-                    <td> x </td>
-                    <td> number </td>
-                    <td style="text-align: center;"> robot position in x axis on game map </td>
-                </tr>
-                <tr>
-                    <td> y </td>
-                    <td> number </td>
-                    <td style="text-align: center;"> robot position in y axis on game map </td>
+                    <td> position </td>
+                    <td> object </td>
+                    <td style="text-align: center;"> position (x; y) </td>
                 </tr>
                 <tr>
                     <td> health </td>

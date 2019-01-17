@@ -12,4 +12,4 @@ Step 4: Install [MongoDB](https://www.mongodb.com/) and create new database. Cha
 
 Step 5: Start project with `npm start`
 
-Step 6: Open project in the browser: [http://localhost:3000](http://localhost:3000) 
+Step 6: Open project in the browser: [http://localhost:3000](http://localhost:3000)

@@ -162,22 +162,6 @@ const player = {
     },
 
     /**
-     * Moves robot forwards its rotation by distance given 
-     * @param {Number} distance Distance in pixels 
-     */
-    moveForwardBy(distance) {
-        
-    },
-
-    /**
-     * Moves robot backwards in opposite side of its rotation
-     * @param {Number} distance Distance in pixels
-     */
-    moveBackBy(distance) {
-
-    },
-
-    /**
      * Rotates player clockwise if degrees < 0, 
      * and counter-clockwise if degrees > 0
      */
@@ -218,8 +202,8 @@ const player = {
     /**
      * Returns info about player
      */
-    getState: () => {
-        return context.robot.getObjectState();
+    getPlayerInfo: () => {
+        return context.robot.getPlayerInfo()
     }
 }
 

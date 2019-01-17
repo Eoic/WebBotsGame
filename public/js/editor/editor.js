@@ -153,6 +153,10 @@ function fetchScripts() {
  * @param {Object} event On click event
  */
 function selectScript(_event) {
+
+    if(isScriptSelected())
+        saveScript()
+
     scriptsContainer.querySelectorAll('.btn-active').forEach(element => {
         element.classList.remove('btn-active');
     });

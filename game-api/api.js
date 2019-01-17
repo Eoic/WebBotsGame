@@ -249,6 +249,22 @@ class Player {
             tracker: this.tracker.getData()
         }
     }
+
+    getPlayerInfo() {
+        return {
+            position: {
+                x: this.x,
+                y: this.y
+            },
+            health: this.health,
+            energy: this.energy,
+            rotation: this.rotation,
+            turretRotation: this.turretRotation,
+            enemyDistance: this.enemyDistance,
+            enemyVisible: false,
+            gunCooldown: this.cooldownTicks
+        }
+    }
 }
 
 const CONSTANTS = {
@@ -284,7 +300,7 @@ const CONSTANTS = {
     PRECISION: 0.1,
     VISIBLE_MAP_OFFSET: 100,
     ROUND_COUNT: 5,                 // One multiplayer match length
-    ROUND_TICKS_LENGTH: 200      // 1800 -> ~1 min
+    ROUND_TICKS_LENGTH: 200         // 1800 -> ~1 min
 }
 
 const utilities = {

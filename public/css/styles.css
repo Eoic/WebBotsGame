@@ -268,7 +268,7 @@ footer {
     padding-bottom: 10px;
 }
 
-@media only screen and (max-width: 999px) {
+@media only screen and (max-width: 1234px) {
     .navbar-list>li {
         display: block;
         padding: 10px;
@@ -278,7 +278,7 @@ footer {
     }
 }
 
-@media only screen and (min-width: 1000px) {
+@media only screen and (min-width: 1235px) {
     .nav-dropdown {
         display: none;
     }

@@ -35,11 +35,16 @@ function onCollision() {
 
 }
 
+function onHitSuccess(event) {
+
+}
+
 module.exports = {
     update,
     onBulletHit,
     onBulletMiss,
-    onWallHit
+    onWallHit,
+    onHitSuccess
 }
 `
 

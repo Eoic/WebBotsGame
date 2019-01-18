@@ -83,6 +83,7 @@ class Player {
         this.turretRotation = 0
         this.enemyDistance = -1
         this.bulletPool = []
+        this.messages = []
         this.initBulletPool()
         this.targetPosX = 0
         this.targetPosY = 0
@@ -106,6 +107,7 @@ class Player {
         this.x = this.startPosX
         this.y = this.startPosY
         this.rotation = this.startRotation
+        this.turretRotation = 0
     }
 
     applyDamage(damage) {
@@ -281,14 +283,14 @@ const CONSTANTS = {
     MOVEMENT_SPEED: 130,
     TURRET_ROTATION_SPEED: 3,
     P_ONE_START_POS: {
-        X: 32,
-        Y: 32
+        X: 40,
+        Y: 40
     },
     P_TWO_START_POS: {
-        X: 642,
-        Y: 432
+        X: 630,
+        Y: 420
     },
-    PLAYER_BOX_SIZE: 28,
+    PLAYER_BOX_SIZE: 27,
 
     // Player info
     HP_FULL: 100,
@@ -296,18 +298,18 @@ const CONSTANTS = {
     BULLET_COST: 6,
     BULLET_POOL_SIZE: 20,
     BULLET_TRAVEL_SPEED: 350,
-    BULLET_DAMAGE: 15,
+    BULLET_DAMAGE: 20,
     PLAYER_HALF_WIDTH: 28,
     PLAYER_HALF_HEIGHT: 21.3,
-    FOV: 8, // Approximate half angle size
-    GUN_COOLDOWN: 30, // In ticks
+    FOV: 8,                             // Approximate half angle size
+    GUN_COOLDOWN: 30,                   // In ticks
 
     // Misc
     ENERGY_REFRESH_STEP: 10,
     PRECISION: 0.1,
     VISIBLE_MAP_OFFSET: 100,
     ROUND_COUNT: 5,                 // One multiplayer match length
-    ROUND_TICKS_LENGTH: 200         // 1800 -> ~1 min
+    ROUND_TICKS_LENGTH: 800         // 1800 -> ~1 min
 }
 
 const utilities = {
@@ -329,7 +331,7 @@ const utilities = {
      */
     checkMapBounds: (x, y) => {
         return (utilities.checkBoundsLowerX(x) && utilities.checkBoundsLowerY(y) &&
-            utilities.checkBoundsUpperX(x) && utilities.checkBoundsUpperY(y))
+                utilities.checkBoundsUpperX(x) && utilities.checkBoundsUpperY(y))
     },
 
     /**
@@ -360,7 +362,7 @@ const utilities = {
      * @param {Array} playerBulletPool 
      * @param {Object} enemyInstance 
      */
-    checkForHits(playerInstance, enemyInstance, onBulletHitCallback) {
+    checkForHits(playerInstance, enemyInstance, onBulletHitCallback, onHitSuccessCallback) {
         playerInstance.bulletPool.forEach(bullet => {
             if (bullet.isAlive) {
                 if (bullet.x >= enemyInstance.x - CONSTANTS.PLAYER_HALF_WIDTH &&
@@ -373,14 +375,14 @@ const utilities = {
                     
                     // Pass info event of enemy being hit
                     // Should be wrapped inside try / catch
-                    if (typeof onBulletHitCallback !== 'undefined') {
-                        onBulletHitCallback({
-                            getHealth: () => enemyInstance.health,
-                            getEnergy: () => enemyInstance.energy,
-                            getHitPosition: () => ({
-                                x: enemyInstance.x,
-                                y: enemyInstance.y
-                            })
+                    if (typeof onBulletHitCallback !== 'undefined')
+                        onBulletHitCallback()
+
+                    if(typeof onHitSuccessCallback !== 'undefined') {
+                        onHitSuccessCallback({
+                            x: enemyInstance.x,
+                            y: enemyInstance.y,
+                            health: enemyInstance.health
                         })
                     }
                 }

@@ -10,8 +10,8 @@ const MOVEMENT_SPEED = 75
 const spritesDir = '/static/img/sprites'
 const playerObjectKeys = ['playerOne', 'playerTwo']
 const initPositions = [
-    { x: 32, y: 32, rotation: 0 },
-    { x: 642, y: 432, rotation: Math.PI }
+    { x: 40, y: 40, rotation: 0 },
+    { x: 630, y: 420, rotation: 0 }
 ]
 const baseAnchor = { x: 0.5, y: 0.5 }
 const turretAnchor = { x: 0.3, y: 0.5 }
@@ -545,6 +545,7 @@ function createTableCell(innerText) {
 function calculateDamageDone(shotsFired, damageDone) {
     if(shotsFired === 0)
         return 0
-
-    return damageDone / (shotsFired * 15) * 100
+    
+    let accuracy = damageDone / (shotsFired * 20) * 100
+    return Math.round(accuracy * 100) / 100;
 }

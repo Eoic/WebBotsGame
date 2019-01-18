@@ -35,13 +35,16 @@ const { updateUserAchievements } = require('./achievements')
 
 const context = {
     delta: 0,
-    robot: {},
-    messages: []
+    robot: {}
 };
 
 const GAME_TYPE = {
     SIMULATION: 'S',
     MULTIPLAYER: 'M'
+}
+
+let codeCache = {
+
 }
 
 const nodeVM = new NodeVM({
@@ -162,22 +165,6 @@ const player = {
     },
 
     /**
-     * Moves robot forwards its rotation by distance given 
-     * @param {Number} distance Distance in pixels 
-     */
-    moveForwardBy(distance) {
-        
-    },
-
-    /**
-     * Moves robot backwards in opposite side of its rotation
-     * @param {Number} distance Distance in pixels
-     */
-    moveBackBy(distance) {
-
-    },
-
-    /**
      * Rotates player clockwise if degrees < 0, 
      * and counter-clockwise if degrees > 0
      */
@@ -208,8 +195,7 @@ const player = {
      */
     shoot: () => {
         if (context.robot.energy >= CONSTANTS.BULLET_COST) {
-            context.robot.createBullet()
-            return true
+            return context.robot.createBullet()
         }
 
         return false
@@ -218,8 +204,8 @@ const player = {
     /**
      * Returns info about player
      */
-    getState: () => {
-        return context.robot.getObjectState();
+    getPlayerInfo: () => {
+        return context.robot.getPlayerInfo()
     }
 }
 
@@ -245,7 +231,7 @@ const scanner = {
 // For logging messaget so output window
 const logger = {
     log: (content, messageType) => {
-        context.messages.push({
+        context.robot.messages.push({
             content,
             type: (typeof messageType !== 'undefined') ? messageType : MESSAGE_TYPE.INFO
         })
@@ -279,6 +265,7 @@ function update(delta) {
             utilities.resetCallMap(callMap)
             context.robot = gameStates[clientID][key]
             context.robot.decrementGunCooldown()
+            context.robot.messages = []
 
             try {
                 gameStates[clientID].code[key].update()
@@ -289,12 +276,11 @@ function update(delta) {
             utilities.insideFOV(context.robot, gameStates[clientID][playerKeys[1 ^ index]])
             utilities.wallCollision(context.robot.getPosition(), utilities.getExportedFunction(gameStates[clientID].code[key], 'onWallHit'))
             utilities.checkPlayerCollisions(context.robot.getPosition(), gameStates[clientID][playerKeys[1 ^ index]].getPosition(), utilities.getExportedFunction(gameStates[clientID].code[key], 'onCollision'))
-            utilities.checkForHits(gameStates[clientID][playerKeys[1 ^ index]], context.robot, utilities.getExportedFunction(gameStates[clientID].code[key], 'onBulletHit'))
+            utilities.checkForHits(gameStates[clientID][playerKeys[1 ^ index]], context.robot, utilities.getExportedFunction(gameStates[clientID].code[key], 'onBulletHit'), utilities.getExportedFunction(gameStates[clientID].code[playerKeys[1 ^ index]], 'onHitSuccess'))
             context.robot.updateBulletPositions(context.delta, utilities.getExportedFunction(gameStates[clientID].code[key], 'onBulletMiss'))
         })
 
         sendUpdate(gameStates, clientID)    // Send game update after game state were updated
-        context.messages = []               // Flush output buffer
     }
 }
 
@@ -306,7 +292,7 @@ function sendUpdate(gameStates, clientId) {
             playerTwo: gameStates[clientId].playerTwo.getObjectState(),
             gameSession: (typeof gameStates[clientId].multiplayerData !== 'undefined') ? gameStates[clientId].multiplayerData : null,
             gameType: gameStates[clientId].gameType,
-            messages: context.messages
+            messages: [...gameStates[clientId].playerOne.messages, ...gameStates[clientId].playerTwo.messages]
         }))
     }
 }
@@ -380,8 +366,6 @@ function updatePlayerStatistics(gameSessionData, gameState, winner) {
     if (winner === gameSessionData.createdBy)
         gameWon = 1
 
-    // also add time played, 
-
     User.findOneAndUpdate({ username: gameSessionData.createdBy }, {
         $inc: {
             'statistic.gamesPlayed': 1,
@@ -407,6 +391,7 @@ function nextRound(gameState) {
         gameState[key].resetBulletPool()
     })
 
+    gameState.code = compileScripts(codeCache[gameState.socket.id], playerKeys, [gameState.playerOne, gameState.playerTwo])
     gameState.multiplayerData.elapsedRounds++
     gameState.multiplayerData.elapsedTicks = 0
     return 1
@@ -430,17 +415,19 @@ const loop = () => {
  * @param {Array} scripts 
  * @param {Array} keys 
  */
-function compileScripts(scripts, keys) {
-    let code = {}
+function compileScripts(scripts, keys, players) {
+    let code = { }
 
     try {
         keys.forEach((key, index) => {
+            context.robot = players[index]
             code[key] = nodeVM.run(scripts[index])
         })
     } catch (err) {
         console.log(err)
     }
 
+    context.robot = {}
     return code
 }
 
@@ -451,11 +438,14 @@ function compileScripts(scripts, keys) {
  * @param {Object} ws 
  */
 function createGameObjects(scripts, playerKeys, ws, gameType, names = ['placeholder', 'placeholder'], sessionId = undefined) {
-    let code = compileScripts(scripts, playerKeys)
+    let playerOne = new Player(CONSTANTS.P_ONE_START_POS.X, CONSTANTS.P_ONE_START_POS.Y, 0, new GameTracker(), names[0])
+    let playerTwo = new Player(CONSTANTS.P_TWO_START_POS.X, CONSTANTS.P_TWO_START_POS.Y, 0, new GameTracker(), names[1])
+    let code = compileScripts(scripts, playerKeys, [playerOne, playerTwo])
+    codeCache[ws.id] = scripts // To compile after each round end (except first)
 
     gameStates[ws.id] = {
-        playerOne: new Player(CONSTANTS.P_ONE_START_POS.X, CONSTANTS.P_ONE_START_POS.Y, 0, new GameTracker(), names[0]),
-        playerTwo: new Player(CONSTANTS.P_TWO_START_POS.X, CONSTANTS.P_TWO_START_POS.Y, Math.PI, new GameTracker(), names[1]),
+        playerOne, 
+        playerTwo,
         socket: ws,
         gameType,
         code

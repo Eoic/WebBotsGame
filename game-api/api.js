@@ -83,6 +83,7 @@ class Player {
         this.turretRotation = 0
         this.enemyDistance = -1
         this.bulletPool = []
+        this.messages = []
         this.initBulletPool()
         this.targetPosX = 0
         this.targetPosY = 0
@@ -106,6 +107,7 @@ class Player {
         this.x = this.startPosX
         this.y = this.startPosY
         this.rotation = this.startRotation
+        this.turretRotation = 0
     }
 
     applyDamage(damage) {
@@ -127,11 +129,11 @@ class Player {
         if (Math.abs(this.rotation - destinationDegree) > CONSTANTS.PRECISION) {
             this.rotation += direction * delta
             this.rotation = this.rotation % (2 * Math.PI)
-            return false;
+            return true;
         }
         else {
             this.rotation = Math.atan2(x, y)
-            return true;
+            return false;
         }
     }
 
@@ -193,7 +195,7 @@ class Player {
     createBullet() {
 
         if (this.cooldownTicks !== 0)
-            return;
+            return false
 
         for (let i = 0; i < CONSTANTS.BULLET_POOL_SIZE; i++) {
             if (this.bulletPool[i].isAlive == false) {
@@ -207,25 +209,31 @@ class Player {
                 this.tracker.registerShotFired()
                 this.cooldownTicks = CONSTANTS.GUN_COOLDOWN
                 this.energy -= CONSTANTS.BULLET_COST
-                return;
+                return true
             } else if (i == CONSTANTS.BULLET_POOL_SIZE - 1) {
                 console.log("Bullet pool is too small")
+                return false
             }
         }
     }
 
+    /**
+     * @param {Number} x 
+     * @param {Number} y 
+     * @param {Number} delta 
+     */
     rotateTurret(x, y, delta) {
         let destinationDegree = Math.atan2(x, y);
         let direction = (destinationDegree > 0) ? 1 : -1;
 
         if (Math.abs(this.turretRotation - destinationDegree) > CONSTANTS.PRECISION) {
-            this.turretRotation += direction * delta
+            this.turretRotation += direction * delta * CONSTANTS.TURRET_ROTATION_SPEED
             this.turretRotation = this.turretRotation % (2 * Math.PI)
-            return false;
+            return true;
         }
         else {
             this.turretRotation = Math.atan2(x, y)
-            return true;
+            return false;
         }
     }
 
@@ -249,6 +257,22 @@ class Player {
             tracker: this.tracker.getData()
         }
     }
+
+    getPlayerInfo() {
+        return {
+            position: {
+                x: this.x,
+                y: this.y
+            },
+            health: this.health,
+            energy: this.energy,
+            rotation: this.rotation,
+            turretRotation: this.turretRotation,
+            enemyDistance: this.enemyDistance,
+            enemyVisible: false,
+            gunCooldown: this.cooldownTicks
+        }
+    }
 }
 
 const CONSTANTS = {
@@ -257,15 +281,16 @@ const CONSTANTS = {
     MAP_WIDTH: 674,
     MAP_HEIGHT: 464,
     MOVEMENT_SPEED: 130,
+    TURRET_ROTATION_SPEED: 3,
     P_ONE_START_POS: {
-        X: 32,
-        Y: 32
+        X: 40,
+        Y: 40
     },
     P_TWO_START_POS: {
-        X: 642,
-        Y: 432
+        X: 630,
+        Y: 420
     },
-    PLAYER_BOX_SIZE: 28,
+    PLAYER_BOX_SIZE: 27,
 
     // Player info
     HP_FULL: 100,
@@ -273,18 +298,18 @@ const CONSTANTS = {
     BULLET_COST: 6,
     BULLET_POOL_SIZE: 20,
     BULLET_TRAVEL_SPEED: 350,
-    BULLET_DAMAGE: 15,
+    BULLET_DAMAGE: 20,
     PLAYER_HALF_WIDTH: 28,
     PLAYER_HALF_HEIGHT: 21.3,
-    FOV: 8, // Approximate half angle size
-    GUN_COOLDOWN: 30, // In ticks
+    FOV: 8,                             // Approximate half angle size
+    GUN_COOLDOWN: 30,                   // In ticks
 
     // Misc
     ENERGY_REFRESH_STEP: 10,
     PRECISION: 0.1,
     VISIBLE_MAP_OFFSET: 100,
     ROUND_COUNT: 5,                 // One multiplayer match length
-    ROUND_TICKS_LENGTH: 200      // 1800 -> ~1 min
+    ROUND_TICKS_LENGTH: 800         // 1800 -> ~1 min
 }
 
 const utilities = {
@@ -306,7 +331,7 @@ const utilities = {
      */
     checkMapBounds: (x, y) => {
         return (utilities.checkBoundsLowerX(x) && utilities.checkBoundsLowerY(y) &&
-            utilities.checkBoundsUpperX(x) && utilities.checkBoundsUpperY(y))
+                utilities.checkBoundsUpperX(x) && utilities.checkBoundsUpperY(y))
     },
 
     /**
@@ -337,7 +362,7 @@ const utilities = {
      * @param {Array} playerBulletPool 
      * @param {Object} enemyInstance 
      */
-    checkForHits(playerInstance, enemyInstance, onBulletHitCallback) {
+    checkForHits(playerInstance, enemyInstance, onBulletHitCallback, onHitSuccessCallback) {
         playerInstance.bulletPool.forEach(bullet => {
             if (bullet.isAlive) {
                 if (bullet.x >= enemyInstance.x - CONSTANTS.PLAYER_HALF_WIDTH &&
@@ -347,17 +372,17 @@ const utilities = {
                     bullet.isAlive = false
                     let damageAmount = enemyInstance.applyDamage(CONSTANTS.BULLET_DAMAGE)
                     playerInstance.tracker.registerDamageDone(damageAmount)
-
+                    
                     // Pass info event of enemy being hit
                     // Should be wrapped inside try / catch
-                    if (typeof onBulletHitCallback !== 'undefined') {
-                        onBulletHitCallback({
-                            getHealth: () => enemyInstance.health,
-                            getEnergy: () => enemyInstance.energy,
-                            getHitPosition: () => ({
-                                x: enemyInstance.x,
-                                y: enemyInstance.y
-                            })
+                    if (typeof onBulletHitCallback !== 'undefined')
+                        onBulletHitCallback()
+
+                    if(typeof onHitSuccessCallback !== 'undefined') {
+                        onHitSuccessCallback({
+                            x: enemyInstance.x,
+                            y: enemyInstance.y,
+                            health: enemyInstance.health
                         })
                     }
                 }

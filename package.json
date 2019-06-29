@@ -27,7 +27,7 @@
     "express-session": "^1.15.6",
     "express-sitemap": "^1.8.0",
     "express-validator": "^5.3.0",
-    "handlebars": "^4.0.12",
+    "handlebars": "^4.0.14",
     "jdenticon": "^2.1.1",
     "memorystore": "^1.6.0",
     "mocha": "^5.2.0",
